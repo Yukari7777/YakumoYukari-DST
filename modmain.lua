@@ -10,7 +10,6 @@ PrefabFiles = {
 	"barrierfieldfx",
 	"scheme",
 	"effect_fx"
-	--"shadowyukari"
 }
 
 Assets = {
@@ -59,6 +58,8 @@ local TheInput = GLOBAL.TheInput
 local IsPaused = GLOBAL.IsPaused
 local Inspect = GetModConfigData("inspect")
 local Language = GetModConfigData("language")
+local FindEntity = GLOBAL.FindEntity
+local IsYukari = ThePlayer.prefab == "yakumoyukari"
 
 ----- Basic settings for Yukari -----
 STRINGS.CHARACTER_TITLES.yakumoyukari = "Youkai of Boundaries"
@@ -83,21 +84,20 @@ AddMinimapAtlas("images/map_icons/scheme.xml")
 ------ Function ------
 
 function MakePowerComponents(inst)
-	GLOBAL.assert( GLOBAL.GetPlayer() == nil )
-	local player_prefab = GLOBAL.SaveGameIndex:GetSlotCharacter()
-
-	GLOBAL.TheSim:LoadPrefabs( {player_prefab} )
-	local oldfn = GLOBAL.Prefabs[player_prefab].fn
-	GLOBAL.Prefabs[player_prefab].fn = function()
-		local inst = oldfn()
-		if player_prefab == "yakumoyukari" then
-			inst:AddComponent("power")
-		end
-		return inst
+	if IsYukari and inst.components.power == nil then
+		inst:AddComponent("power")
 	end
 end
 
-AddPrefabPostInit("world", MakePowerComponents)
+AddPlayerPostInit(MakePowerComponents)
+
+function AddSchemeManager(inst)
+	inst:AddComponent("scheme_manager")
+end
+
+-------------------------------- Scheme gate
+
+GLOBAL.jumpintimeline = {}
 
 GLOBAL.ACTIONS.JUMPIN.fn = function(act)
     if act.target.components.teleporter then
@@ -109,24 +109,7 @@ GLOBAL.ACTIONS.JUMPIN.fn = function(act)
 	end
 end
 
-if IsDLCEnabled(GLOBAL.CAPY_DLC) then
-	GLOBAL.ACTIONS.JUMPIN.strfn = function(act)
-		if act.target.components.teleporter and act.target.components.teleporter.getverb then
-			return act.target.components.teleporter.getverb(act.target, act.doer)
-		elseif act.target.components.schemeteleport and act.target.components.schemeteleport.getverb then
-			return act.target.components.schemeteleport.getverb(act.target, act.doer)
-		end
-	end
-end
-
-function AddSchemeManager(inst)
-	inst:AddComponent("scheme_manager")
-end
-
-GLOBAL.jumpintimeline = {}
-
 function SimPostInit(player)
-	-- Store this timeline
 	local state = player.sg.sg.states["jumpin"]
 	GLOBAL.jumpintimeline = state.timeline
 end
@@ -145,13 +128,15 @@ end
 
 AddSimPostInit(SimPostInit)
 
+---------------------------------------------
+
 function GodTelePort()
-	if GetPlayer() and GetPlayer().prefab == "yakumoyukari" then
-		if GetPlayer().components.upgrader.GodTelepoirt and GetPlayer().istelevalid and not IsPaused() then
-			local Chara = GetPlayer()
+	if ThePlayer and IsYukari then
+		if ThePlayer.components.upgrader.GodTelepoirt and ThePlayer.istelevalid then
+			local Chara = ThePlayer -- also play Undertale!
 			if Chara.components.power and Chara.components.power.current >= 20 then
 				local function isvalid(x,y,z)
-					local ground = GLOBAL.GetWorld()
+					local ground = GLOBAL.TheWorld
 					if ground then
 						local tile = ground.Map:GetTileAtPoint(x,y,z)
 						return tile ~= 1--[[return value of GROUND.IMPASSIBLE]] and tile < 128--return value of GROUND.UNDERGROUND
@@ -162,7 +147,7 @@ function GodTelePort()
 				if isvalid(x,y,z) then Chara.Transform:SetPosition(x,y,z) else return false end
 				Chara.SoundEmitter:PlaySound("soundpack/spell/teleport")
 				Chara:Hide()
-				GetPlayer():DoTaskInTime(0.2, function() Chara:Show() end)
+				Chara:DoTaskInTime(0.2, function() Chara:Show() end)
 				Chara.components.power:DoDelta(-20, false)
 			else
 				Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_LOWPOWER"))
@@ -177,177 +162,10 @@ TheInput:AddKeyDownHandler(116, GodTelePort)
 
 ---------------- OVERRIDE -----------------
 
--- resurrection with full health 
-local TouchstoneReturn = function(prefab)
-
-	local oldFn = prefab.components.resurrector.doresurrect
-	prefab.components.resurrector.doresurrect = function(inst, dude)
-		if dude.prefab ~= "yakumoyukari" then
-			return oldFn(inst, dude)
-		end
-
-		inst:AddTag("busy")
-		inst.MiniMapEntity:SetEnabled(false)
-		if inst.Physics then
-			GLOBAL.MakeInventoryPhysics(inst)
-		end
-		
-		ProfileStatsSet("resurrectionstone_used", true)
-
-		dude.components.hunger:Pause()
-		dude.Transform:SetPosition(inst.Transform:GetWorldPosition())
-		dude:Hide()
-
-		GetClock():MakeNextDay()
-		GLOBAL.TheCamera:SetDistance(12)
-		GLOBAL.scheduler:ExecuteInTime(3, function()
-			dude:Show()
-
-			GLOBAL.GetSeasonManager():DoLightningStrike(GLOBAL.Vector3(inst.Transform:GetWorldPosition()))
-
-
-			inst.SoundEmitter:PlaySound("dontstarve/common/resurrectionstone_break")
-			inst.components.lootdropper:DropLoot()
-			inst:Remove()
-			
-			if dude.components.hunger then
-				dude.components.hunger:SetPercent(1)
-			end
-
-			if dude.components.health then
-				dude.components.health:Respawn(dude.components.health:GetMaxHealth())
-			end
-			
-			if dude.components.sanity then
-				dude.components.sanity:SetPercent(1)
-			end
-			
-			if dude.components.power then
-				dude.components.power:SetPercent(0)
-			end
-			
-			if dude.components.temperature then
-				dude.components.temperature:SetTemperature(30)
-			end
-			
-			dude.components.hunger:Resume()
-			
-			dude.sg:GoToState("wakeup")
-			
-			
-			dude:DoTaskInTime(3, function(inst) 
-				if dude.HUD then
-					dude.HUD:Show()
-				end
-				GLOBAL.TheCamera:SetDefault()
-				inst:RemoveTag("busy")
-			end)
-			
-		end)
-	end
-end
--- Meat Effigy Tweak
-local EffigyReturn = function(prefab)
-	local oldFn = prefab.components.resurrector.doresurrect
-	prefab.components.resurrector.doresurrect = function(inst, dude)
-		if dude.prefab ~= "yakumoyukari" then
-			return oldFn(inst, dude)
-		end
-		inst:AddTag("busy")	
-		inst.persists = false
-		inst:RemoveComponent("lootdropper")
-		inst:RemoveComponent("workable")
-		inst:RemoveComponent("inspectable")
-		inst.MiniMapEntity:SetEnabled(false)
-		if inst.Physics then
-			GLOBAL.RemovePhysicsColliders(inst)
-		end
-
-		dude.components.hunger:Pause()
-		GLOBAL.GetClock():MakeNextDay()
-		dude.Transform:SetPosition(inst.Transform:GetWorldPosition())
-		dude:Hide()
-		dude:ClearBufferedAction()
-
-		if dude.HUD then
-			dude.HUD:Hide()
-		end
-		if dude.components.playercontroller then
-			dude.components.playercontroller:Enable(false)
-		end
-
-		GLOBAL.TheCamera:SetDistance(12)
-		dude.components.hunger:Pause()
-		
-		GLOBAL.scheduler:ExecuteInTime(3, function()
-			dude:Show()
-
-			inst:Hide()
-			inst.AnimState:PlayAnimation("debris")
-			inst.components.resurrector.penalty = 0                
-			
-			dude.sg:GoToState("rebirth")
-			
-			dude:DoTaskInTime(3, function() 
-				if dude.HUD then
-					dude.HUD:Show()
-				end
-				if dude.components.hunger then
-					dude.components.hunger:SetPercent(1)
-				end
-				
-				if dude.components.health then
-					dude.components.health:RecalculatePenalty()
-					dude.components.health:Respawn(dude.components.health:GetMaxHealth())
-					dude.components.health:SetInvincible(true)
-				end
-				
-				if dude.components.sanity then
-					dude.components.sanity:SetPercent(1)
-				end
-				if dude.components.playercontroller then
-					dude.components.playercontroller:Enable(true)
-				end
-			
-				if dude.components.temperature then
-					dude.components.temperature:SetTemperature(30)
-				end
-
-				if dude.components.power then
-					dude.components.power:SetPercent(0)
-				end
-				
-				dude.components.hunger:Resume()
-				
-				GLOBAL.TheCamera:SetDefault()
-				inst:RemoveTag("busy")
-			end)
-			inst:DoTaskInTime(4, function() 
-				dude.components.health:SetInvincible(false)
-				inst:Show()
-			end)
-			inst:DoTaskInTime(7, function()
-				local tick_time = TheSim:GetTickTime()
-				local time_to_erode = 4
-				inst:StartThread( function()
-					local ticks = 0
-					while ticks * tick_time < time_to_erode do
-						local erode_amount = ticks * tick_time / time_to_erode
-						inst.AnimState:SetErosionParams( erode_amount, 0.1, 1.0 )
-						ticks = ticks + 1
-						GLOBAL.Yield()
-					end
-					inst:Remove()
-				end)
-			end)
-			
-		end)
-	end
-end
 local function InventoryDamage(self)
 	local function NewTakeDamage(self, damage, attacker, weapon, ...)
 		-- GRAZE MECHANISM
-		local Chara = GetPlayer()
+		local Chara = ThePlayer
 		if self.inst.prefab == "yakumoyukari" then
 			local totaldodge = Chara.dodgechance + Chara.components.upgrader.hatdodgechance
 			if math.random() < totaldodge then
@@ -412,34 +230,40 @@ local function InventoryDamage(self)
 end
 -- Bunnyman Retarget Function
 local function BunnymanNormalRetargetFn(inst)
-
 	local function is_meat(item)
-		return item.components.edible and item.components.edible.foodtype == "MEAT" 
+		return item.components.edible and item.components.edible.foodtype == GLOBAL.FOODTYPE.MEAT
 	end
 	
 	local function NormalRetargetFn(inst)
-		
-		return GLOBAL.FindEntity(inst, TUNING.PIG_TARGET_DIST,
+		return FindEntity(inst, TUNING.PIG_TARGET_DIST,
 			function(guy)
-				
-				if guy.components.health and not guy.components.health:IsDead() and inst.components.combat:CanTarget(guy) then
-					if not guy:HasTag("realyoukai") then -- not even be targeted with meat.
-						if guy:HasTag("monster") or guy:HasTag("youkai") then return guy end
-						if guy:HasTag("player") 
-						and guy.components.inventory 
-						and guy:GetDistanceSqToInst(inst) < TUNING.BUNNYMAN_SEE_MEAT_DIST*TUNING.BUNNYMAN_SEE_MEAT_DIST 
-						and guy.components.inventory:FindItem(is_meat) then 
-						return guy end
-					end
-				end
-			end)
+				return inst.components.combat:CanTarget(guy)
+					and (guy:HasTag("monster") or guy:HasTag("youkai"))
+					or (guy.components.inventory ~= nil and
+						guy:IsNear(inst, TUNING.BUNNYMAN_SEE_MEAT_DIST) and
+						guy.components.inventory:FindItem(is_meat) ~= nil)
+			end,
+			{ "_combat", "_health" }, -- see entityreplica.lua
+			{ "realyoukai" }, -- not even be targetted with meat
+			{ "monster", "player" })
 	end
 	inst.components.combat:SetRetargetFunction(1, NormalRetargetFn)
 end
 -- Pigman Retarget Function
 local function PigmanNormalRetargetFn(inst)
 	local function NormalRetargetFn(inst)
-		return GLOBAL.FindEntity(inst, TUNING.PIG_TARGET_DIST,
+		return FindEntity(inst, TUNING.PIG_TARGET_DIST,
+			
+			function(guy)
+				return (guy.LightWatcher == nil or guy.LightWatcher:IsInLight())
+					and inst.components.combat:CanTarget(guy)
+					and not guy:HasTag("realyoukai")
+			end,
+			{ "monster", "_combat" }, -- see entityreplica.lua
+			inst.components.follower.leader ~= nil and
+			{ "playerghost", "INLIMBO", "abigail" } or
+			{ "playerghost", "INLIMBO" }
+			
 			function(guy)
 				if not guy:HasTag("realyoukai") then
 					if not guy.LightWatcher or guy.LightWatcher:IsInLight() then
@@ -505,7 +329,7 @@ local function BatRetargetFn(inst)
 	
 	local function Retarget(inst)
 		local ta = inst.components.teamattacker
-		local newtarget = GLOBAL.FindEntity(inst, TUNING.BISHOP_TARGET_DIST, function(guy)
+		local newtarget = FindEntity(inst, TUNING.BISHOP_TARGET_DIST, function(guy)
 				return (guy:HasTag("character") or guy:HasTag("monster") )
 					   and not guy:HasTag("bat")
 					   and not guy:HasTag("realyoukai")
@@ -526,7 +350,7 @@ local function BeeRetargetFn(inst)
 	local function SpringBeeRetarget(inst)
 		if GLOBAL.GetSeasonManager() and GLOBAL.GetSeasonManager():IsSpring() then
 			local range = 4
-			return GLOBAL.FindEntity(inst, range, function(guy)
+			return FindEntity(inst, range, function(guy)
 				return (guy:HasTag("character") or guy:HasTag("animal") or guy:HasTag("monster") )
 					and not guy:HasTag("insect")
 					and not guy:HasTag("realyoukai")
@@ -542,7 +366,7 @@ end
 local function FrogRetargetFn(inst)
 	local function retargetfn(inst)
 		if not inst.components.health:IsDead() and not inst.components.sleeper:IsAsleep() then
-			return GLOBAL.FindEntity(inst, TUNING.FROG_TARGET_DIST, function(guy) 
+			return FindEntity(inst, TUNING.FROG_TARGET_DIST, function(guy) 
 				if guy.components.combat and guy.components.health 
 				and not guy.components.health:IsDead() 
 				and not guy:HasTag("realyoukai") then -- stay frogyyyyyyyyyy
@@ -849,12 +673,9 @@ modimport "scripts/actions_yukari.lua"
 modimport "scripts/recipes_yukari.lua"
 modimport "scripts/strings_yukari.lua"
 modimport "scripts/tunings_yukari.lua"
-AddPrefabPostInit("resurrectionstone", TouchstoneReturn) -- Override function TouchstoneReturn to "prefabs/resurrectionstone.lua"
-AddPrefabPostInit("resurrectionstatue", EffigyReturn)
-AddPrefabPostInit("maxwellintro", YukariIntro)                                            
-AddPrefabPostInit("forest", AddSchemeManager)
+AddPrefabPostInit("maxwellintro", YukariIntro) -- Override function YukariIntro to "prefabs/maxwellintro.lua"
+AddPrefabPostInit("forest", AddSchemeManager) 
 AddPrefabPostInit("cave", AddSchemeManager)
-AddPrefabPostInit("flotsam", AddSchemeManager)
 AddPrefabPostInit("world", AddSchemeManager)
 AddPrefabPostInit("bunnyman", BunnymanNormalRetargetFn)
 AddPrefabPostInit("pigman", PigmanNormalRetargetFn)
