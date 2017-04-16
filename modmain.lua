@@ -44,22 +44,23 @@ Assets = {
 
 ----- GLOBAL & require list -----
 local require = GLOBAL.require
+local assert = GLOBAL.assert
 require "class"
 
 local STRINGS = GLOBAL.STRINGS
-local GetClock = GLOBAL.GetClock
 local ProfileStatsSet = GLOBAL.ProfileStatsSet
 local TheCamera = GLOBAL.TheCamera
 local IsDLCEnabled = GLOBAL.IsDLCEnabled
 local SpawnPrefab = GLOBAL.SpawnPrefab
-local GetPlayer = GLOBAL.GetPlayer
+local ThePlayer = GLOBAL.ThePlayer
 local GetString = GLOBAL.GetString
 local TheInput = GLOBAL.TheInput
 local IsPaused = GLOBAL.IsPaused
 local Inspect = GetModConfigData("inspect")
 local Language = GetModConfigData("language")
 local FindEntity = GLOBAL.FindEntity
-local IsYukari = ThePlayer.prefab == "yakumoyukari"
+local SpringCombatMod = GLOBAL.SpringCombatMod
+local IsYukari = ThePlayer and ThePlayer.prefab == "yakumoyukari"
 
 ----- Basic settings for Yukari -----
 STRINGS.CHARACTER_TITLES.yakumoyukari = "Youkai of Boundaries"
@@ -97,36 +98,36 @@ end
 
 -------------------------------- Scheme gate
 
-GLOBAL.jumpintimeline = {}
+-- GLOBAL.jumpintimeline = {}
 
-GLOBAL.ACTIONS.JUMPIN.fn = function(act)
-    if act.target.components.teleporter then
-	    act.target.components.teleporter:Activate(act.doer)
-	    return true
-	elseif act.target.components.schemeteleport then 
-		act.target.components.schemeteleport:Activate(act.doer)
-		return true
-	end
-end
+-- GLOBAL.ACTIONS.JUMPIN.fn = function(act)
+    -- if act.target.components.teleporter then
+	    -- act.target.components.teleporter:Activate(act.doer)
+	    -- return true
+	-- elseif act.target.components.schemeteleport then 
+		-- act.target.components.schemeteleport:Activate(act.doer)
+		-- return true
+	-- end
+-- end
 
-function SimPostInit(player)
-	local state = player.sg.sg.states["jumpin"]
-	GLOBAL.jumpintimeline = state.timeline
-end
+-- function SimPostInit(player)
+	-- local state = player.sg.sg.states["jumpin"]
+	-- GLOBAL.jumpintimeline = state.timeline
+-- end
 
-GLOBAL.DisableWormholeJumpNoise = function()
-	local player = GLOBAL.GetPlayer()
-	local state = player.sg.sg.states["jumpin"]
-	state.timeline = nil
-end
+-- GLOBAL.DisableWormholeJumpNoise = function()
+	-- local player = GLOBAL.ThePlayer
+	-- local state = player.sg.sg.states["jumpin"]
+	-- state.timeline = nil
+-- end
 
-GLOBAL.EnableWormholeJumpNoise = function()
-	local player = GLOBAL.GetPlayer()
-	local state = player.sg.sg.states["jumpin"]
-	state.timeline = GLOBAL.jumpintimeline
-end
+-- GLOBAL.EnableWormholeJumpNoise = function()
+	-- local player = GLOBAL.ThePlayer
+	-- local state = player.sg.sg.states["jumpin"]
+	-- state.timeline = GLOBAL.jumpintimeline
+-- end
 
-AddSimPostInit(SimPostInit)
+-- AddSimPostInit(SimPostInit)
 
 ---------------------------------------------
 
@@ -253,91 +254,41 @@ end
 local function PigmanNormalRetargetFn(inst)
 	local function NormalRetargetFn(inst)
 		return FindEntity(inst, TUNING.PIG_TARGET_DIST,
-			
+
 			function(guy)
 				return (guy.LightWatcher == nil or guy.LightWatcher:IsInLight())
 					and inst.components.combat:CanTarget(guy)
-					and not guy:HasTag("realyoukai")
 			end,
 			{ "monster", "_combat" }, -- see entityreplica.lua
 			inst.components.follower.leader ~= nil and
 			{ "playerghost", "INLIMBO", "abigail" } or
-			{ "playerghost", "INLIMBO" }
-			
-			function(guy)
-				if not guy:HasTag("realyoukai") then
-					if not guy.LightWatcher or guy.LightWatcher:IsInLight() then
-						return guy:HasTag("monster") or guy:HasTag("youkai") and not guy:HasTag("realyoukai") and guy.components.health and not guy.components.health:IsDead() and inst.components.combat:CanTarget(guy) and not 
-						(inst.components.follower.leader ~= nil and guy:HasTag("abigail"))
-					end
-				end
-			end)
+			{ "playerghost", "INLIMBO", "realyoukai" })
 	end
 	inst.components.combat:SetRetargetFunction(1, NormalRetargetFn)
-end
-local function SetNormalPigFn(inst)
-	local function SetNormalPig(inst)
-		inst:RemoveTag("werepig")
-		inst:RemoveTag("guard")
-		local brain = require "brains/pigbrain"
-		inst:SetBrain(brain)
-		inst:SetStateGraph("SGpig")
-		inst.AnimState:SetBuild(inst.build)
-		
-		inst.components.sleeper:SetResistance(2)
-		inst.components.werebeast:SetOnNormalFn(SetNormalPig)
-
-		inst.components.combat:SetDefaultDamage(TUNING.PIG_DAMAGE)
-		inst.components.combat:SetAttackPeriod(TUNING.PIG_ATTACK_PERIOD)
-		inst.components.combat:SetKeepTargetFunction(NormalKeepTargetFn)
-		inst.components.locomotor.runspeed = TUNING.PIG_RUN_SPEED
-		inst.components.locomotor.walkspeed = TUNING.PIG_WALK_SPEED
-		
-		inst.components.sleeper:SetSleepTest(NormalShouldSleep)
-		inst.components.sleeper:SetWakeTest(DefaultWakeTest)
-		
-		inst.components.lootdropper:SetLoot({})
-		inst.components.lootdropper:AddRandomLoot("meat",3)
-		inst.components.lootdropper:AddRandomLoot("pigskin",1)
-		inst.components.lootdropper.numrandomloot = 1
-
-		inst.components.health:SetMaxHealth(TUNING.PIG_HEALTH)
-		inst.components.combat:SetRetargetFunction(3, PigmanNormalRetargetFn)
-		inst.components.combat:SetTarget(nil)
-		inst:ListenForEvent("suggest_tree_target", function(inst, data)
-			if data and data.tree and inst:GetBufferedAction() ~= ACTIONS.CHOP then
-				inst.tree_target = data.tree
-			end
-		end)
-		
-		inst.components.trader:Enable()
-		inst.components.talker:StopIgnoringAll()
-	end
-	inst.components.werebeast:SetOnNormalFn(SetNormalPig)
 end
 -- Bat Retarget Function
 local function BatRetargetFn(inst)
 
-	local function NoError(inst, attacker, ...) 
+	local function MakeTeam(inst, attacker, ...) 
 		local leader = SpawnPrefab("teamleader")
-		leader:AddTag("bat")
-		leader.components.teamleader.threat = attacker
-		leader.components.teamleader.team_type = inst.components.teamattacker.team_type
-		leader.components.teamleader:NewTeammate(inst)
+		leader.components.teamleader:SetUp(attacker, inst)
 		leader.components.teamleader:BroadcastDistress(inst)
 	end
 	
 	local function Retarget(inst)
 		local ta = inst.components.teamattacker
-		local newtarget = FindEntity(inst, TUNING.BISHOP_TARGET_DIST, function(guy)
-				return (guy:HasTag("character") or guy:HasTag("monster") )
-					   and not guy:HasTag("bat")
-					   and not guy:HasTag("realyoukai")
-					   and inst.components.combat:CanTarget(guy)
-		end)
+		local newtarget = FindEntity(inst, TUNING.BAT_TARGET_DIST, function(guy)
+				return inst.components.combat:CanTarget(guy)
+			end,
+			nil,
+			{"bat", "realyoukai"},
+			{"character", "monster"}
+		)
+
 		if newtarget and not ta.inteam and not ta:SearchForTeam() then
-			NoError(inst, newtarget)
+			MakeTeam(inst, newtarget)
 		end
+
 		if ta.inteam and not ta.teamleader:CanAttack() then
 			return newtarget
 		end
@@ -348,17 +299,27 @@ end
 -- Spring Bee Retarget Function
 local function BeeRetargetFn(inst)
 	local function SpringBeeRetarget(inst)
-		if GLOBAL.GetSeasonManager() and GLOBAL.GetSeasonManager():IsSpring() then
-			local range = 4
-			return FindEntity(inst, range, function(guy)
-				return (guy:HasTag("character") or guy:HasTag("animal") or guy:HasTag("monster") )
-					and not guy:HasTag("insect")
-					and not guy:HasTag("realyoukai")
-					and inst.components.combat:CanTarget(guy)
-			end)
-		else
-			return false
-		end
+		return GLOBAL.TheWorld.state.isspring and
+        FindEntity(inst, 4,
+            function(guy)
+                return inst.components.combat:CanTarget(guy)
+            end,
+            { "_combat", "_health" },
+            { "insect", "INLIMBO" },
+            { "character", "animal", "monster" })
+        or nil
+	end
+	inst.components.combat:SetRetargetFunction(2, SpringBeeRetarget)
+end
+local function KillerbeeRetargetFn(inst)
+	local function KillerRetarget(inst)
+		return FindEntity(inst, SpringCombatMod(8),
+			function(guy)
+				return inst.components.combat:CanTarget(guy)
+			end,
+			{ "_combat", "_health" },
+			{ "insect", "INLIMBO", "realyoukai" },
+			{ "character", "animal", "monster" })
 	end
 	inst.components.combat:SetRetargetFunction(2, SpringBeeRetarget)
 end
@@ -366,14 +327,15 @@ end
 local function FrogRetargetFn(inst)
 	local function retargetfn(inst)
 		if not inst.components.health:IsDead() and not inst.components.sleeper:IsAsleep() then
-			return FindEntity(inst, TUNING.FROG_TARGET_DIST, function(guy) 
-				if guy.components.combat and guy.components.health 
-				and not guy.components.health:IsDead() 
-				and not guy:HasTag("realyoukai") then -- stay frogyyyyyyyyyy
-					return guy.components.inventory ~= nil
-				end
-			end)
-		end
+        return FindEntity(inst, TUNING.FROG_TARGET_DIST, function(guy) 
+            if not guy.components.health:IsDead() then
+                return guy.components.inventory ~= nil
+            end
+        end,
+        {"_combat","_health"}, -- see entityreplica.lua
+		{"realyoukai"}
+        )
+    end
 	end
 	inst.components.combat:SetRetargetFunction(3, retargetfn)
 end
@@ -387,57 +349,19 @@ local function SetInspectable(inst)
 	end
 end
 
-local armorlist = {
-	"grass",
-	"marble",
-	"ruins",
-	"sanity",
-	"snurtleshell",
-	"wood"
-}
-local function GetName(i)
-	return "armor_"..armorlist[i]
-end
-
-for i = 1, table.maxn(armorlist), 1 do
-	AddPrefabPostInit(GetName(i), function(inst)
-		local function Blocked(owner)
-		
-		end
-		
-		local function equip(inst, owner)
-			owner.AnimState:OverrideSymbol("swap_body", GetName(i), "swap_body")
-			inst:ListenForEvent("blocked", Blocked, owner)
-		end
-		
-		local function unequip(inst, owner)
-			owner.AnimState:ClearOverrideSymbol("swap_body")
-			inst:RemoveEventCallback("blocked", Blocked, owner)
-		end
-
-		inst.components.equippable:SetOnEquip( equip )
-		inst.components.equippable:SetOnUnequip( unequip )
-	end)
-end
-
 local function ToolEfficientFn(self)
 
-	local function ToolEfficient(self, act, effectiveness, ...)
-		effectiveness = effectiveness or 1
-		
-		if GetPlayer() and GetPlayer().prefab == "yakumoyukari" then
-			if GetPlayer().components.upgrader and GetPlayer().components.upgrader.IsEfficient then
-				if act == GLOBAL.ACTIONS.HAMMER then else
+	local function ToolEfficient(self, action, effectiveness, ...)
+		assert(GLOBAL.TOOLACTIONS[action.id], "invalid tool action")
+		if ThePlayer and IsYukari then
+			if ThePlayer.components.upgrader and ThePlayer.components.upgrader.IsEfficient then
+				if action == GLOBAL.ACTIONS.HAMMER then else
 					effectiveness = effectiveness + 0.5
 				end
 			end
 		end
-		
-		if not self.action then
-			self.action = {}
-		end
-		
-		self.action[act] = effectiveness
+		self.actions[action] = effectiveness or 1
+		self.inst:AddTag(action.id.."_tool")
 	end
 	
 	self.SetAction = ToolEfficient
@@ -446,17 +370,17 @@ end
 
 ---------- print current upgrade & ability
 function DebugUpgrade()
-	if GetPlayer() and GetPlayer().components.upgrader then
-		local HP = GetPlayer().health_level
-		local HN = GetPlayer().hunger_level
-		local SA = GetPlayer().sanity_level
-		local PO = GetPlayer().power_level
+	if ThePlayer and ThePlayer.components.upgrader then
+		local HP = ThePlayer.health_level
+		local HN = ThePlayer.hunger_level
+		local SA = ThePlayer.sanity_level
+		local PO = ThePlayer.power_level
 		
 		local str = "Health Upgrade - "..HP.."\nHunger Upgrade - "..HN.."\nSanity Upgrade - "..SA.."\nPower Upgrade - "..PO
 		if Language == "chinese" then
 			str = "生 命 升 级 - "..HP.."\n饥 饿 升 级 - "..HN.."\n心 智 升 级 - "..SA.."\n妖 力 升 级 - "..PO
 		end
-		GetPlayer().components.talker:Say(str)
+		ThePlayer.components.talker:Say(str)
 	end
 end
 
@@ -468,7 +392,7 @@ function DebugAbility()
 	
 	for i = 1, 4, 1 do
 		for j = 1, 6, 1 do
-			if GetPlayer() and GetPlayer().components.upgrader and GetPlayer().components.upgrader.ability[i][j] then
+			if ThePlayer and ThePlayer.components.upgrader and ThePlayer.components.upgrader.ability[i][j] then
 				if i == 1 then
 					HP = HP + 1
 				elseif i == 2 then
@@ -485,29 +409,29 @@ function DebugAbility()
 	if Language == "chinese" then
 		str = "生 命 能 力 - lev."..HP.."\n饥 饿 能 力 - lev."..HN.."\n心 智 能 力 - lev."..SA.."\n妖 力 能 力 - lev."..PO
 	end
-	GetPlayer().components.talker:Say(str)
+	ThePlayer.components.talker:Say(str)
 end
 
 function DebugCooltime()
 	
 	local Invincible = ""
 	
-	if GetPlayer() and GetPlayer().components.upgrader.InvincibleLearned then
-		if GetPlayer().invin_cool then
+	if ThePlayer and ThePlayer.components.upgrader.InvincibleLearned then
+		if ThePlayer.invin_cool then
 			if Language == "chinese" then
-				if GetPlayer().invin_cool >= 1440 then
+				if ThePlayer.invin_cool >= 1440 then
 					Invincible = "無 敵  -  ? 行"
-				elseif GetPlayer().invin_cool > 0 then
-					Invincible = "無 敵  -  "..GetPlayer().invin_cool.." 秒 "
-				elseif GetPlayer().invin_cool == 0 then
+				elseif ThePlayer.invin_cool > 0 then
+					Invincible = "無 敵  -  "..ThePlayer.invin_cool.." 秒 "
+				elseif ThePlayer.invin_cool == 0 then
 					Invincible = "無 敵  -  準 備"
 				end
 			else
-				if GetPlayer().invin_cool >= 1440 then
+				if ThePlayer.invin_cool >= 1440 then
 					Invincible = "Invincibility - On"
-				elseif GetPlayer().invin_cool > 0 then
-					Invincible = "Invincibility - "..GetPlayer().invin_cool.."s"
-				elseif GetPlayer().invin_cool == 0 then
+				elseif ThePlayer.invin_cool > 0 then
+					Invincible = "Invincibility - "..ThePlayer.invin_cool.."s"
+				elseif ThePlayer.invin_cool == 0 then
 					Invincible = "Invincibility - Ready"
 				end
 			end
@@ -516,14 +440,14 @@ function DebugCooltime()
 	
 	local str = Invincible
 	if str == "" then 
-		GetPlayer().components.talker:Say(GetString(GetPlayer().prefab, "DESCRIBE_NOSKILL"))
+		ThePlayer.components.talker:Say(GetString(ThePlayer.prefab, "DESCRIBE_NOSKILL"))
 	else
-		GetPlayer().components.talker:Say(str)
+		ThePlayer.components.talker:Say(str)
 	end
 end
 
 function DoDebug_1()
-	if GetPlayer() and GetPlayer():HasTag("yakumoyukari") then 
+	if ThePlayer and ThePlayer:HasTag("yakumoyukari") then 
 		if not IsPaused() 
 		and not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
 		-- and not TheInput:IsKeyDown(GLOBAL.KEY_ALT) <<<<<<<<<<<<<<<<<< This cause alt+tab issue!!
@@ -534,7 +458,7 @@ function DoDebug_1()
 end
 
 function DoDebug_2()
-	if GetPlayer() and GetPlayer():HasTag("yakumoyukari") then 
+	if ThePlayer and ThePlayer:HasTag("yakumoyukari") then 
 		if not IsPaused() 
 		and not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
 		and TheInput:IsKeyDown(GLOBAL.KEY_SHIFT) then 
@@ -544,7 +468,7 @@ function DoDebug_2()
 end
 
 function DoDebug_3()
-	if GetPlayer() and GetPlayer():HasTag("yakumoyukari") then 
+	if ThePlayer and ThePlayer:HasTag("yakumoyukari") then 
 		if not IsPaused() 
 		and not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
 		and TheInput:IsKeyDown(GLOBAL.KEY_SHIFT) then 
@@ -557,131 +481,20 @@ TheInput:AddKeyDownHandler(98, DoDebug_1)
 TheInput:AddKeyDownHandler(118, DoDebug_2)
 TheInput:AddKeyDownHandler(110, DoDebug_3)
 
--- Custom Intro
-
-local function YukariIntro(inst)
-    if GLOBAL.GetPlayer().prefab == "yakumoyukari" then
-		if Language == "chinese" then
-			inst.components.maxwelltalker.speeches.SANDBOX_1 =
-			{
-				appearsound = "dontstarve/maxwell/disappear",
-				voice = "dontstarve/maxwell/talk_LP_world5",
-				appearanim = "appear5",
-				idleanim= "idle5_loop",
-				dialogpreanim = "dialog5_pre",
-				dialoganim="dialog5_loop",
-				dialogpostanim = "dialog5_pst",
-				disappearanim = "disappear5",
-				-- these one gonna make maxwell very very mad.
-				disableplayer = true,
-				skippable = true,
-				{
-					string = "哦 哦 哦 哦 哦 哦 哦 哇 啊 啊 啊 啊 哦 哦!!",
-					wait = 3,
-					anim = nil,
-					sound = nil,
-				},
-				{
-					string = "你 是 怎 么 打 破 结 界 来 到 这 里 的?!",
-					wait = 4,
-					anim = nil,
-					sound = nil,
-				},
-				{
-					string = "不 过 没 关 系，无 论 你 以 前 是 否 强 大,",
-					wait = 3,
-					anim = nil,
-					sound = nil,
-				},
-				{
-					string = "我 刚 让 你 变 得 一 团 糟!",
-					wait = 3,
-					anim = nil,
-					sound = nil,
-				},
-				{
-					string = "你 不 可 能 活 下 去，你 必 须 死 ！",
-					wait = 4,
-					anim = nil,
-					sound = nil,
-				},
-				{
-					string = "因 为 你 现 在 很 虚 弱!!",
-					wait = 4,
-					anim = nil,
-					sound = nil,
-				},
-			}
-		else
-			inst.components.maxwelltalker.speeches.SANDBOX_1 =
-			{
-				appearsound = "dontstarve/maxwell/disappear",
-				voice = "dontstarve/maxwell/talk_LP_world5",
-				appearanim = "appear5",
-				idleanim= "idle5_loop",
-				dialogpreanim = "dialog5_pre",
-				dialoganim="dialog5_loop",
-				dialogpostanim = "dialog5_pst",
-				disappearanim = "disappear5",
-				-- these one gonna make maxwell very very mad.
-				disableplayer = true,
-				skippable = true,
-				{
-					string = "OWWWWWWAAAAAAWWWW!!!!!",
-					wait = 3,
-					anim = nil,
-					sound = nil,
-				},
-				{
-					string = "HOW THE HECK CAN YOU JUST PASS THROUGH OUR BOUNDARIES?!",
-					wait = 4,
-					anim = nil,
-					sound = nil,
-				},
-				{
-					string = "Well, whatever you were strong or not,",
-					wait = 3,
-					anim = nil,
-					sound = nil,
-				},
-				{
-					string = "I just MESSED you up!",
-					wait = 3,
-					anim = nil,
-					sound = nil,
-				},
-				{
-					string = "YOU MUST DIE. YOU MUST NOT SURVIVE,",
-					wait = 4,
-					anim = nil,
-					sound = nil,
-				},
-				{
-					string = "BECAUSE OF YOUR GODDAMN WEAKNESS!!",
-					wait = 4,
-					anim = nil,
-					sound = nil,
-				},
-			}
-		end
-    end
-end
 -------------------------------
-
 modimport "scripts/power_init.lua" -- load "scripts/power_init.lua"
 modimport "scripts/actions_yukari.lua"
 modimport "scripts/recipes_yukari.lua"
 modimport "scripts/strings_yukari.lua"
 modimport "scripts/tunings_yukari.lua"
-AddPrefabPostInit("maxwellintro", YukariIntro) -- Override function YukariIntro to "prefabs/maxwellintro.lua"
-AddPrefabPostInit("forest", AddSchemeManager) 
+AddPrefabPostInit("forest", AddSchemeManager) -- Override function AddSchemeManager to prefab "forest"
 AddPrefabPostInit("cave", AddSchemeManager)
 AddPrefabPostInit("world", AddSchemeManager)
 AddPrefabPostInit("bunnyman", BunnymanNormalRetargetFn)
 AddPrefabPostInit("pigman", PigmanNormalRetargetFn)
-AddPrefabPostInit("pigman", SetNormalPigFn)
 AddPrefabPostInit("bat", BatRetargetFn)
 AddPrefabPostInit("bee", BeeRetargetFn)
+AddPrefabPostInit("killerbee", KillerbeeRetargetFn)
 AddPrefabPostInit("frog", FrogRetargetFn)
 AddPrefabPostInit("shadowwatcher", SetInspectable)
 AddPrefabPostInit("shadowskittish", SetInspectable)

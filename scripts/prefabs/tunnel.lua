@@ -10,31 +10,31 @@ local function onpreload(inst, data)
 		if data.ax and data.ay and data.az then
 			local scheme_a = SpawnPrefab("tunnel")
 			scheme_a.Transform:SetPosition(data.ax, data.ay, data.az)
-			GetWorld().components.scheme_manager:InitGate(scheme_a)
+			TheWorld.components.scheme_manager:InitGate(scheme_a)
 		end
 		
 		if data.bx and data.by and data.bz then
 			local scheme_b = SpawnPrefab("tunnel")
 			scheme_b.Transform:SetPosition(data.bx, data.by, data.bz)
-			GetWorld().components.scheme_manager:InitGate(scheme_b)
+			TheWorld.components.scheme_manager:InitGate(scheme_b)
 		end
 		
-		GetWorld().components.scheme_manager.isb = data.isb
+		TheWorld.components.scheme_manager.isb = data.isb
 	end
 end
 
 local function onsave(inst, data)
 
-	if GetWorld().components.scheme_manager.gate_a then
-		local x, y, z = GetWorld().components.scheme_manager.gate_a.Transform:GetWorldPosition()
+	if TheWorld.components.scheme_manager.gate_a then
+		local x, y, z = TheWorld.components.scheme_manager.gate_a.Transform:GetWorldPosition()
 		data.ax, data.ay, data.az = x, y, z
 	end
-	if GetWorld().components.scheme_manager.gate_b then
-		local x, y, z = GetWorld().components.scheme_manager.gate_b.Transform:GetWorldPosition()
+	if TheWorld.components.scheme_manager.gate_b then
+		local x, y, z = TheWorld.components.scheme_manager.gate_b.Transform:GetWorldPosition()
 		data.bx, data.by, data.bz = x, y, z
 	end
 	
-	data.isb = GetWorld().components.scheme_manager.isb
+	data.isb = TheWorld.components.scheme_manager.isb
 end
 
 local function fn(Sim)

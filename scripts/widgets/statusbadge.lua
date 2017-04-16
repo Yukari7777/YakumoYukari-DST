@@ -5,7 +5,7 @@ local Widget = require "widgets/widget"
 
 local StatusBadge = Class(Widget, function(self, imagexml, imagetex, name)
 	Widget._ctor(self, "StatusBadge")
-	self.owner = GetPlayer()
+	self.owner = ThePlayer
 	self:SetScale(1,1,1)
 
 	self.text = self:AddChild(Text(BODYTEXTFONT, 33))

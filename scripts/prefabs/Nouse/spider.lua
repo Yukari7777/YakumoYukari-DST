@@ -107,7 +107,7 @@ local function NormalRetarget(inst)
         function(guy) 
             if inst.components.combat:CanTarget(guy) and not guy:HasTag("realyoukai")
                and not (inst.components.follower and inst.components.follower.leader == guy)
-               and not (inst.components.follower and inst.components.follower.leader == GetPlayer() and guy:HasTag("companion")) then
+               and not (inst.components.follower and inst.components.follower.leader == ThePlayer and guy:HasTag("companion")) then
                 return guy:HasTag("youkai") or (guy:HasTag("character") and not guy:HasTag("monster"))
             end
     end)
@@ -123,7 +123,7 @@ local function WarriorRetarget(inst)
 				return ((guy:HasTag("character") and not guy:HasTag("monster")) or guy:HasTag("pig")) or guy:HasTag("youkai")
 					   and inst.components.combat:CanTarget(guy)
 					   and not (inst.components.follower and inst.components.follower.leader == guy)
-					   and not (inst.components.follower and inst.components.follower.leader == GetPlayer() and guy:HasTag("companion"))
+					   and not (inst.components.follower and inst.components.follower.leader == ThePlayer and guy:HasTag("companion"))
 		end
 	end)
 end
@@ -140,7 +140,7 @@ local function keeptargetfn(inst, target)
           and target.components.health
           and not target.components.health:IsDead()
           and not (inst.components.follower and inst.components.follower.leader == target)
-          and not (inst.components.follower and inst.components.follower.leader == GetPlayer() and target:HasTag("companion"))
+          and not (inst.components.follower and inst.components.follower.leader == ThePlayer and target:HasTag("companion"))
 end
 
 local function ShouldSleep(inst)
@@ -222,7 +222,7 @@ end
 local function create_common(Sim)
 	local inst = CreateEntity()
 	
-	inst:ListenForEvent( "daytime", function(i, data) StartDay( inst ) end, GetWorld())	
+	inst:ListenForEvent( "daytime", function(i, data) StartDay( inst ) end, TheWorld)	
 	inst.OnEntitySleep = OnEntitySleep
 	
     inst.entity:AddTransform()
@@ -321,7 +321,7 @@ local function create_common(Sim)
     inst:SetBrain(brain)
 
     inst:ListenForEvent("attacked", OnAttacked)
-    inst:ListenForEvent("dusktime", function() StartNight(inst) end, GetWorld())
+    inst:ListenForEvent("dusktime", function() StartNight(inst) end, TheWorld)
 
     return inst
 end

@@ -18,11 +18,11 @@ function MakeCard(name)
 		inst.components.finiteuses:SetMaxUses(3)
 		inst.components.finiteuses:SetUses(3)
 		inst.components.spellcard:SetSpellFn(function()
-			if GetPlayer().components.health then
-				GetPlayer().components.health:DoDelta(20)
+			if ThePlayer.components.health then
+				ThePlayer.components.health:DoDelta(20)
 			end
-			if GetPlayer().components.power then
-				GetPlayer().components.power:DoDelta(-5, false)
+			if ThePlayer.components.power then
+				ThePlayer.components.power:DoDelta(-5, false)
 			end
 			inst.components.finiteuses:Use(1)
 		end)
@@ -33,13 +33,13 @@ function MakeCard(name)
 		inst.components.finiteuses:SetMaxUses(3)
 		inst.components.finiteuses:SetUses(3)
 		inst.components.spellcard:SetSpellFn(function()
-			if GetPlayer().components.sanity then
-				local amount = GetPlayer().components.sanity:GetMaxSanity() * GetPlayer().components.sanity:GetPercent()
-				GetPlayer().components.sanity:SetPercent(1)
-				GetPlayer().components.sanity:DoDelta(-amount)
+			if ThePlayer.components.sanity then
+				local amount = ThePlayer.components.sanity:GetMaxSanity() * ThePlayer.components.sanity:GetPercent()
+				ThePlayer.components.sanity:SetPercent(1)
+				ThePlayer.components.sanity:DoDelta(-amount)
 			end
-			if GetPlayer().components.power then
-				GetPlayer().components.power:DoDelta(-60, false)
+			if ThePlayer.components.power then
+				ThePlayer.components.power:DoDelta(-60, false)
 			end
 			inst.components.finiteuses:Use(1)
 		end)
@@ -54,7 +54,7 @@ function MakeCard(name)
 		inst.IsInvisible = nil
 		inst.Duration = 0
 		inst.components.spellcard:SetSpellFn(function()
-			local Chara = GetPlayer()
+			local Chara = ThePlayer
 			if inst.IsInvisible == true then
 				inst.Duration = inst.Duration + 10
 				Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_INVINCIBILITY_DURATION"))
@@ -103,7 +103,7 @@ function MakeCard(name)
 		inst.components.spellcard.action = ACTIONS.CASTTOHOH
 		inst.components.spellcard.costpower = 300
 		inst.components.spellcard:SetSpellFn(function()
-			local Chara = GetPlayer()
+			local Chara = ThePlayer
 			local x,y,z = Chara.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x, y, z, 40)
 			local Language = GetModConfigData("language", "YakumoYukari")
@@ -170,11 +170,8 @@ function MakeCard(name)
 		inst.Duration = 0
 		inst.Activated = nil
 		inst.components.spellcard:SetSpellFn(function()
-			local Chara = GetPlayer()
+			local Chara = ThePlayer
 			local old_dmg = Chara.components.combat.damagemultiplier
-			if IsDLCEnabled(CAPY_DLC) then
-				old_dmg = Chara.components.combat:GetDamageModifier("yukari_bonus")
-			end
 			local old_speed = Chara.components.upgrader.bonusspeed
 			local isfast = 1
 			if Chara:HasTag("realyoukai") then
@@ -202,9 +199,6 @@ function MakeCard(name)
 								inst.Activated = false
 								
 								Chara.components.combat.damagemultiplier = 1.2
-								if IsDLCEnabled(CAPY_DLC) then
-									Chara.components.combat:AddDamageModifier("yukari_bonus", 0.2)
-								end
 								Chara.components.locomotor.walkspeed = 4
 								Chara.components.locomotor.runspeed = 6
 								Chara.components.combat:SetAttackPeriod(TUNING.WILSON_ATTACK_PERIOD)
@@ -219,9 +213,6 @@ function MakeCard(name)
 								Chara.components.sanity:DoDelta(- Chara.components.sanity:GetMaxSanity() * 0.025)
 							end
 							Chara.components.combat.damagemultiplier = math.max(GetMultipulier(), old_dmg)
-							if IsDLCEnabled(CAPY_DLC) then
-								Chara.components.combat:AddDamageModifier("yukari_bonus", math.max(GetMultipulier()-1, old_dmg))
-							end
 							Chara.components.locomotor.walkspeed = 6 + math.max(GetMultipulier(), old_speed)
 							Chara.components.locomotor.runspeed = 8 + math.max(GetMultipulier(), old_speed)
 							Chara.components.combat:SetAttackPeriod(TUNING.WILSON_ATTACK_PERIOD * math.min(1, 1 - GetMultipulier()/3, isfast))
@@ -242,7 +233,7 @@ function MakeCard(name)
 		inst.components.finiteuses:SetMaxUses(5)
 		inst.components.finiteuses:SetUses(5)
 		inst.components.spellcard:SetSpellFn(function()
-			local Chara = GetPlayer()
+			local Chara = ThePlayer
 			local x,y,z = Chara.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x, y, z, 50)
 			for k,v in pairs(ents) do
@@ -282,23 +273,23 @@ function MakeCard(name)
 		inst.components.stackable.maxsize = TUNING.STACK_SIZE_LARGEITEM
 		inst.Activated = nil
 		inst.components.spellcard:SetSpellFn(function()
-			local Chara = GetPlayer()
+			local Chara = ThePlayer
 			if Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) and Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "molehat" then
 				Chara.components.talker:Say(GetString(Chara.prefab, "ACTIONFAIL_GENERIC"))
 			else
 				if inst.Activated == nil then
 					Chara:DoPeriodicTask(1, function()
 						if inst.Activated then
-							if GetClock() and GetWorld() and GetWorld().components.colourcubemanager then
+							if GetClock() and TheWorld and TheWorld.components.colourcubemanager then
 								GetClock():SetNightVision(true)
-								GetWorld().components.colourcubemanager:SetOverrideColourCube("images/colour_cubes/purple_moon_cc.tex", .5)
+								TheWorld.components.colourcubemanager:SetOverrideColourCube("images/colour_cubes/purple_moon_cc.tex", .5)
 							end
 							if Chara.components.power and Chara.components.power.current >= 1 then
 								Chara.components.power:DoDelta(-1, false)
 							else 
 								Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_LOWPOWER"))
-								if GetWorld() and GetWorld().components.colourcubemanager then
-									GetWorld().components.colourcubemanager:SetOverrideColourCube(nil, .5)
+								if TheWorld and TheWorld.components.colourcubemanager then
+									TheWorld.components.colourcubemanager:SetOverrideColourCube(nil, .5)
 								end
 								GetClock():SetNightVision(false)
 								inst.Activated = false
@@ -309,11 +300,11 @@ function MakeCard(name)
 									Chara.components.combat:GetAttacked(inst, 10)
 								end
 								inst.Activated = false
-								 if GetClock() and GetWorld() and GetWorld().components.colourcubemanager then
-									if GetClock():IsDay() and not GetWorld():IsCave() then
-										GetWorld().components.colourcubemanager:SetOverrideColourCube("images/colour_cubes/mole_vision_off_cc.tex", .25)
+								 if GetClock() and TheWorld and TheWorld.components.colourcubemanager then
+									if GetClock():IsDay() and not TheWorld:IsCave() then
+										TheWorld.components.colourcubemanager:SetOverrideColourCube("images/colour_cubes/mole_vision_off_cc.tex", .25)
 									else
-										GetWorld().components.colourcubemanager:SetOverrideColourCube("images/colour_cubes/mole_vision_on_cc.tex", .25)
+										TheWorld.components.colourcubemanager:SetOverrideColourCube("images/colour_cubes/mole_vision_on_cc.tex", .25)
 									end
 								end
 							end
@@ -325,8 +316,8 @@ function MakeCard(name)
 				else
 					if inst.Activated then
 						inst.Activated = false
-						if GetWorld() and GetWorld().components.colourcubemanager then
-							GetWorld().components.colourcubemanager:SetOverrideColourCube(nil, .5)
+						if TheWorld and TheWorld.components.colourcubemanager then
+							TheWorld.components.colourcubemanager:SetOverrideColourCube(nil, .5)
 						end
 						GetClock():SetNightVision(false)
 					else 
@@ -337,12 +328,12 @@ function MakeCard(name)
 			end
 		end)
 		inst.components.finiteuses:SetOnFinished(function()
-			if GetWorld() and GetWorld().components.colourcubemanager then
-				GetWorld().components.colourcubemanager:SetOverrideColourCube(nil, .5)
+			if TheWorld and TheWorld.components.colourcubemanager then
+				TheWorld.components.colourcubemanager:SetOverrideColourCube(nil, .5)
 			end
 			inst.Activated = false
 			GetClock():SetNightVision(false)
-			GetPlayer().components.talker:Say(GetString(GetPlayer().prefab, "DESCRIBE_DONEEFFCT"))
+			ThePlayer.components.talker:Say(GetString(ThePlayer.prefab, "DESCRIBE_DONEEFFCT"))
 			inst:Remove()
 		end)
 	end
@@ -351,8 +342,8 @@ function MakeCard(name)
 		inst.components.spellcard.costpower = 80
 		inst:RemoveComponent("finiteuses")
 		inst.components.spellcard:SetSpellFn(function()
-			local Chara = GetPlayer()
-			if not (GetWorld().components.butterflyspawner and GetWorld().components.birdspawner) then
+			local Chara = ThePlayer
+			if not (TheWorld.components.butterflyspawner and TheWorld.components.birdspawner) then
 				Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_NOSPAWN"))
 			else
 				if Chara.components.power then
@@ -371,7 +362,7 @@ function MakeCard(name)
 				if num > 0 then
 					Chara:StartThread(function()
 						for k = 1, num do
-							local pt = GetWorld().components.birdspawner:GetSpawnPoint(Vector3(GetPlayer().Transform:GetWorldPosition() ))
+							local pt = TheWorld.components.birdspawner:GetSpawnPoint(Vector3(ThePlayer.Transform:GetWorldPosition() ))
 							local butter = SpawnPrefab("butterfly")
 							butter.Transform:SetPosition(pt.x, pt.y, pt.z)
 							butter:AddTag("magicbutter")
@@ -397,7 +388,7 @@ function MakeCard(name)
 				fx.AnimState:PlayAnimation("hit")
 				fx.AnimState:PushAnimation("idle_loop")
 				end
-				fx.entity:SetParent(GetPlayer().entity)
+				fx.entity:SetParent(ThePlayer.entity)
 				fx.AnimState:SetScale(0.7,0.7,0.7)
 				fx.AnimState:SetMultColour(0.5,0,0.5,0.3)
 				fx.Transform:SetPosition(0, 0.2, 0)
@@ -406,7 +397,7 @@ function MakeCard(name)
 			end
 		end
 		inst.components.spellcard:SetSpellFn(function()
-			local Chara = GetPlayer()
+			local Chara = ThePlayer
 			local fx = barrier()
 			if inst.Activated == nil then -- create barrier
 				inst.Activated = true
@@ -448,7 +439,7 @@ function MakeCard(name)
 			inst.Activated = false
 			fx.kill_fx(fx)
 			inst.fx = nil
-			GetPlayer().components.talker:Say(GetString(GetPlayer().prefab, "DESCRIBE_DONEEFFCT"))
+			ThePlayer.components.talker:Say(GetString(ThePlayer.prefab, "DESCRIBE_DONEEFFCT"))
 			inst:Remove()
 		end)
 	end
@@ -457,7 +448,7 @@ function MakeCard(name)
 		inst.components.spellcard.costpower = 200
 		inst:RemoveComponent("finiteuses")
 		inst.components.spellcard:SetSpellFn(function()
-			local Chara = GetPlayer()
+			local Chara = ThePlayer
 			local x,y,z = Chara.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x, y, z, 60)
 			for k,v in pairs(ents) do
@@ -566,12 +557,12 @@ function MakeCard(name)
 			{"deerclops", 1, "bad", function(prefab) prefab:Remove(); GetSeasonManager():DoLightningStrike(TheInput:GetWorldPosition()) end},
 		}
 		local function spawn() -- TODO : makes character stop while spelling
-			local Chara = GetPlayer()
-			if GetPlayer().components.kramped.threshold == nil then
-				GetPlayer().components.kramped.threshold = TUNING.KRAMPUS_THRESHOLD + math.random(TUNING.KRAMPUS_THRESHOLD_VARIANCE)
+			local Chara = ThePlayer
+			if ThePlayer.components.kramped.threshold == nil then
+				ThePlayer.components.kramped.threshold = TUNING.KRAMPUS_THRESHOLD + math.random(TUNING.KRAMPUS_THRESHOLD_VARIANCE)
 			end -- just in case
-			local threshold = GetPlayer().components.kramped.threshold
-			local actions = GetPlayer().components.kramped.actions
+			local threshold = ThePlayer.components.kramped.threshold
+			local actions = ThePlayer.components.kramped.actions
 			local naughtiness = actions / threshold -- just percentage
 			local key, amount, grade, pt, name
 			local function GetPoint(pt)
@@ -579,7 +570,7 @@ function MakeCard(name)
 				local radius = 6+math.random()*6
 				
 				local result_offset = FindValidPositionByFan(theta, radius, 12, function(offset)
-					local ground = GetWorld()
+					local ground = TheWorld
 					local spawn_point = pt + offset
 					if not (ground.Map and ground.Map:GetTileAtPoint(spawn_point.x, spawn_point.y, spawn_point.z) == GROUND.IMPASSABLE) then
 						return true
@@ -617,18 +608,25 @@ function MakeCard(name)
 					local function GetKey(name)
 					
 						local value
-						
-						if SaveGameIndex:IsModeShipwrecked() then
-							value = math.random(table.maxn(name))
-						else
-							local valid = 0
+						local valid = 0
 							for i = 1, table.maxn(name) do
 								if not name[i][5] then
 									valid = valid + 1
 								end
 							end
 							value = math.random(valid)
-						end
+							
+						-- if SaveGameIndex:IsModeShipwrecked() then
+							-- value = math.random(table.maxn(name))
+						-- else
+							-- local valid = 0
+							-- for i = 1, table.maxn(name) do
+								-- if not name[i][5] then
+									-- valid = valid + 1
+								-- end
+							-- end
+							-- value = math.random(valid)
+						-- end
 						
 						return value
 					end
@@ -648,7 +646,7 @@ function MakeCard(name)
 					for i = 1, amount do
 						local prefab = SpawnPrefab(name[key][1])
 						prefab:AddTag("spawned")
-						pt = GetPoint(Vector3(GetPlayer().Transform:GetWorldPosition()))
+						pt = GetPoint(Vector3(ThePlayer.Transform:GetWorldPosition()))
 						if name[key][4] then
 							name[key][4](prefab) -- problem
 						end
@@ -678,7 +676,7 @@ function MakeCard(name)
 					for i = 1, amount do
 						local prefab = SpawnPrefab(name[key][1])
 						prefab:AddTag("spawned")
-						pt = GetPoint(Vector3(GetPlayer().Transform:GetWorldPosition()))
+						pt = GetPoint(Vector3(ThePlayer.Transform:GetWorldPosition()))
 						if name[key][4] then
 							name[key][4](prefab)
 						end
@@ -709,10 +707,10 @@ function MakeCard(name)
 		end
 		inst.components.spellcard:SetSpellFn(function()
 			if inst.Activated then
-				GetPlayer().components.talker:Say(GetString(GetPlayer().prefab, "ACTIONFAIL_GENERIC"))
+				ThePlayer.components.talker:Say(GetString(ThePlayer.prefab, "ACTIONFAIL_GENERIC"))
 			else
 				inst.Activated = true
-				local Chara = GetPlayer()
+				local Chara = ThePlayer
 				local x,y,z = Chara.Transform:GetWorldPosition()
 				local ents = TheSim:FindEntities(x, y, z, 100)
 				Chara.components.playercontroller:Enable(false)
@@ -740,7 +738,7 @@ function MakeCard(name)
 		inst:AddComponent("stackable")
 		inst.components.stackable.maxsize = TUNING.STACK_SIZE_LARGEITEM
 		inst.components.spellcard:SetSpellFn(function()
-			local Chara = GetPlayer()
+			local Chara = ThePlayer
 			local Inventory = Chara.components.inventory
 			
 			local function repair(v)

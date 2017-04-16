@@ -11,7 +11,7 @@ end)
 
 function scheme_manager:InitGate(inst)
 
-	self = GetWorld().components.scheme_manager
+	self = TheWorld.components.scheme_manager
 	
 	local function SchemeConnect()
 		self.gate_a.components.schemeteleport:Target(self.gate_b)

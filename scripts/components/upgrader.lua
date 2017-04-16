@@ -64,7 +64,7 @@ Upgrader = Class(function(self, inst) -- hmm.. This is more like upgrade manager
 end)
 
 function GetUpgradeCount()
-	local G = GetPlayer()
+	local G = ThePlayer
 	return {G.health_level, G.hunger_level, G.sanity_level, G.power_level}
 end
 
@@ -241,11 +241,7 @@ function Upgrader:SkillManager(inst)
 		inst.components.upgrader.powergenbonus = 0.25
 		TUNING.ARMOR_RUINSHAT_DMG_AS_SANITY = 0.025
 		TUNING.ARMOR_SANITY_DMG_AS_SANITY = 0.05
-		if IsDLCEnabled(CAPY_DLC) then
-			TUNING.ARMORMARBLE_SLOW = -0.1
-		else
-			TUNING.ARMORMARBLE_SLOW = 0.9
-		end
+		TUNING.ARMORMARBLE_SLOW = 0.9
 	end
 	
 	if skill[4][2] then
@@ -286,7 +282,7 @@ function Upgrader:SkillManager(inst)
 	if skill[4][6] then
 		inst.components.upgrader.IsEfficient = true
 		inst.components.upgrader.bonusspeed = 4
-		GetPlayer().components.moisture.baseDryingRate = 0.5
+		ThePlayer.components.moisture.baseDryingRate = 0.5
 	end
 	
 end

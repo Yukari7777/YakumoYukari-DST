@@ -26,10 +26,10 @@ local function GetIndex(inst)
 end
 
 local function GetStatLevel(index)
-	if index == 1 then return GetPlayer().health_level
-	elseif index == 2 then return GetPlayer().hunger_level
-	elseif index == 3 then return GetPlayer().sanity_level
-	elseif index == 4 then return GetPlayer().power_level
+	if index == 1 then return ThePlayer.health_level
+	elseif index == 2 then return ThePlayer.hunger_level
+	elseif index == 3 then return ThePlayer.sanity_level
+	elseif index == 4 then return ThePlayer.power_level
 	end
 end
 
@@ -53,15 +53,16 @@ local function GetIngreCount(index)
 end
 
 local function GetTable(index)
-	if SaveGameIndex:IsModeShipwrecked() then
-		return Ingredients_sw[index]
-	else
-		return Ingredients[index]
-	end
+	-- if SaveGameIndex:IsModeShipwrecked() then
+		-- return Ingredients_sw[index]
+	-- else
+		-- return Ingredients[index]
+	-- end
+	return Ingredients[index]
 end
 
 local function GetBackpack()
-	local Chara = GetPlayer()
+	local Chara = ThePlayer
 	local backpack
 	
 	if EQUIPSLOTS.BACK and Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.BACK) then -- check if backpack slot mod is enabled.
@@ -77,7 +78,7 @@ local function GetBackpack()
 end
 
 local function CountInventoryItem(prefab)
-	local inventory = GetPlayer().components.inventory
+	local inventory = ThePlayer.components.inventory
 	local backpack = GetBackpack()
 	local count = 0
 	
@@ -169,7 +170,7 @@ local function SetDesc(index)
 	local Language = GetModConfigData("language", "YakumoYukari")
 		
 	local function IsHanded()
-		local hands = GetPlayer().components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
+		local hands = ThePlayer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
 		if hands and condition then
 			if Language == "chinese" then
 				return "\n我 手 里 必 须 拿 点 东 西."
@@ -204,7 +205,7 @@ end
 local function DoUpgrade(inst)
 	
 	local backpack = GetBackpack()
-	local Chara = GetPlayer()
+	local Chara = ThePlayer
 	local index = GetIndex(inst)
 	local items = GetTable(index)
 	local count = GetIngreCount(index)
@@ -277,9 +278,6 @@ function MakePanel(iname)
 		local anim = inst.entity:AddAnimState()    		
 		
 		MakeInventoryPhysics(inst)   
-		if IsDLCEnabled(CAPY_DLC) then    
-			MakeInventoryFloatable(inst, "idle", "idle")
-		end	
 		
 		anim:SetBank(fname)    
 		anim:SetBuild(fname)    

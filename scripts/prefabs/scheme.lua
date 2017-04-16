@@ -25,11 +25,11 @@ local function GetIngameName(prefab)
 end
 
 local function onsave(inst, data)
-	GetPlayer().hatlevel = inst.hatlevel
+	ThePlayer.hatlevel = inst.hatlevel
 end
 
 local function onpreload(inst, data)
-	inst.hatlevel = GetPlayer().hatlevel
+	inst.hatlevel = ThePlayer.hatlevel
 	if data and data.hatlevel then
 		inst.hatlevel = data.hatlevel
 		data.hatlevel = nil
@@ -38,7 +38,7 @@ end
 
 local function GetBackpack()
 	local backpack
-	local Chara = GetPlayer()
+	local Chara = ThePlayer
 	
 	if EQUIPSLOTS.BACK and Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.BACK) then -- check if backpack slot mod is enabled.
 		backpack = Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.BACK)
@@ -58,11 +58,12 @@ local function GetTable(inst)
 	local list = {}
 	
 	if hatlevel < 5 then
-		if SaveGameIndex:IsModeShipwrecked() then
-			list = Ingredients_sw[hatlevel]
-		else
-			list = Ingredients[hatlevel]
-		end
+		-- if SaveGameIndex:IsModeShipwrecked() then
+			-- list = Ingredients_sw[hatlevel]
+		-- else
+			-- list = Ingredients[hatlevel]
+		-- end
+		list = Ingredients[hatlevel]
 		if list[1][2] >= 20 then
 			for i = 1, table.maxn(list), 1 do 
 				list[i][2] = math.ceil(list[i][2] * 0.25)
@@ -74,7 +75,7 @@ local function GetTable(inst)
 end
 
 local function CountInventoryItem(prefab)
-	local inventory = GetPlayer().components.inventory
+	local inventory = ThePlayer.components.inventory
 	local backpack = GetBackpack()
 	local count = 0
 	
@@ -143,7 +144,7 @@ local function SetDesc(inst)
 	local Language = GetModConfigData("language", "YakumoYukari")
 		
 	local function IsHanded()
-		local hands = GetPlayer().components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
+		local hands = ThePlayer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
 		if hands and condition then
 			if Language == "chinese" then
 				return "\n我 手 里 必 须 拿 点 东 西."
@@ -165,21 +166,21 @@ end
 
 local function SetCondition(inst)
 	local condition = GetCondition(inst)
-	local hands = GetPlayer().components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
+	local hands = ThePlayer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
 	inst.components.spellcard:SetCondition( condition )
 	SetDesc(inst)
 end
 
 local function DoUpgrade(inst)
 
-	local Chara = GetPlayer()
+	local Chara = ThePlayer
 	local list = GetTable(inst)
 	local backpack = GetBackpack()
 	
 	for i = 1, table.maxn(list), 1 do
 		local function consume(item, left_count, backpack)
 		
-			local Chara = GetPlayer()
+			local Chara = ThePlayer
 			local Inventory = Chara.components.inventory
 			for k,v in pairs(Inventory.itemslots) do
 				if v.prefab == item then
@@ -225,7 +226,7 @@ local function DoUpgrade(inst)
 end
 
 local function OnFinish(inst)
-	local Chara = GetPlayer()
+	local Chara = ThePlayer
 	inst.hatlevel = inst.hatlevel + 1
 	Chara.hatlevel = inst.hatlevel
 	SetCondition(inst)
@@ -241,10 +242,7 @@ local function fn()
 	local anim = inst.entity:AddAnimState()    
 	local sound = inst.entity:AddSoundEmitter()   
 
-	MakeInventoryPhysics(inst)    
-	if IsDLCEnabled(CAPY_DLC) then    
-		MakeInventoryFloatable(inst, "idle", "idle")
-	end	
+	MakeInventoryPhysics(inst)
 	
 	anim:SetBank("spell")    
 	anim:SetBuild("spell")    
@@ -265,10 +263,7 @@ local function fn()
 	inst.components.spellcard:SetSpellFn( DoUpgrade )
 	inst.components.spellcard:SetOnFinish( OnFinish )
 	inst.components.spellcard:SetCondition( false )
-	inst.hatlevel = GetPlayer().hatlevel
-	
-	inst:AddComponent("characterspecific")
-    inst.components.characterspecific:SetOwner("yakumoyukari")
+	inst.hatlevel = ThePlayer.hatlevel
 	
 	local function callfn()
 		SetCondition(inst)
@@ -278,8 +273,8 @@ local function fn()
 	inst.OnPreLoad = onpreload
 	SetCondition(inst)
 	
-	GetPlayer():ListenForEvent("equip", callfn )
-	GetPlayer():ListenForEvent("unequip", callfn )
+	ThePlayer:ListenForEvent("equip", callfn )
+	ThePlayer:ListenForEvent("unequip", callfn )
 	inst:DoPeriodicTask(1, callfn)
 	
 	return inst

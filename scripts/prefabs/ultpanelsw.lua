@@ -63,12 +63,9 @@ function MakeUltimateSW(name, value)
 		local anim = inst.entity:AddAnimState()   
 		
 		MakeInventoryPhysics(inst)   
-		if IsDLCEnabled(CAPY_DLC) then    
-			MakeInventoryFloatable(inst, "idle", "idle")
-		end	
 		
 		local function IsHanded()
-			local hands = GetPlayer().components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
+			local hands = ThePlayer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
 			if hands then return false else return true end
 		end
 		
@@ -92,8 +89,8 @@ function MakeUltimateSW(name, value)
 		inst.components.spellcard:SetSpellFn( DoUpgrade )
 		inst.components.spellcard:SetCondition( IsHanded() )
 		
-		GetPlayer():ListenForEvent("equip", CallFn )
-		GetPlayer():ListenForEvent("unequip", CallFn )
+		ThePlayer:ListenForEvent("equip", CallFn )
+		ThePlayer:ListenForEvent("unequip", CallFn )
 		
 		return inst
 	end

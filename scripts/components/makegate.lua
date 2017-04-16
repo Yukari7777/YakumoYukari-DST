@@ -22,7 +22,7 @@ function MakeGate:GetBlinkPoint()
 end
 
 function MakeGate:CanMakeToPoint(pt)
-    local ground = GetWorld()
+    local ground = TheWorld
     if ground then
 		local tile = ground.Map:GetTileAtPoint(pt.x, pt.y, pt.z)
 		return tile ~= GROUND.IMPASSIBLE and tile < GROUND.UNDERGROUND
@@ -32,7 +32,7 @@ end
 
 function MakeGate:CollectPointActions(doer, pos, actions, right)
 	if right then
-		local equip = GetPlayer().components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
+		local equip = ThePlayer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
 		if self.target_position then
 			pos = self.target_position
 		end
@@ -101,7 +101,7 @@ function MakeGate:RCreate(pt, caster)
 		end
 		local scheme = SpawnPrefab("tunnel")
 		scheme.Transform:SetPosition(pt.x, pt.y, pt.z)
-		GetWorld().components.scheme_manager:InitGate(scheme)
+		TheWorld.components.scheme_manager:InitGate(scheme)
 	end)
 	
 	self.onusefn(self.inst, pt, caster)

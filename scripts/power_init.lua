@@ -1,6 +1,5 @@
 local require = GLOBAL.require
 local TUNING = GLOBAL.TUNING
-local GetPlayer = GLOBAL.GetPlayer
 
 local YokaiBadge = require "widgets/yokaibadge"
 
@@ -17,7 +16,7 @@ end
 
 local function StatusDisplaysInit(class)
 
-	if GetPlayer().components.power then
+	if class.owner.components.power then
 	 
 		class.power = class:AddChild(YokaiBadge(class.owner))
 		-- /////// TEMP Support, only works with default settings. ///////

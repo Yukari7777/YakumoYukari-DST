@@ -30,8 +30,13 @@ local assets = {
         Asset( "SOUND", "sound/wilson.fsb" ),
 
         Asset( "ANIM", "anim/yakumoyukari.zip" ),
+		Asset( "ATLAS", "images/avatars/avatar_yakumoyukari.xml"),
+		Asset( "ATLAS", "images/avatars/avatar_ghost_yakumoyukari.xml"),
 }
 local prefabs = {
+	"scheme",
+	"yukariumbre",
+	"yukarihat",
 	"scheme"
 }
 
@@ -54,12 +59,6 @@ local function GetStartInv()
 end
 
 local start_inv = GetStartInv()
-
-local important_items = {
-	"yukariumbre",
-	"yukarihat",
-	"scheme",
-}
 
 local function onsave(inst, data)
 	data.health_level = inst.health_level
@@ -150,17 +149,17 @@ local function OnhitEvent(inst, data)
 end
 
 local function OnAttackedEvent(attacked, data)
-	if GetPlayer().components.health and GetPlayer().components.upgrader.IsFight then
-		if not GetPlayer().components.health.invincible then -- Check another invinciblity.
-			GetPlayer().components.health:SetInvincible(true)
-			scheduler:ExecuteInTime(1, GetPlayer().components.health:SetInvincible(false))
+	if ThePlayer.components.health and ThePlayer.components.upgrader.IsFight then
+		if not ThePlayer.components.health.invincible then -- Check another invinciblity.
+			ThePlayer.components.health:SetInvincible(true)
+			scheduler:ExecuteInTime(1, ThePlayer.components.health:SetInvincible(false))
 		end
 	end
 end
 
 local function TelePortDelay()
-	GetPlayer():DoTaskInTime(0.5, function()
-		GetPlayer().istelevalid = true 
+	ThePlayer:DoTaskInTime(0.5, function()
+		ThePlayer.istelevalid = true 
 	end)
 end
 
@@ -171,7 +170,7 @@ local function DoPowerRestore(inst, amount)
 end
 	
 function DoHungerUp(inst, data)
-	if GetPlayer():HasTag("inspell") then 
+	if ThePlayer:HasTag("inspell") then 
 		return
 	end
 	local Hunger = inst.components.hunger
@@ -188,20 +187,6 @@ function DoHungerUp(inst, data)
 			inst.components.combat.damagemultiplier = 1.2 + math.max(Hunger:GetPercent() - 0.2, 0)
 		elseif inst.components.upgrader.powerupvalue == 5 then
 			inst.components.combat.damagemultiplier = 1.2 + Hunger:GetPercent()
-		end
-		
-		if IsDLCEnabled(CAPY_DLC) then
-			if inst.components.upgrader.powerupvalue == 1 then
-				inst.components.combat:AddDamageModifier("yukari_bonus", math.max(Hunger:GetPercent() - 0.8, 0)) 
-			elseif inst.components.upgrader.powerupvalue == 2 then	
-				inst.components.combat:AddDamageModifier("yukari_bonus", math.max(Hunger:GetPercent() - 0.6, 0)) 
-			elseif inst.components.upgrader.powerupvalue == 3 then
-				inst.components.combat:AddDamageModifier("yukari_bonus", math.max(Hunger:GetPercent() - 0.4, 0)) 
-			elseif inst.components.upgrader.powerupvalue == 4 then
-			inst.components.combat:AddDamageModifier("yukari_bonus", math.max(Hunger:GetPercent() - 0.2, 0)) 
-			elseif inst.components.upgrader.powerupvalue == 5 then
-				inst.components.combat:AddDamageModifier("yukari_bonus", Hunger:GetPercent() ) 
-			end
 		end
 		
 	end
@@ -252,7 +237,7 @@ local function GetPoint(pt)
 	local radius = 6 + math.random()*6
 	
 	local result_offset = FindValidPositionByFan(theta, radius, 12, function(offset)
-		local ground = GetWorld()
+		local ground = TheWorld
 		local spawn_point = pt + offset
 		if not (ground.Map and ground.Map:GetTileAtPoint(spawn_point.x, spawn_point.y, spawn_point.z) == GROUND.IMPASSABLE) then
 			return true
@@ -277,7 +262,7 @@ local function PeriodicFunction(inst, data)
 			TUNING.SANITY_NIGHT_MID = 0
 			TUNING.SANITY_NIGHT_DARK = 0
 			TUNING.SANITY_NIGHT_LIGHT = 0
-		elseif not GetWorld():IsCave() then
+		elseif not TheWorld:IsCave() then
 			TUNING.SANITY_NIGHT_MID = 0
 			TUNING.SANITY_NIGHT_DARK = 0
 			TUNING.SANITY_NIGHT_LIGHT = 0
@@ -294,7 +279,7 @@ local function PeriodicFunction(inst, data)
 	end
 	
 	if inst.components.upgrader.NightVision then
-		if GetClock():IsNight() or GetWorld():IsCave() then
+		if GetClock():IsNight() or TheWorld:IsCave() then
 			if inst.components.sanity and inst.components.sanity:GetPercent() >= 0.8 and inst.components.sanity:GetPercent() < 0.98 then
 				inst.Light:SetRadius(1);inst.Light:SetFalloff(.9);inst.Light:SetIntensity(0.3);inst.Light:SetColour(128/255,0,217/255);inst.Light:Enable(true)
 			elseif inst.components.sanity and inst.components.sanity:GetPercent() >= 0.98 then
@@ -313,9 +298,9 @@ local function PeriodicFunction(inst, data)
 	
 	if inst.components.upgrader.SightDistance and inst.components.upgrader.SightDistance > 0 then
 		local dis = inst.components.upgrader.SightDistance
-		local pt = GetPoint(Vector3(GetPlayer().Transform:GetWorldPosition()))
-		GetWorld().minimap.MiniMap:ShowArea(pt.x, pt.y, pt.z, 50 * dis)
-		GetWorld().Map:VisitTile(GetWorld().Map:GetTileCoordsAtPoint(pt.x, pt.y, pt.z))
+		local pt = GetPoint(Vector3(ThePlayer.Transform:GetWorldPosition()))
+		TheWorld.minimap.MiniMap:ShowArea(pt.x, pt.y, pt.z, 50 * dis)
+		TheWorld.Map:VisitTile(TheWorld.Map:GetTileCoordsAtPoint(pt.x, pt.y, pt.z))
 	end
 end
 
@@ -356,11 +341,17 @@ local function OnGraze(inst)
 end
 
 local function DebugFunction()
-	if GetPlayer().components.power then
-		GetPlayer().components.power.max = 300
-		GetPlayer().components.power.current = 300
+	if ThePlayer.components.power then
+		ThePlayer.components.power.max = 300
+		ThePlayer.components.power.current = 300
 	end
 end	
+
+local function common_init(inst)
+	inst:AddTag("youkai")
+	inst:AddTag("yakumoga")
+	inst:AddTag("yakumoyukari")
+end
 
 local fn = function(inst)
 	
@@ -386,15 +377,12 @@ local fn = function(inst)
 	inst.soundsname = "willow"
 	inst.MiniMapEntity:SetIcon( "yakumoyukari.tex" )
 	
+	inst.components.sanity:SetMax(75)
 	inst.components.health:SetMaxHealth(80)
 	inst.components.hunger:SetMax(150)
-	inst.components.sanity:SetMax(75)
 	inst.components.builder.science_bonus = 1
 	
     inst.components.combat.damagemultiplier = 1.2
-	if IsDLCEnabled(CAPY_DLC) then
-		inst.components.combat:AddDamageModifier("yukari_bonus", 0.2)
-	end
 	
 	local day_time = TUNING.SEG_TIME * TUNING.DAY_SEGS_DEFAULT
 	inst.components.hunger.hungerrate = 1.5 * TUNING.WILSON_HUNGER_RATE
@@ -512,12 +500,8 @@ local fn = function(inst)
 		end
 		return inst.components.eater:EatMEAT(food)
 	end
+
 	
-	inst.components.inventory:GuaranteeItems(important_items)
-	
-	inst:AddTag("youkai")
-	inst:AddTag("yakumoga")
-	inst:AddTag("yakumoyukari")
 	inst:RemoveTag("notarget")
 	inst:RemoveTag("inspell")
 	inst:RemoveTag("IsDamage")
@@ -560,4 +544,4 @@ local fn = function(inst)
 	end)
 end
 
-return MakePlayerCharacter("yakumoyukari", prefabs, assets, fn, start_inv)
+return MakePlayerCharacter("yakumoyukari", prefabs, assets, common_init, fn, start_inv)

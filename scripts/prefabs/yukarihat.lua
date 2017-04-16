@@ -19,8 +19,8 @@ local function UpdateSound(inst)
 end  
 
 local function firedmg(amount)
-	if GetPlayer().fireimmuned == false and GetPlayer().components.health then
-		GetPlayer().components.health.fire_damage_scale = amount
+	if ThePlayer.fireimmuned == false and ThePlayer.components.health then
+		ThePlayer.components.health.fire_damage_scale = amount
 	end
 end
 
@@ -28,7 +28,6 @@ local function Ability(inst, owner)
 
 	if owner.components.upgrader:IsHatValid(owner) then
 		if owner.hatlevel >= 3 then
-			inst.components.dapperness.mitigates_rain = true
 			inst.components.waterproofer:SetEffectiveness(1)
 		end
 		
@@ -40,7 +39,6 @@ local function Ability(inst, owner)
 			end
 		end
 	else
-		inst.components.dapperness.mitigates_rain = false
 		inst.components.waterproofer:SetEffectiveness(0)
 		inst.components.equippable.poisonblocker = false
 		inst.components.equippable.poisongasblocker = false
@@ -74,9 +72,6 @@ local function fn()
 	local sound = inst.entity:AddSoundEmitter()   
 	
 	MakeInventoryPhysics(inst)    
-	if IsDLCEnabled(CAPY_DLC) then    
-		MakeInventoryFloatable(inst, "idle", "idle")
-	end	
 		
 	anim:SetBank("yukarihat")    
 	anim:SetBuild("yukarihat")    
@@ -92,9 +87,6 @@ local function fn()
 	inst:AddComponent("waterproofer")
 	inst.components.waterproofer:SetEffectiveness(0)
 	
-	inst:AddComponent("dapperness")
-    inst.components.dapperness.mitigates_rain = false	
-	
 	inst.entity:AddMiniMapEntity()
     inst.MiniMapEntity:SetIcon("yukarihat.tex")
 	
@@ -105,16 +97,13 @@ local function fn()
 	inst.components.equippable.poisonblocker = false	
 	inst.components.equippable.poisongasblocker = false
 	
-	inst:AddComponent("characterspecific")
-    inst.components.characterspecific:SetOwner("yakumoyukari")
-	
 	local function CallFn()
-		Ability(inst, GetPlayer()) 
+		Ability(inst, ThePlayer) 
 	end
 	
 	inst:DoTaskInTime(0, CallFn)
-	GetPlayer():ListenForEvent( "equip", CallFn )
-	GetPlayer():ListenForEvent( "unequip", CallFn )
+	ThePlayer:ListenForEvent( "equip", CallFn )
+	ThePlayer:ListenForEvent( "unequip", CallFn )
 	
 	return inst
 end

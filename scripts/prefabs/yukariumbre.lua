@@ -48,7 +48,6 @@ local function OnUnequipYukari(inst, owner)
 	
 	inst.isunfolded = false
 	inst.components.weapon:SetDamage(6)
-	inst.components.dapperness.mitigates_rain = false
 	inst.components.waterproofer:SetEffectiveness(0)
 end    
 
@@ -62,7 +61,6 @@ local function unfoldit(inst)
 		owner.SoundEmitter:PlaySound("dontstarve/wilson/use_umbrella_down")
 		owner.DynamicShadow:SetSize(1.3, 0.6)
 		inst.components.weapon:SetDamage(6)
-		inst.components.dapperness.mitigates_rain = false
 		inst.components.waterproofer:SetEffectiveness(0)
 		
 		inst.isunfolded = false
@@ -74,7 +72,6 @@ local function unfoldit(inst)
 		owner.SoundEmitter:PlaySound("dontstarve/wilson/use_umbrella_up") 
 		owner.DynamicShadow:SetSize(2.2, 1.4)
 		inst.components.weapon:SetDamage(1)
-		inst.components.dapperness.mitigates_rain = true
 		inst.components.waterproofer:SetEffectiveness(1)
 		
 		inst.isunfolded = true
@@ -93,9 +90,6 @@ local function fn()
 	local sound = inst.entity:AddSoundEmitter()   
 	
 	MakeInventoryPhysics(inst)     
-	if IsDLCEnabled(CAPY_DLC) then
-		MakeInventoryFloatable(inst, "idle", "idle")	
-	end
 	
 	anim:SetBank("yukariumbre")    
 	anim:SetBuild("yukariumbre")    
@@ -109,14 +103,11 @@ local function fn()
 	inst.components.waterproofer:SetEffectiveness(0)
 	
 	inst:AddComponent("makegate")
-	if GetPlayer().components.power then
+	if ThePlayer.components.power then
 		inst.components.makegate.onusefn = onuse
 	end
 	
 	inst.isunfolded = false
-	
-	inst:AddComponent("dapperness")
-    inst.components.dapperness.mitigates_rain = false
 	
 	inst:AddComponent("insulator")
     inst.components.insulator:SetSummer()
@@ -144,14 +135,11 @@ local function fn()
 	inst.components.equippable:SetOnEquip( OnEquipYukari )    
 	inst.components.equippable:SetOnUnequip( OnUnequipYukari )
 	
-	inst:AddComponent("characterspecific")
-    inst.components.characterspecific:SetOwner("yakumoyukari")
-	
 	inst.entity:AddMiniMapEntity()
     inst.MiniMapEntity:SetIcon("yukariumbre.tex")
 	
-	inst:ListenForEvent("rainstop", function() UpdateSound(inst) end, GetWorld()) 
-	inst:ListenForEvent("rainstart", function() UpdateSound(inst) end, GetWorld()) 
+	inst:ListenForEvent("rainstop", function() UpdateSound(inst) end, TheWorld) 
+	inst:ListenForEvent("rainstart", function() UpdateSound(inst) end, TheWorld) 
 	
 	inst.components.equippable.walkspeedmult = TUNING.CANE_SPEED_MULT
 

@@ -1220,7 +1220,6 @@ return {
 
 		HOUNDFIRE = "It's hot! be careful!",
 
-		--- CAPY DLC ------------------------------------------------------------------------------------------------
 		ANTIVENOM = "This can be a venom or an antivenom.",
 		VENOMGLAND = "It's a poison to cure poison.",
 		BLOWDART_POISON = "Another ragned weapon!",

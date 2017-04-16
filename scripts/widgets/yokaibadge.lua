@@ -2,10 +2,7 @@ local UIAnim = require "widgets/uianim"
 local Widget = require "widgets/widget"
 local Text = require "widgets/text"
 local Stat = require "widgets/statusdisplays"
-
-if IsDLCEnabled(CAPY_DLC) or IsDLCEnabled(REIGN_OF_GIANTS) then
-	local MoistureMeter = require "widgets/moisturemeter"
-end
+local MoistureMeter = require "widgets/moisturemeter"
 
 local function CombindIsModEnabled(name)
 	for _, moddir in ipairs(KnownModIndex:GetModsToLoad()) do
@@ -18,7 +15,7 @@ end
 
 local yokaibadge = Class(Widget, function(self, owner)
 	Widget._ctor(self, "yokaibadge")
-	self.owner = GetPlayer()
+	self.owner = ThePlayer
 	
 	self.percent = 0
     self:SetPosition(0,0,0)
@@ -79,7 +76,7 @@ function yokaibadge:PulseGreen()
 end
 
 function yokaibadge:SetPercent(val, max)
-	self.owner = GetPlayer()	
+	self.owner = ThePlayer	
     val = val or self.percent
 	
 	self.power = self.owner.components.power.current

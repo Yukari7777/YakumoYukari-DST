@@ -3,7 +3,7 @@ local Widget = require "widgets/widget"
 
 local StatusBar = Class(Widget, function(self)
 	Widget._ctor(self, "StatusBadge")
-	self.owner = GetPlayer()
+	self.owner = ThePlayer
 	self:SetScale(1,1,1)
 
 	self.bg = self:AddChild(Image(idir.."bar.xml", "bar.tex"))
