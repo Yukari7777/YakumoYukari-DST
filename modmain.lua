@@ -332,7 +332,7 @@ local function FrogRetargetFn(inst)
                 return guy.components.inventory ~= nil
             end
         end,
-        {"_combat","_health"}, -- see entityreplica.lua
+        {"_combat","_health"},
 		{"realyoukai"}
         )
     end
@@ -450,7 +450,6 @@ function DoDebug_1()
 	if ThePlayer and ThePlayer:HasTag("yakumoyukari") then 
 		if not IsPaused() 
 		and not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
-		-- and not TheInput:IsKeyDown(GLOBAL.KEY_ALT) <<<<<<<<<<<<<<<<<< This cause alt+tab issue!!
 		and TheInput:IsKeyDown(GLOBAL.KEY_SHIFT) then 
 			DebugUpgrade() 
 		end
