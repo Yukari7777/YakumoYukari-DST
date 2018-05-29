@@ -252,34 +252,23 @@ end
 
 local function PeriodicFunction(inst, data)
 
-	local old_sanity_1 = -100/(TUNING.SEG_TIME * GetClock().nightsegs * 20)
-	local old_sanity_2 = -100/(TUNING.SEG_TIME * GetClock().nightsegs * 2)
-	local old_sanity_3 = -100/(TUNING.SEG_TIME * GetClock().nightsegs * 20)
 	local Light = inst.entity:AddLight()
 	
 	if inst.components.upgrader.ResistDark then
 		if inst.components.upgrader.ResistCave then
-			TUNING.SANITY_NIGHT_MID = 0
-			TUNING.SANITY_NIGHT_DARK = 0
-			TUNING.SANITY_NIGHT_LIGHT = 0
+			inst.components.sanity.night_drain_mult = 0
 		elseif not TheWorld:IsCave() then
-			TUNING.SANITY_NIGHT_MID = 0
-			TUNING.SANITY_NIGHT_DARK = 0
-			TUNING.SANITY_NIGHT_LIGHT = 0
+			inst.components.sanity.night_drain_mult = 0
 		end
 	else
 		if inst.hatequipped then
-			TUNING.SANITY_NIGHT_MID = old_sanity_1 * 0.5
-			TUNING.SANITY_NIGHT_DARK = old_sanity_2 * 0.5
-			TUNING.SANITY_NIGHT_LIGHT = old_sanity_3 * 0.5
+			inst.components.sanity.night_drain_mult = 0.5
 		end
-		TUNING.SANITY_NIGHT_MID = old_sanity_1
-		TUNING.SANITY_NIGHT_DARK = old_sanity_2
-		TUNING.SANITY_NIGHT_LIGHT = old_sanity_3
+		inst.components.sanity.night_drain_mult = 1
 	end
 	
 	if inst.components.upgrader.NightVision then
-		if GetClock():IsNight() or TheWorld:IsCave() then
+		if TheWorld.state.phase == "night" or TheWorld:IsCave() then
 			if inst.components.sanity and inst.components.sanity:GetPercent() >= 0.8 and inst.components.sanity:GetPercent() < 0.98 then
 				inst.Light:SetRadius(1);inst.Light:SetFalloff(.9);inst.Light:SetIntensity(0.3);inst.Light:SetColour(128/255,0,217/255);inst.Light:Enable(true)
 			elseif inst.components.sanity and inst.components.sanity:GetPercent() >= 0.98 then
@@ -384,12 +373,10 @@ local fn = function(inst)
 	
     inst.components.combat.damagemultiplier = 1.2
 	
-	local day_time = TUNING.SEG_TIME * TUNING.DAY_SEGS_DEFAULT
+	--local day_time = TUNING.SEG_TIME * TUNING.DAY_SEGS_DEFAULT
 	inst.components.hunger.hungerrate = 1.5 * TUNING.WILSON_HUNGER_RATE
-	TUNING.MOISTURE_SANITY_PENALTY_MAX = -100/(day_time*2) -- default * 3
-	TUNING.NIGHTSWORD_USES = 110
-	TUNING.ARMOR_SANITY = 850
-	TUNING.HAMMER_DAMAGE = 10
+	--TUNING.MOISTURE_SANITY_PENALTY_MAX = -100/(day_time*2) -- default * 3
+	-- TUNING.HAMMER_DAMAGE = 10
 	STRINGS.NAMES.SHADOWWATCHER = "Watcher"
 	STRINGS.NAMES.SHADOWSKITTISH = "Shadow Creature"
 	STRINGS.NAMES.SHADOWSKITTISH_WATER = "Shadow Creature"
@@ -404,7 +391,6 @@ local fn = function(inst)
 			if food.prefab == "minotaurhorn"
 			or food.prefab == "deerclops_eyeball"
 			or food.prefab == "tigereye" then
-				-- I don't think Yukari wants to eat eyes..
 				DoPowerRestore(inst, 300)
 				
 			elseif food.prefab == "trunk_winter"
@@ -453,7 +439,7 @@ local fn = function(inst)
 			elseif food.prefab == "drumstick" 
 			or food.prefab == "drumstick_cooked" then
 				food.components.edible.sanityvalue = 0
-				DoPowerRestore(inst, 16) -- easter chicken
+				DoPowerRestore(inst, 16)
 				
 			elseif food.prefab == "doydoyegg_cooked" 
 			or food.prefab == "bird_egg_cooked"

@@ -8,7 +8,7 @@ local assets=
 prefabs = {}
 
 local function UpdateSound(inst)
-    local soundShouldPlay = (GetSeasonManager():IsRaining() and inst.components.equippable:IsEquipped() and inst.upgraded)
+    local soundShouldPlay = (TheWorld.state.israining and inst.components.equippable:IsEquipped() and inst.upgraded)
     if soundShouldPlay ~= inst.SoundEmitter:PlayingSound("umbrellarainsound") then
         if soundShouldPlay then
 		    inst.SoundEmitter:PlaySound("dontstarve/rain/rain_on_umbrella", "umbrellarainsound") 

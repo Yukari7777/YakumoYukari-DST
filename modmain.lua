@@ -74,8 +74,7 @@ if Language == "chinese" then
 	STRINGS.CHARACTER_QUOTES.yakumoyukari = "\"我 将 会 掌 控 这 个 世 界！.\""
 	STRINGS.CHARACTERS.YAKUMOYUKARI = require "speech_yakumoyukari_ch"
 end
-table.insert(GLOBAL.CHARACTER_GENDERS.FEMALE, "yakumoyukari")
-AddModCharacter("yakumoyukari")
+AddModCharacter("yakumoyukari", "FEMALE")
 AddMinimapAtlas("images/map_icons/yakumoyukari.xml")
 AddMinimapAtlas("images/map_icons/yukarihat.xml")
 AddMinimapAtlas("images/map_icons/yukariumbre.xml")

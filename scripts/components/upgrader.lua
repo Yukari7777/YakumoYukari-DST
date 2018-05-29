@@ -51,16 +51,6 @@ Upgrader = Class(function(self, inst) -- hmm.. This is more like upgrade manager
 		self.hatskill[i] = false
 	end
 	
-	
-	self.old_tiny = 100/(TUNING.SEG_TIME*32)
-	self.old_small = 100/(TUNING.SEG_TIME*8)
-	self.old_med = 100/(TUNING.SEG_TIME*5)
-	self.old_large = 100/(TUNING.SEG_TIME*2)
-	self.old_huge = 100/(TUNING.SEG_TIME*0.5)
-	
-	self.old_crazysmall = TUNING.CRAZINESS_SMALL 
-	self.old_crazymed = TUNING.CRAZINESS_MED
-	
 end)
 
 function GetUpgradeCount()
@@ -101,14 +91,14 @@ function Upgrader:SkillManager(inst)
 	
 	if skill[1][1] then
 		inst.components.upgrader.healthbonus = 10
-		TUNING.HEALING_TINY = 2
-	    TUNING.HEALING_SMALL = 5
-	    TUNING.HEALING_MEDSMALL = 12
-	    TUNING.HEALING_MED = 30
-	    TUNING.HEALING_MEDLARGE = 35
-	    TUNING.HEALING_LARGE = 50
-	    TUNING.HEALING_HUGE = 75
-	    TUNING.HEALING_SUPERHUGE = 300
+		-- TUNING.HEALING_TINY = 2
+	    -- TUNING.HEALING_SMALL = 5
+	    -- TUNING.HEALING_MEDSMALL = 12
+	    -- TUNING.HEALING_MED = 30
+	    -- TUNING.HEALING_MEDLARGE = 35
+	    -- TUNING.HEALING_LARGE = 50
+	    -- TUNING.HEALING_HUGE = 75
+	    -- TUNING.HEALING_SUPERHUGE = 300
 	end
 	
 	if skill[1][2] then
@@ -146,37 +136,29 @@ function Upgrader:SkillManager(inst)
 	if skill[2][1] then
 		inst.components.upgrader.hungerbonus = 25
 		inst.components.upgrader.powerupvalue = 1
-		TUNING.INSULATION_TINY = 60
-		TUNING.INSULATION_SMALL = 120
-		TUNING.INSULATION_MED = 240
-		TUNING.INSULATION_LARGE = 480
+		inst.components.temperature.inherentinsulation = TUNING.INSULATION_TINY
+		inst.components.temperature.inherentsummerinsulation = TUNING.INSULATION_TINY
 	end
 	
 	if skill[2][2] then
 		inst.components.upgrader.hungerbonus = 50
 		inst.components.upgrader.powerupvalue = 2
-		TUNING.INSULATION_TINY = 90
-		TUNING.INSULATION_SMALL = 180
-		TUNING.INSULATION_MED = 360
-		TUNING.INSULATION_LARGE = 720
+		inst.components.temperature.inherentinsulation = TUNING.INSULATION_SMALL
+		inst.components.temperature.inherentsummerinsulation = TUNING.INSULATION_SMALL
 	end
 	
 	if skill[2][3] then
 		inst.components.upgrader.hungerbonus = 75
 		inst.components.upgrader.powerupvalue = 3
-		TUNING.INSULATION_TINY = 120
-		TUNING.INSULATION_SMALL = 240
-		TUNING.INSULATION_MED = 480
-		TUNING.INSULATION_LARGE = 960
+		inst.components.temperature.inherentinsulation = TUNING.INSULATION_MED
+		inst.components.temperature.inherentsummerinsulation = TUNING.INSULATION_MED
 	end
 	
 	if skill[2][4] then
 		inst.components.upgrader.hungerbonus = 100
 		inst.components.upgrader.powerupvalue = 4
-		TUNING.INSULATION_TINY = 150
-		TUNING.INSULATION_SMALL = 300
-		TUNING.INSULATION_MED = 600
-		TUNING.INSULATION_LARGE = 1200
+		inst.components.temperature.inherentinsulation = TUNING.INSULATION_LARGE
+		inst.components.temperature.inherentsummerinsulation = TUNING.INSULATION_LARGE
 	end
 	
 	if skill[2][5] then
@@ -189,37 +171,25 @@ function Upgrader:SkillManager(inst)
 	end
 	
 	if skill[3][1] then	
-		TUNING.SANITYAURA_TINY = inst.components.upgrader.old_tiny * 0.7 
-		TUNING.SANITYAURA_SMALL = inst.components.upgrader.old_small * 0.75
-		TUNING.SANITYAURA_MED = inst.components.upgrader.old_med * 0.8
-		TUNING.SANITYAURA_LARGE = inst.components.upgrader.old_large * 0.9
-		TUNING.SANITYAURA_HUGE = inst.components.upgrader.old_huge * 0.95
+		inst.components.sanity.
+		_aura_mult = 0.9
 	end
 	
 	if skill[3][2] then
 		inst.components.upgrader.ResistDark = true
-		inst.components.upgrader.sanitybonus = 25	
-		TUNING.CRAZINESS_SMALL = inst.components.upgrader.old_crazysmall * 0.3
-		TUNING.CRAZINESS_MED = inst.components.upgrader.old_crazysmall * 0.4
+		inst.components.upgrader.sanitybonus = 25
+		inst.components.sanity.neg_aura_mult = 0.7
 	end
 	
 	if skill[3][3] then
 		inst.components.upgrader.sanitybonus = 50
 		inst.components.upgrader.ResistCave = true		
-		TUNING.SANITYAURA_TINY = inst.components.upgrader.old_tiny * 0.2 
-		TUNING.SANITYAURA_SMALL = inst.components.upgrader.old_small * 0.3
-		TUNING.SANITYAURA_MED = inst.components.upgrader.old_med * 0.4
-		TUNING.SANITYAURA_LARGE = inst.components.upgrader.old_large * 0.65
-		TUNING.SANITYAURA_HUGE = inst.components.upgrader.old_huge * 0.8
+		inst.components.sanity.neg_aura_mult = 0.5
 	end
 	
 	if skill[3][4] then
 		inst.components.upgrader.sanitybonus = 75	
-		TUNING.SANITYAURA_TINY = 0
-		TUNING.SANITYAURA_SMALL = inst.components.upgrader.old_small * 0.1
-		TUNING.SANITYAURA_MED = inst.components.upgrader.old_med * 0.2
-		TUNING.SANITYAURA_LARGE = inst.components.upgrader.old_large * 0.3
-		TUNING.SANITYAURA_HUGE = inst.components.upgrader.old_huge * 0.4
+		inst.components.sanity.neg_aura_mult = 0.3
 	end
 	
 	if skill[3][5] then
@@ -228,38 +198,31 @@ function Upgrader:SkillManager(inst)
 	
 	if skill[3][6] then
 		inst.components.upgrader.IsFight = true
-		TUNING.SANITYAURA_TINY = 0
-		TUNING.SANITYAURA_SMALL = 0
-		TUNING.SANITYAURA_MED = 0
-		TUNING.SANITYAURA_LARGE = 0
-		TUNING.SANITYAURA_HUGE = 0
+		inst.components.sanity.neg_aura_mult = 0.1
 	end	
 	
 	if skill[4][1] then
 		inst.components.upgrader.bonusspeed = 1
 		inst.components.upgrader.powerbonus = 25
 		inst.components.upgrader.powergenbonus = 0.25
-		TUNING.ARMOR_RUINSHAT_DMG_AS_SANITY = 0.025
-		TUNING.ARMOR_SANITY_DMG_AS_SANITY = 0.05
-		TUNING.ARMORMARBLE_SLOW = 0.9
 	end
 	
 	if skill[4][2] then
 		inst:RemoveTag("youkai")
 		inst.components.upgrader.powerbonus = 50
 		inst.components.upgrader.powergenbonus = 0.5
-		TUNING.NIGHTSWORD_USES = 140
-		TUNING.ARMOR_SANITY = 1000
-	    TUNING.ICESTAFF_USES = 25 -- increased by 20~25%
-	    TUNING.FIRESTAFF_USES = 25
-	    TUNING.TELESTAFF_USES = 6
-		TUNING.REDAMULET_USES = 25
-		TUNING.YELLOWSTAFF_USES = 25
-		TUNING.ORANGESTAFF_USES = 25
-		TUNING.GREENAMULET_USES = 6
-		TUNING.GREENSTAFF_USES = 6
-		TUNING.PANFLUTE_USES = 12
-		TUNING.HORN_USES = 12
+		-- TUNING.NIGHTSWORD_USES = 140
+		-- TUNING.ARMOR_SANITY = 1000
+	    -- TUNING.ICESTAFF_USES = 25
+	    -- TUNING.FIRESTAFF_USES = 25
+	    -- TUNING.TELESTAFF_USES = 6
+		-- TUNING.REDAMULET_USES = 25
+		-- TUNING.YELLOWSTAFF_USES = 25
+		-- TUNING.ORANGESTAFF_USES = 25
+		-- TUNING.GREENAMULET_USES = 6
+		-- TUNING.GREENSTAFF_USES = 6
+		-- TUNING.PANFLUTE_USES = 12
+		-- TUNING.HORN_USES = 12
 	end
 	
 	if skill[4][3] then
@@ -339,7 +302,9 @@ function Upgrader:DoUpgrade(inst, stat)
 	local hunger_percent = inst.components.hunger:GetPercent()
 	local health_percent = inst.components.health:GetPercent()
 	local sanity_percent = inst.components.sanity:GetPercent()
-	local power_percent = inst.components.power:GetPercent()
+	if inst.components.power then
+		local power_percent = inst.components.power:GetPercent()
+	end
 	
 	local difficulty = GetModConfigData("difficulty", "YakumoYukari")
 	local STATUS = TUNING.STATUS_DEFAULT
@@ -384,8 +349,10 @@ function Upgrader:DoUpgrade(inst, stat)
 		inst.components.hunger.hungerrate = math.max( 0, (STATUS.DEFAULT_HR - inst.hunger_level * STATUS.HR_RATE - math.max(0, (inst.hunger_level - 30) * 0.025 )) ) * TUNING.WILSON_HUNGER_RATE 
 		inst.components.hunger.max = STATUS.DEFAULT_HU + self.hungerbonus
 		inst.components.sanity.max = STATUS.DEFAULT_SN + inst.sanity_level * STATUS.SN_RATE + self.sanitybonus + math.max(0, (inst.sanity_level - 30) * 5)
-		inst.components.power.max = STATUS.DEFAULT_PW + inst.power_level * STATUS.PO_RATE + self.powerbonus + self.hatpowerbonus + math.max(0, (inst.power_level - 30) * 5)
-		inst.components.power.regenrate = STATUS.DEFAULT_PR + inst.power_level * STATUS.PR_RATE + self.powergenbonus
+		if inst.components.power then
+			inst.components.power.max = STATUS.DEFAULT_PW + inst.power_level * STATUS.PO_RATE + self.powerbonus + self.hatpowerbonus + math.max(0, (inst.power_level - 30) * 5)
+			inst.components.power.regenrate = STATUS.DEFAULT_PR + inst.power_level * STATUS.PR_RATE + self.powergenbonus
+		end
 		inst.components.locomotor.walkspeed = 4 + self.bonusspeed + self.hatbonusspeed
 		inst.components.locomotor.runspeed = 6 + self.bonusspeed + self.hatbonusspeed
 	end
@@ -394,7 +361,9 @@ function Upgrader:DoUpgrade(inst, stat)
 	inst.components.health:SetPercent(health_percent)
 	inst.components.hunger:SetPercent(hunger_percent)
 	inst.components.sanity:SetPercent(sanity_percent)
-	inst.components.power:SetPercent(power_percent)
+	if inst.components.power then
+		inst.components.power:SetPercent(power_percent)
+	end
 	
 end
 

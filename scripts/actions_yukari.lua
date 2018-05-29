@@ -7,14 +7,17 @@ local Language = GetModConfigData("language")
 
 -- Action Settings for Yukari --
 
-local CREATE = GLOBAL.Action(1, false, true, 14) -- create action CREATE
+local CREATE = GLOBAL.Action(1, false, true, 14)
 CREATE.id = "CREATE"
 CREATE.str = "Teleport"
 CREATE.fn = function(act)
+	print(act.pos, act.target)
     if act.invobject and act.invobject.components.makegate then
         return act.invobject.components.makegate:Create(act.pos, act.doer)
     end
 end
+AddAction(CREATE)
+AddComponentAction("USEITEM", "create", function(inst, doer, target) table.insert(actions, GLOBAL.ACTIONS.CREATE) end)
 
 AddStategraphPostInit("wilson", function(Stategraph) -- create Stategraph(override to "SGwilson.lua")
 	
