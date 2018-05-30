@@ -53,8 +53,7 @@ Upgrader = Class(function(self, inst) -- hmm.. This is more like upgrade manager
 	
 end)
 
-function GetUpgradeCount()
-	local G = ThePlayer
+function GetUpgradeCount(G)
 	return {G.health_level, G.hunger_level, G.sanity_level, G.power_level}
 end
 
@@ -66,7 +65,7 @@ function Upgrader:AbilityManager(inst)
 
 	local ability = inst.components.upgrader.ability
 	local hatskill = inst.components.upgrader.hatskill
-	local level = GetUpgradeCount()
+	local level = GetUpgradeCount(inst)
 	local point = {5, 10, 17, 25}
 
 	for i = 1, 4, 1 do
@@ -245,7 +244,7 @@ function Upgrader:SkillManager(inst)
 	if skill[4][6] then
 		inst.components.upgrader.IsEfficient = true
 		inst.components.upgrader.bonusspeed = 4
-		ThePlayer.components.moisture.baseDryingRate = 0.5
+		inst.components.moisture.baseDryingRate = 0.5
 	end
 	
 end

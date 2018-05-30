@@ -64,15 +64,6 @@ function MakeUltimateSW(name, value)
 		
 		MakeInventoryPhysics(inst)   
 		
-		local function IsHanded()
-			local hands = ThePlayer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
-			if hands then return false else return true end
-		end
-		
-		local function CallFn()
-			inst.components.spellcard:SetCondition( IsHanded() )
-		end
-		
 		anim:SetBank("spell")    
 		anim:SetBuild("spell")    
 		anim:PlayAnimation("idle")    
@@ -82,6 +73,16 @@ function MakeUltimateSW(name, value)
 		inst:AddComponent("inventoryitem") 
 		inst.components.inventoryitem.imagename = fname    
 		inst.components.inventoryitem.atlasname = "images/inventoryimages/"..fname..".xml"    
+		owner = inst.components.inventoryitem.owner
+
+		local function IsHanded()
+			local hands = owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
+			if hands then return false else return true end
+		end
+		
+		local function CallFn()
+			inst.components.spellcard:SetCondition( IsHanded() )
+		end
 		
 		inst:AddComponent("spellcard")
 		inst.components.spellcard.index = value
@@ -89,8 +90,8 @@ function MakeUltimateSW(name, value)
 		inst.components.spellcard:SetSpellFn( DoUpgrade )
 		inst.components.spellcard:SetCondition( IsHanded() )
 		
-		ThePlayer:ListenForEvent("equip", CallFn )
-		ThePlayer:ListenForEvent("unequip", CallFn )
+		owner:ListenForEvent("equip", CallFn )
+		owner:ListenForEvent("unequip", CallFn )
 		
 		return inst
 	end

@@ -9,43 +9,43 @@ function MakeCard(name)
 		Asset("IMAGE", "images/inventoryimages/"..fname..".tex"),
 	}
 
-	local function onfinished(inst)
+	local function onfinished(inst, owner)
 		inst:Remove()
 	end
 		
-	local function test(inst)
+	local function test(inst, owner)
 		inst.components.spellcard.costpower = 5
 		inst.components.finiteuses:SetMaxUses(3)
 		inst.components.finiteuses:SetUses(3)
 		inst.components.spellcard:SetSpellFn(function()
-			if ThePlayer.components.health then
-				ThePlayer.components.health:DoDelta(20)
+			if owner.components.health then
+				owner.components.health:DoDelta(20)
 			end
-			if ThePlayer.components.power then
-				ThePlayer.components.power:DoDelta(-5, false)
+			if owner.components.power then
+				owner.components.power:DoDelta(-5, false)
 			end
 			inst.components.finiteuses:Use(1)
 		end)
 	end
 	
-	local function mesh(inst)
+	local function mesh(inst, owner)
 		inst.components.spellcard.costpower = 60
 		inst.components.finiteuses:SetMaxUses(3)
 		inst.components.finiteuses:SetUses(3)
 		inst.components.spellcard:SetSpellFn(function()
-			if ThePlayer.components.sanity then
-				local amount = ThePlayer.components.sanity:GetMaxSanity() * ThePlayer.components.sanity:GetPercent()
-				ThePlayer.components.sanity:SetPercent(1)
-				ThePlayer.components.sanity:DoDelta(-amount)
+			if owner.components.sanity then
+				local amount = owner.components.sanity:GetMaxSanity() * owner.components.sanity:GetPercent()
+				owner.components.sanity:SetPercent(1)
+				owner.components.sanity:DoDelta(-amount)
 			end
-			if ThePlayer.components.power then
-				ThePlayer.components.power:DoDelta(-60, false)
+			if owner.components.power then
+				owner.components.power:DoDelta(-60, false)
 			end
 			inst.components.finiteuses:Use(1)
 		end)
 	end
 	
-	local function away(inst)
+	local function away(inst, owner)
 		inst.components.spellcard.costpower = 50
 		inst.components.finiteuses:SetMaxUses(5)
 		inst.components.finiteuses:SetUses(5)
@@ -54,26 +54,25 @@ function MakeCard(name)
 		inst.IsInvisible = nil
 		inst.Duration = 0
 		inst.components.spellcard:SetSpellFn(function()
-			local Chara = ThePlayer
 			if inst.IsInvisible == true then
 				inst.Duration = inst.Duration + 10
-				Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_INVINCIBILITY_DURATION"))
-				if Chara.components.power then
-					Chara.components.power:DoDelta(-50, false)
+				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_INVINCIBILITY_DURATION"))
+				if owner.components.power then
+					owner.components.power:DoDelta(-50, false)
 				end
 				inst.components.finiteuses:Use(1)
 			else
-				Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_CLOAKING"))
-				Chara.AnimState:SetMultColour(0.3,0.3,0.3,.3)
-				Chara:AddTag("notarget")
+				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_CLOAKING"))
+				owner.AnimState:SetMultColour(0.3,0.3,0.3,.3)
+				owner:AddTag("notarget")
 				inst.Duration = 10
 				if inst.IsInvisible == nil then -- to prevent DoPeriodicTask overlapping
-					Chara:DoPeriodicTask(1, function() -- So, this one is set only once.
+					owner:DoPeriodicTask(1, function() -- So, this one is set only once.
 						if inst.IsInvisible == true and inst.Duration > 0 then
-							local x,y,z = Chara.Transform:GetWorldPosition()
+							local x,y,z = owner.Transform:GetWorldPosition()
 							local ents = TheSim:FindEntities(x, y, z, 100)
 							for k,v in pairs(ents) do
-								if v.components.combat and v.components.combat.target == Chara then
+								if v.components.combat and v.components.combat.target == owner then
 									v.components.combat.target = nil
 								end
 							end
@@ -82,29 +81,28 @@ function MakeCard(name)
 							inst.Duration = inst.Duration - 1
 						end
 						if inst.Duration <= 0 and inst.IsInvisible == true then
-							Chara:RemoveTag("notarget")
-							Chara.AnimState:SetMultColour(1,1,1,1)
+							owner:RemoveTag("notarget")
+							owner.AnimState:SetMultColour(1,1,1,1)
 							inst.IsInvisible = false
-							Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_DECLOAKING"))
+							owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DECLOAKING"))
 						end
 					end)
 				end
 				inst.IsInvisible = true
-				if Chara.components.power then
-					Chara.components.power:DoDelta(-50, false)
+				if owner.components.power then
+					owner.components.power:DoDelta(-50, false)
 				end
 				inst.components.finiteuses:Use(1)
 			end
 		end)
 	end
 	
-	local function necro(inst)
+	local function necro(inst, owner)
 		inst:RemoveComponent("finiteuses")
 		inst.components.spellcard.action = ACTIONS.CASTTOHOH
 		inst.components.spellcard.costpower = 300
 		inst.components.spellcard:SetSpellFn(function()
-			local Chara = ThePlayer
-			local x,y,z = Chara.Transform:GetWorldPosition()
+			local x,y,z = owner.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x, y, z, 40)
 			local Language = GetModConfigData("language", "YakumoYukari")
 			SetSharedLootTable('nodrop', {})
@@ -145,8 +143,8 @@ function MakeCard(name)
 				
 			end
 			-- TODO : Delete moleworm, crab pile -> sand pile
-			if Chara.components.power then
-				Chara.components.power:DoDelta(-300, false)
+			if owner.components.power then
+				owner.components.power:DoDelta(-300, false)
 			end
 
 			local str = {}
@@ -158,69 +156,68 @@ function MakeCard(name)
 				str[2] = "在 虚 空 中 永 眠 吧.."
 				str[3] = "你 什 么 都 不 是.."
 			end
-			Chara.components.talker:Say(str[math.random(3)])
+			owner.components.talker:Say(str[math.random(3)])
 			inst:Remove()
 		end)
 	end
 	
-	local function curse(inst)
+	local function curse(inst, owner)
 		inst.components.spellcard.costpower = 50
 		inst.components.finiteuses:SetMaxUses(3)
 		inst.components.finiteuses:SetUses(3)
 		inst.Duration = 0
 		inst.Activated = nil
 		inst.components.spellcard:SetSpellFn(function()
-			local Chara = ThePlayer
-			local old_dmg = Chara.components.combat.damagemultiplier
-			local old_speed = Chara.components.upgrader.bonusspeed
+			
+			local old_dmg = owner.components.combat.damagemultiplier
+			local old_speed = owner.components.upgrader.bonusspeed
 			local isfast = 1
-			if Chara:HasTag("realyoukai") then
+			if owner:HasTag("realyoukai") then
 				isfast = 0
 			end
-			
 			local function GetMultipulier()
-				if Chara.components.sanity then
-					return 3 * (1 - math.ceil(10 * Chara.components.sanity:GetPercent())/10)
+				if owner.components.sanity then
+					return 3 * (1 - math.ceil(10 * owner.components.sanity:GetPercent())/10)
 				end
 			end
 			if inst.Activated == true then
-				Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_CANNOTRESIST"))
+				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_CANNOTRESIST"))
 			else
 				inst.Duration = 20
 				if inst.Activated == nil then
-					Chara:DoPeriodicTask(1, function()
+					owner:DoPeriodicTask(1, function()
 						if inst.Duration > 0 then
 							inst.Activated = true
 							inst.Duration = inst.Duration - 1
-							if Chara:HasTag("inspell") then else
-								Chara:AddTag("inspell")
+							if owner:HasTag("inspell") then else
+								owner:AddTag("inspell")
 							end
 							if inst.Duration == 0 then
 								inst.Activated = false
 								
-								Chara.components.combat.damagemultiplier = 1.2
-								Chara.components.locomotor.walkspeed = 4
-								Chara.components.locomotor.runspeed = 6
-								Chara.components.combat:SetAttackPeriod(TUNING.WILSON_ATTACK_PERIOD)
+								owner.components.combat.damagemultiplier = 1.2
+								owner.components.locomotor.walkspeed = 4
+								owner.components.locomotor.runspeed = 6
+								owner.components.combat:SetAttackPeriod(TUNING.WILSON_ATTACK_PERIOD)
 								
-								Chara.components.upgrader:DoUpgrade(Chara)
-								Chara:RemoveTag("inspell")
-								Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_NOREINFORCE"))
+								owner.components.upgrader:DoUpgrade(owner)
+								owner:RemoveTag("inspell")
+								owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NOREINFORCE"))
 							end
 						end
 						if inst.Activated then
-							if Chara.components.sanity then
-								Chara.components.sanity:DoDelta(- Chara.components.sanity:GetMaxSanity() * 0.025)
+							if owner.components.sanity then
+								owner.components.sanity:DoDelta(- owner.components.sanity:GetMaxSanity() * 0.025)
 							end
-							Chara.components.combat.damagemultiplier = math.max(GetMultipulier(), old_dmg)
-							Chara.components.locomotor.walkspeed = 6 + math.max(GetMultipulier(), old_speed)
-							Chara.components.locomotor.runspeed = 8 + math.max(GetMultipulier(), old_speed)
-							Chara.components.combat:SetAttackPeriod(TUNING.WILSON_ATTACK_PERIOD * math.min(1, 1 - GetMultipulier()/3, isfast))
+							owner.components.combat.damagemultiplier = math.max(GetMultipulier(), old_dmg)
+							owner.components.locomotor.walkspeed = 6 + math.max(GetMultipulier(), old_speed)
+							owner.components.locomotor.runspeed = 8 + math.max(GetMultipulier(), old_speed)
+							owner.components.combat:SetAttackPeriod(TUNING.WILSON_ATTACK_PERIOD * math.min(1, 1 - GetMultipulier()/3, isfast))
 						end
 					end)
 				end
-				if Chara.components.power then
-					Chara.components.power:DoDelta(-50, false)
+				if owner.components.power then
+					owner.components.power:DoDelta(-50, false)
 				end
 				inst.components.finiteuses:Use(1)
 			end
@@ -228,13 +225,12 @@ function MakeCard(name)
 		end)
 	end
 		
-	local function balance(inst)
+	local function balance(inst, owner)
 		inst.components.spellcard.costpower = 100
 		inst.components.finiteuses:SetMaxUses(5)
 		inst.components.finiteuses:SetUses(5)
 		inst.components.spellcard:SetSpellFn(function()
-			local Chara = ThePlayer
-			local x,y,z = Chara.Transform:GetWorldPosition()
+			local x,y,z = owner.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x, y, z, 50)
 			for k,v in pairs(ents) do
 				if v.components.pickable then
@@ -255,14 +251,14 @@ function MakeCard(name)
 				end
 			end
 		
-			if Chara.components.power then
-				Chara.components.power:DoDelta(-100, false)
+			if owner.components.power then
+				owner.components.power:DoDelta(-100, false)
 			end
 			inst.components.finiteuses:Use(1)
 		end)
 	end
 	
-	local function laplace(inst)
+	local function laplace(inst, owner)
 		inst.components.spellcard.costpower = 1
 		table.insert(assets, Asset("IMAGE", "images/colour_cubes/purple_moon_cc.tex"))
 		table.insert(assets, Asset("IMAGE", "images/colour_cubes/mole_vision_on_cc.tex"))
@@ -273,31 +269,30 @@ function MakeCard(name)
 		inst.components.stackable.maxsize = TUNING.STACK_SIZE_LARGEITEM
 		inst.Activated = nil
 		inst.components.spellcard:SetSpellFn(function()
-			local Chara = ThePlayer
-			if Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) and Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "molehat" then
-				Chara.components.talker:Say(GetString(Chara.prefab, "ACTIONFAIL_GENERIC"))
+			if owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) and owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "molehat" then
+				owner.components.talker:Say(GetString(owner.prefab, "ACTIONFAIL_GENERIC"))
 			else
 				if inst.Activated == nil then
-					Chara:DoPeriodicTask(1, function()
+					owner:DoPeriodicTask(1, function()
 						if inst.Activated then
 							if GetClock() and TheWorld and TheWorld.components.colourcubemanager then
 								GetClock():SetNightVision(true)
 								TheWorld.components.colourcubemanager:SetOverrideColourCube("images/colour_cubes/purple_moon_cc.tex", .5)
 							end
-							if Chara.components.power and Chara.components.power.current >= 1 then
-								Chara.components.power:DoDelta(-1, false)
+							if owner.components.power and owner.components.power.current >= 1 then
+								owner.components.power:DoDelta(-1, false)
 							else 
-								Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_LOWPOWER"))
+								owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_LOWPOWER"))
 								if TheWorld and TheWorld.components.colourcubemanager then
 									TheWorld.components.colourcubemanager:SetOverrideColourCube(nil, .5)
 								end
 								GetClock():SetNightVision(false)
 								inst.Activated = false
 							end
-							if Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) and Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "molehat" then
-								Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_EYEHURT"))
-								if Chara.components.combat then
-									Chara.components.combat:GetAttacked(inst, 10)
+							if owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) and owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "molehat" then
+								owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_EYEHURT"))
+								if owner.components.combat then
+									owner.components.combat:GetAttacked(inst, 10)
 								end
 								inst.Activated = false
 								 if GetClock() and TheWorld and TheWorld.components.colourcubemanager then
@@ -312,7 +307,7 @@ function MakeCard(name)
 						end
 					end)
 					inst.Activated = true
-					Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_NEWSIGHT"))
+					owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NEWSIGHT"))
 				else
 					if inst.Activated then
 						inst.Activated = false
@@ -322,7 +317,7 @@ function MakeCard(name)
 						GetClock():SetNightVision(false)
 					else 
 						inst.Activated = true
-						Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_NEWSIGHT"))
+						owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NEWSIGHT"))
 					end
 				end
 			end
@@ -333,36 +328,35 @@ function MakeCard(name)
 			end
 			inst.Activated = false
 			GetClock():SetNightVision(false)
-			ThePlayer.components.talker:Say(GetString(ThePlayer.prefab, "DESCRIBE_DONEEFFCT"))
+			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
 			inst:Remove()
 		end)
 	end
 	
-	local function butter(inst)
+	local function butter(inst, owner)
 		inst.components.spellcard.costpower = 80
 		inst:RemoveComponent("finiteuses")
 		inst.components.spellcard:SetSpellFn(function()
-			local Chara = ThePlayer
 			if not (TheWorld.components.butterflyspawner and TheWorld.components.birdspawner) then
-				Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_NOSPAWN"))
+				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NOSPAWN"))
 			else
-				if Chara.components.power then
-					Chara.components.power:DoDelta(-80, false)
+				if owner.components.power then
+					owner.components.power:DoDelta(-80, false)
 				end
 				local num = 5 + math.random(5)
 				
-				local x, y, z = Chara.Transform:GetWorldPosition()
+				local x, y, z = owner.Transform:GetWorldPosition()
 				local ents = TheSim:FindEntities(x,y,z, 12, nil, nil, {'magicbutter'})
 				if #ents > 10 then
 					num = 0
-					Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_TOOMANYBUTTER"))
+					owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_TOOMANYBUTTER"))
 					return
 				end
 				
 				if num > 0 then
-					Chara:StartThread(function()
+					owner:StartThread(function()
 						for k = 1, num do
-							local pt = TheWorld.components.birdspawner:GetSpawnPoint(Vector3(ThePlayer.Transform:GetWorldPosition() ))
+							local pt = TheWorld.components.birdspawner:GetSpawnPoint(Vector3(owner.Transform:GetWorldPosition() ))
 							local butter = SpawnPrefab("butterfly")
 							butter.Transform:SetPosition(pt.x, pt.y, pt.z)
 							butter:AddTag("magicbutter")
@@ -374,7 +368,7 @@ function MakeCard(name)
 		end)
 	end
 	
-	local function bait(inst) -- name : Bewitching Bait
+	local function bait(inst, owner) -- name : Bewitching Bait
 		inst.components.spellcard.costpower = 1
 		inst.components.finiteuses:SetMaxUses(300)
 		inst.components.finiteuses:SetUses(300)
@@ -388,7 +382,7 @@ function MakeCard(name)
 				fx.AnimState:PlayAnimation("hit")
 				fx.AnimState:PushAnimation("idle_loop")
 				end
-				fx.entity:SetParent(ThePlayer.entity)
+				fx.entity:SetParent(owner.entity)
 				fx.AnimState:SetScale(0.7,0.7,0.7)
 				fx.AnimState:SetMultColour(0.5,0,0.5,0.3)
 				fx.Transform:SetPosition(0, 0.2, 0)
@@ -397,31 +391,30 @@ function MakeCard(name)
 			end
 		end
 		inst.components.spellcard:SetSpellFn(function()
-			local Chara = ThePlayer
 			local fx = barrier()
 			if inst.Activated == nil then -- create barrier
 				inst.Activated = true
-				Chara:DoPeriodicTask(1, function()
+				owner:DoPeriodicTask(1, function()
 					if inst.Activated then
-						if Chara.components.power and Chara.components.power.current >= 1 then
-							Chara.components.power:DoDelta(-1, false)
-							Chara:AddTag("IsDamage")
-							local x,y,z = Chara.Transform:GetWorldPosition()
+						if owner.components.power and owner.components.power.current >= 1 then
+							owner.components.power:DoDelta(-1, false)
+							owner:AddTag("IsDamage")
+							local x,y,z = owner.Transform:GetWorldPosition()
 							local ents = TheSim:FindEntities(x, y, z, 6)
 							for k,v in pairs(ents) do
-								if v.components.combat and v.components.combat.target ~= Chara then
-									v.components.combat.target = Chara
+								if v.components.combat and v.components.combat.target ~= owner then
+									v.components.combat.target = owner
 								end
 							end
 							inst.components.finiteuses:Use(1)
 						else 
-							Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_LOWPOWER"))
+							owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_LOWPOWER"))
 							inst.Activated = false
 							fx.kill_fx(fx)
 							inst.fx = nil
 						end
 					else
-						Chara:RemoveTag("IsDamage")
+						owner:RemoveTag("IsDamage")
 					end
 				end)
 			else
@@ -439,17 +432,16 @@ function MakeCard(name)
 			inst.Activated = false
 			fx.kill_fx(fx)
 			inst.fx = nil
-			ThePlayer.components.talker:Say(GetString(ThePlayer.prefab, "DESCRIBE_DONEEFFCT"))
+			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
 			inst:Remove()
 		end)
 	end
 	
-	local function addictive(inst)
+	local function addictive(inst, owner)
 		inst.components.spellcard.costpower = 200
 		inst:RemoveComponent("finiteuses")
 		inst.components.spellcard:SetSpellFn(function()
-			local Chara = ThePlayer
-			local x,y,z = Chara.Transform:GetWorldPosition()
+			local x,y,z = owner.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x, y, z, 60)
 			for k,v in pairs(ents) do
 				if v.components.pickable then
@@ -478,20 +470,19 @@ function MakeCard(name)
 					v.components.burnable:Extinguish()
 				end
 			end
-			if Chara.components.power then
-				Chara.components.power:DoDelta(-200, false)
+			if owner.components.power then
+				owner.components.power:DoDelta(-200, false)
 			end
 			inst:Remove()
 		end)
 	end
 	
-	local function lament(inst) -- Urashima's Box
+	local function lament(inst, owner) -- Urashima's Box
 		inst:RemoveComponent("finiteuses")
 		inst.components.spellcard.costpower = 20
 		inst:AddComponent("stackable")
 		inst.components.stackable.maxsize = TUNING.STACK_SIZE_SMALLITEM
 		inst.Activated = false
-		local Chara = ThePlayer
 		local count = 0
 		local LootTable_c = { -- {name, count, grade, OnSpawnfunction, MustThisWorld}
 			{"cutgrass", math.random(4), "common"},
@@ -536,10 +527,10 @@ function MakeCard(name)
 			{"purplegem", math.random(2), "rare", nil, "sw"}, -- gives additional chance
 		}
 		local LootTable_b = {
-			{"ash", math.random(2), "bad", function() if Chara.components.health then Chara.components.health:DoDelta(-2, nil, nil, true) end end},
-			{"spoiled_food", math.random(2), "bad", function() if Chara.components.hunger then Chara.components.hunger:DoDelta(-3, nil, true) end end},
-			{"rottenegg", math.random(2), "bad", function() if Chara.components.hunger then Chara.components.hunger:DoDelta(-3, nil, true) end end},
-			{"charcoal", math.random(2), "bad", function() if Chara.components.sanity then Chara.components.sanity:DoDelta(-2) end end},
+			{"ash", math.random(2), "bad", function() if owner.components.health then owner.components.health:DoDelta(-2, nil, nil, true) end end},
+			{"spoiled_food", math.random(2), "bad", function() if owner.components.hunger then owner.components.hunger:DoDelta(-3, nil, true) end end},
+			{"rottenegg", math.random(2), "bad", function() if owner.components.hunger then owner.components.hunger:DoDelta(-3, nil, true) end end},
+			{"charcoal", math.random(2), "bad", function() if owner.components.sanity then owner.components.sanity:DoDelta(-2) end end},
 			{"killerbee", math.random(2), "bad"},
 			{"mosquito", 1, "bad", nil, "rog"},
 			{"frog", 1, "bad", nil, "rog"},
@@ -551,10 +542,10 @@ function MakeCard(name)
 			{"spider", math.random(2), "bad", nil, "sw"},
 		}
 		local LootTable_h = {
-			{"ash", math.random(3), "bad", function() if Chara.components.health then Chara.components.health:DoDelta(-3, nil, nil, true) end end},
-			{"spoiled_food", math.random(3), "bad", function() if Chara.components.hunger then Chara.components.hunger:DoDelta(-5, nil, true) end end},
-			{"rottenegg", math.random(3), "bad", function() if Chara.components.hunger then Chara.components.hunger:DoDelta(-5, nil, true) end end},
-			{"charcoal", math.random(3), "bad", function() if Chara.components.sanity then Chara.components.sanity:DoDelta(-4) end end},	
+			{"ash", math.random(3), "bad", function() if owner.components.health then owner.components.health:DoDelta(-3, nil, nil, true) end end},
+			{"spoiled_food", math.random(3), "bad", function() if owner.components.hunger then owner.components.hunger:DoDelta(-5, nil, true) end end},
+			{"rottenegg", math.random(3), "bad", function() if owner.components.hunger then owner.components.hunger:DoDelta(-5, nil, true) end end},
+			{"charcoal", math.random(3), "bad", function() if owner.components.sanity then owner.components.sanity:DoDelta(-4) end end},	
 			{"crawlingnightmare", 1, "bad"},
 			{"nightmarebeak", 1, "bad"},
 			{"killerbee", math.random(4), "bad"},
@@ -565,8 +556,8 @@ function MakeCard(name)
 			{"mosquito_poison", math.random(3), "bad", nil, "sw"},
 		}
 		local function spawn()
-			if Chara.components.kramped.threshold == nil then -- just in case
-				Chara.components.kramped.threshold = 50
+			if owner.components.kramped.threshold == nil then -- just in case
+				owner.components.kramped.threshold = 50
 			end
 			local function GetLoot(list)
 				local loot = {}
@@ -603,12 +594,12 @@ function MakeCard(name)
 					return pt+result_offset
 				end
 			end
-			local threshold = Chara.components.kramped.threshold
-			local actions = Chara.components.kramped.actions
+			local threshold = owner.components.kramped.threshold
+			local actions = owner.components.kramped.actions
 			local naughtiness = actions / threshold
 			local key, amount, grade, pt, list, loot
 			if count > 1 then
-				Chara:DoTaskInTime(0.5, function()
+				owner:DoTaskInTime(0.5, function()
 					if naughtiness < 0.33 then
 						if math.random() < 0.66 then -- 66%, common stuff
 							list = LootTable_c
@@ -652,7 +643,7 @@ function MakeCard(name)
 							prefab.components.lootdropper:SetLoot({})
 							prefab.components.lootdropper:SetChanceLootTable('nodrop')
 						end
-						pt = GetPoint(Vector3(Chara.Transform:GetWorldPosition()))
+						pt = GetPoint(Vector3(owner.Transform:GetWorldPosition()))
 						if loot[key][4] then
 							loot[key][4](prefab)
 						end
@@ -660,9 +651,9 @@ function MakeCard(name)
 						fx.AnimState:SetMultColour(color.r, color.g, color.b, color.a)
 						fx.Transform:SetPosition(pt.x, pt.y, pt.z)
 						if grade ~= "bad" then
-							Chara.SoundEmitter:PlaySound("soundpack/spell/item")
+							owner.SoundEmitter:PlaySound("soundpack/spell/item")
 						else
-							Chara.SoundEmitter:PlaySound("dontstarve/HUD/sanity_down")
+							owner.SoundEmitter:PlaySound("dontstarve/HUD/sanity_down")
 						end
 						prefab.Transform:SetPosition(pt.x, pt.y, pt.z)
 					end
@@ -670,8 +661,8 @@ function MakeCard(name)
 					spawn()
 				end)
 			elseif count == 1 then
-				Chara:DoTaskInTime(1.2, function()
-					local Speech = GetString(Chara.prefab, "ANNOUNCE_TRAP_WENT_OFF") -- "Oops"
+				owner:DoTaskInTime(1.2, function()
+					local Speech = GetString(owner.prefab, "ANNOUNCE_TRAP_WENT_OFF") -- "Oops"
 					if naughtiness < 0.8 then
 						list = LootTable_b 
 					else
@@ -690,54 +681,54 @@ function MakeCard(name)
 							prefab.components.lootdropper:SetLoot({})
 							prefab.components.lootdropper:SetChanceLootTable('nodrop')
 						end
-						pt = GetPoint(Vector3(Chara.Transform:GetWorldPosition()))
+						pt = GetPoint(Vector3(owner.Transform:GetWorldPosition()))
 						if loot[key][4] then
 							loot[key][4](prefab)
 						end
 						local fx = SpawnPrefab("small_puff")
 						fx.AnimState:SetMultColour(0,0,0,1)
 						fx.Transform:SetPosition(pt.x, pt.y, pt.z)
-						Chara.SoundEmitter:PlaySound("dontstarve/HUD/sanity_down")
+						owner.SoundEmitter:PlaySound("dontstarve/HUD/sanity_down")
 						prefab.Transform:SetPosition(pt.x, pt.y, pt.z)
 					end
 					 
-					Chara.components.kramped:OnNaughtyAction( math.min(threshold - (actions + 1), math.random(10, 30)) )
+					owner.components.kramped:OnNaughtyAction( math.min(threshold - (actions + 1), math.random(10, 30)) )
 					-- So Naughty points can be gained until 'threshold - 1' so that prevent spawning Krampus.
-					local x,y,z = Chara.Transform:GetWorldPosition()
+					local x,y,z = owner.Transform:GetWorldPosition()
 					local ents = TheSim:FindEntities(x, y, z, 14)
 					for k,v in pairs(ents) do
 						if v.components.combat and v:HasTag("spawned")then
-							v.components.combat.target = Chara
+							v.components.combat.target = owner
 						end
 					end
-					Chara:RemoveTag("notarget")
+					owner:RemoveTag("notarget")
 					count = count - 1
-					Chara.components.health:SetInvincible(false)
-					Chara.components.playercontroller:Enable(true)
-					Chara.components.talker:Say(Speech)
+					owner.components.health:SetInvincible(false)
+					owner.components.playercontroller:Enable(true)
+					owner.components.talker:Say(Speech)
 					inst.Activated = false
 				end)
 			end
 		end
 		inst.components.spellcard:SetSpellFn(function()
 			if inst.Activated then
-				ThePlayer.components.talker:Say(GetString(ThePlayer.prefab, "ACTIONFAIL_GENERIC"))
+				owner.components.talker:Say(GetString(owner.prefab, "ACTIONFAIL_GENERIC"))
 			else
 				inst.Activated = true
-				local Chara = ThePlayer
-				local x,y,z = Chara.Transform:GetWorldPosition()
+				
+				local x,y,z = owner.Transform:GetWorldPosition()
 				local ents = TheSim:FindEntities(x, y, z, 100)
-				Chara.components.playercontroller:Enable(false)
-				Chara.components.health:SetInvincible(true)
+				owner.components.playercontroller:Enable(false)
+				owner.components.health:SetInvincible(true)
 				for k,v in pairs(ents) do
-					if v.components.combat and v.components.combat.target == Chara then
+					if v.components.combat and v.components.combat.target == owner then
 						v.components.combat.target = nil
 					end
 				end
-				Chara:AddTag("notarget")
+				owner:AddTag("notarget")
 				count = math.random(3, 7)
-				if Chara.components.power then
-					Chara.components.power:DoDelta(-20, false)
+				if owner.components.power then
+					owner.components.power:DoDelta(-20, false)
 				end
 				spawn()
 				inst.components.stackable:Get():Remove()
@@ -745,15 +736,14 @@ function MakeCard(name)
 		end)
 	end
 	
-	local function matter(inst) -- Universe of Matter and Antimatter
+	local function matter(inst, owner) -- Universe of Matter and Antimatter
 		inst.components.spellcard.costpower = 150
 		inst.components.finiteuses:SetMaxUses(2)
 		inst.components.finiteuses:SetUses(2)
 		inst:AddComponent("stackable")
 		inst.components.stackable.maxsize = TUNING.STACK_SIZE_LARGEITEM
 		inst.components.spellcard:SetSpellFn(function()
-			local Chara = ThePlayer
-			local Inventory = Chara.components.inventory
+			local Inventory = owner.components.inventory
 			
 			local function repair(v)
 				
@@ -791,8 +781,8 @@ function MakeCard(name)
 				repair(v)
 			end
 			
-			if Chara.components.power then
-				Chara.components.power:DoDelta(-150, false)
+			if owner.components.power then
+				owner.components.power:DoDelta(-150, false)
 			end
 			inst.components.finiteuses:Use(1)
 		end)
@@ -804,7 +794,7 @@ function MakeCard(name)
 		local trans = inst.entity:AddTransform()    
 		local anim = inst.entity:AddAnimState()   
 		
-		MakeInventoryPhysics(inst)   
+		MakeInventoryPhysics(inst, owner)   
 		
 		anim:SetBank("spell")    
 		anim:SetBuild("spell")    
@@ -818,36 +808,37 @@ function MakeCard(name)
 		
 		inst:AddComponent("inventoryitem") 
 		inst.components.inventoryitem.imagename = fname    
-		inst.components.inventoryitem.atlasname = "images/inventoryimages/"..fname..".xml"    
+		inst.components.inventoryitem.atlasname = "images/inventoryimages/"..fname..".xml"   
+		local owner = inst.components.inventoryitem.owner
 		
 		inst:AddComponent("spellcard")
 		inst.components.spellcard.name = name
 		
 		local fn = nil
 		if name == "test" then
-			fn = test(inst)
+			fn = test(inst, owner)
 		elseif name == "mesh" then
-			fn = mesh(inst)
+			fn = mesh(inst, owner)
 		elseif name == "away" then
-			fn = away(inst)
+			fn = away(inst, owner)
 		elseif name == "necro" then
-			fn = necro(inst)
+			fn = necro(inst, owner)
 		elseif name == "curse" then
-			fn = curse(inst)
+			fn = curse(inst, owner)
 		elseif name == "balance" then
-			fn = balance(inst)
+			fn = balance(inst, owner)
 		elseif name == "laplace" then
-			fn = laplace(inst)
+			fn = laplace(inst, owner)
 		elseif name == "butter" then
-			fn = butter(inst)
+			fn = butter(inst, owner)
 		elseif name == "bait" then
-			fn = bait(inst)
+			fn = bait(inst, owner)
 		elseif name == "addictive" then
-			fn = addictive(inst)
+			fn = addictive(inst, owner)
 		elseif name == "lament" then
-			fn = lament(inst)
+			fn = lament(inst, owner)
 		elseif name == "matter" then
-			fn = matter(inst)
+			fn = matter(inst, owner)
 		end
 		
 		return inst

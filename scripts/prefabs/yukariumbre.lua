@@ -37,7 +37,7 @@ local function OnEquipYukari(inst, owner)
 	owner.AnimState:Show("ARM_carry")        
 	owner.AnimState:Hide("ARM_normal")
 	
-	inst.components.useableitem.inuse = false -- I HAVE NO IDEA WHY THIS IS NOT WORKING AUTOMATLY.
+	inst.components.useableitem.inuse = false
 end    
 
 local function OnUnequipYukari(inst, owner)   
@@ -103,9 +103,7 @@ local function fn()
 	inst.components.waterproofer:SetEffectiveness(0)
 	
 	inst:AddComponent("makegate")
-	if ThePlayer.components.power then
-		inst.components.makegate.onusefn = onuse
-	end
+	inst.components.makegate.onusefn = onuse
 	
 	inst.isunfolded = false
 	

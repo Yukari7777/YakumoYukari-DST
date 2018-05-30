@@ -133,7 +133,7 @@ end
 function GodTelePort()
 	if ThePlayer and IsYukari then
 		if ThePlayer.components.upgrader.GodTelepoirt and ThePlayer.istelevalid then
-			local Chara = ThePlayer -- also play Undertale!
+			local Chara = ThePlayer
 			if Chara.components.power and Chara.components.power.current >= 20 then
 				local function isvalid(x,y,z)
 					local ground = GLOBAL.TheWorld

@@ -32,7 +32,7 @@ end
 
 function MakeGate:CollectPointActions(doer, pos, actions, right)
 	if right then
-		local equip = ThePlayer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
+		local equip = doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
 		if self.target_position then
 			pos = self.target_position
 		end

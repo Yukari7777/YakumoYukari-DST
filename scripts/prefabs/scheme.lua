@@ -25,11 +25,11 @@ local function GetIngameName(prefab)
 end
 
 local function onsave(inst, data)
-	ThePlayer.hatlevel = inst.hatlevel
+	inst.components.inventoryitem.owner.hatlevel = inst.hatlevel
 end
 
 local function onpreload(inst, data)
-	inst.hatlevel = ThePlayer.hatlevel
+	inst.hatlevel = inst.components.inventoryitem.owner.hatlevel
 	if data and data.hatlevel then
 		inst.hatlevel = data.hatlevel
 		data.hatlevel = nil
@@ -38,7 +38,7 @@ end
 
 local function GetBackpack()
 	local backpack
-	local Chara = ThePlayer
+	local Chara = inst.components.inventoryitem.owner
 	
 	if EQUIPSLOTS.BACK and Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.BACK) then -- check if backpack slot mod is enabled.
 		backpack = Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.BACK)
@@ -54,7 +54,7 @@ end
 
 local function GetTable(inst)
 	local difficulty = GetModConfigData("difficulty", "YakumoYukari")
-	local hatlevel = inst.hatlevel
+	local hatlevel = inst.hatlevel or 1
 	local list = {}
 	
 	if hatlevel < 5 then
@@ -75,7 +75,7 @@ local function GetTable(inst)
 end
 
 local function CountInventoryItem(prefab)
-	local inventory = ThePlayer.components.inventory
+	local inventory = inst.components.inventoryitem.owner.components.inventory
 	local backpack = GetBackpack()
 	local count = 0
 	
@@ -128,7 +128,7 @@ local function GetCondition(inst)
 	local condition = true
 	
 	if inst.hatlevel < 5 then 
-		for i = 1, table.maxn(list), 1 do 
+		for i = 1, #list, 1 do 
 			condition = condition and ( CountInventoryItem(list[i][1]) >= list[i][2] )
 		end
 	else
@@ -144,7 +144,7 @@ local function SetDesc(inst)
 	local Language = GetModConfigData("language", "YakumoYukari")
 		
 	local function IsHanded()
-		local hands = ThePlayer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
+		local hands = inst.components.inventoryitem.owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
 		if hands and condition then
 			if Language == "chinese" then
 				return "\n我 手 里 必 须 拿 点 东 西."
@@ -166,21 +166,20 @@ end
 
 local function SetCondition(inst)
 	local condition = GetCondition(inst)
-	local hands = ThePlayer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
 	inst.components.spellcard:SetCondition( condition )
 	SetDesc(inst)
 end
 
 local function DoUpgrade(inst)
 
-	local Chara = ThePlayer
+	local Chara = inst.components.inventoryitem.owner
 	local list = GetTable(inst)
 	local backpack = GetBackpack()
 	
 	for i = 1, table.maxn(list), 1 do
 		local function consume(item, left_count, backpack)
 		
-			local Chara = ThePlayer
+			local Chara = inst.components.inventoryitem.owner
 			local Inventory = Chara.components.inventory
 			for k,v in pairs(Inventory.itemslots) do
 				if v.prefab == item then
@@ -226,7 +225,7 @@ local function DoUpgrade(inst)
 end
 
 local function OnFinish(inst)
-	local Chara = ThePlayer
+	local Chara = inst.components.inventoryitem.owner
 	inst.hatlevel = inst.hatlevel + 1
 	Chara.hatlevel = inst.hatlevel
 	SetCondition(inst)
@@ -240,7 +239,7 @@ local function fn()
 	local inst = CreateEntity()    
 	local trans = inst.entity:AddTransform()    
 	local anim = inst.entity:AddAnimState()    
-	local sound = inst.entity:AddSoundEmitter()   
+	local sound = inst.entity:AddSoundEmitter() 
 
 	MakeInventoryPhysics(inst)
 	
@@ -253,7 +252,8 @@ local function fn()
 	inst:AddComponent("inspectable")    
 	
 	inst:AddComponent("inventoryitem")   
-	inst.components.inventoryitem.atlasname = "images/inventoryimages/scheme.xml"  
+	inst.components.inventoryitem.atlasname = "images/inventoryimages/scheme.xml" 
+	local owner = inst.components.inventoryitem.owner
 	
 	inst.entity:AddMiniMapEntity()
     inst.MiniMapEntity:SetIcon("scheme.tex") 
@@ -263,7 +263,6 @@ local function fn()
 	inst.components.spellcard:SetSpellFn( DoUpgrade )
 	inst.components.spellcard:SetOnFinish( OnFinish )
 	inst.components.spellcard:SetCondition( false )
-	inst.hatlevel = ThePlayer.hatlevel
 	
 	local function callfn()
 		SetCondition(inst)
@@ -271,11 +270,11 @@ local function fn()
 	
 	inst.OnSave = onsave
 	inst.OnPreLoad = onpreload
-	SetCondition(inst)
 	
-	ThePlayer:ListenForEvent("equip", callfn )
-	ThePlayer:ListenForEvent("unequip", callfn )
-	inst:DoPeriodicTask(1, callfn)
+	inst:ListenForEvent("equip", callfn )
+	inst:ListenForEvent("unequip", callfn )
+	inst:ListenForEvent("yukariloaded", SetCondition)
+	--inst:DoPeriodicTask(1, callfn)
 	
 	return inst
 end

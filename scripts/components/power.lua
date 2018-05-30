@@ -16,8 +16,8 @@ end)
 
 function Power:IsHatEquipped()
 	local valid = false
-	if ThePlayer.components.inventory and ThePlayer.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) then
-		valid = ThePlayer.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat"
+	if self.inst.components.inventory and self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) then
+		valid = self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat"
 	end
 	return valid
 	
@@ -92,8 +92,8 @@ end
 
 function Power:DoDec(dt, ignore_damage)
 
-	if ThePlayer.hatequipped and ThePlayer.components.upgrader then	
-		self.inst.components.power:DoDelta(self.regenrate * dt * ThePlayer.components.upgrader.dtmult , false ,"power")	
+	if self.inst.hatequipped and self.inst.components.upgrader then	
+		self.inst.components.power:DoDelta(self.regenrate * dt * self.inst.components.upgrader.dtmult , false ,"power")	
 	else
 		self.inst.components.power:DoDelta(self.regenrate * dt, false ,"power")
 	end

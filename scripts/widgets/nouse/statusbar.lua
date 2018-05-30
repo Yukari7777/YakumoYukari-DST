@@ -3,7 +3,7 @@ local Widget = require "widgets/widget"
 
 local StatusBar = Class(Widget, function(self)
 	Widget._ctor(self, "StatusBadge")
-	self.owner = ThePlayer
+	self.owner = owner
 	self:SetScale(1,1,1)
 
 	self.bg = self:AddChild(Image(idir.."bar.xml", "bar.tex"))
@@ -24,7 +24,3 @@ function StatusBar:OnUpdate(dt)
 end
 
 return StatusBar
---[[
-뱃지 합치기, HHSP 패널 각각 만들기
-뒷배경 2개 만들기, 활성화 비활성화용 텍스트 
-]]

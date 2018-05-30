@@ -105,8 +105,6 @@ local function onpreload(inst, data)
 			inst.components.hunger:DoDelta(0)
 			inst.components.sanity:DoDelta(0)
 			inst.components.power:DoDelta(0)
-			
-			inst.components.upgrader:DoUpgrade(inst)
 		end
 	end
 	
@@ -149,17 +147,17 @@ local function OnhitEvent(inst, data)
 end
 
 local function OnAttackedEvent(attacked, data)
-	if ThePlayer.components.health and ThePlayer.components.upgrader.IsFight then
-		if not ThePlayer.components.health.invincible then -- Check another invinciblity.
-			ThePlayer.components.health:SetInvincible(true)
-			scheduler:ExecuteInTime(1, ThePlayer.components.health:SetInvincible(false))
+	if attacked.components.health and attacked.components.upgrader.IsFight then
+		if not attacked.components.health.invincible then -- Check another invinciblity.
+			attacked.components.health:SetInvincible(true)
+			scheduler:ExecuteInTime(1, attacked.components.health:SetInvincible(false))
 		end
 	end
 end
 
-local function TelePortDelay()
-	ThePlayer:DoTaskInTime(0.5, function()
-		ThePlayer.istelevalid = true 
+local function TelePortDelay(player)
+	player:DoTaskInTime(0.5, function()
+		player.istelevalid = true 
 	end)
 end
 
@@ -170,7 +168,7 @@ local function DoPowerRestore(inst, amount)
 end
 	
 function DoHungerUp(inst, data)
-	if ThePlayer:HasTag("inspell") then 
+	if inst:HasTag("inspell") then 
 		return
 	end
 	local Hunger = inst.components.hunger
@@ -287,7 +285,7 @@ local function PeriodicFunction(inst, data)
 	
 	if inst.components.upgrader.SightDistance and inst.components.upgrader.SightDistance > 0 then
 		local dis = inst.components.upgrader.SightDistance
-		local pt = GetPoint(Vector3(ThePlayer.Transform:GetWorldPosition()))
+		local pt = GetPoint(Vector3(inst.Transform:GetWorldPosition()))
 		TheWorld.minimap.MiniMap:ShowArea(pt.x, pt.y, pt.z, 50 * dis)
 		TheWorld.Map:VisitTile(TheWorld.Map:GetTileCoordsAtPoint(pt.x, pt.y, pt.z))
 	end
@@ -329,12 +327,28 @@ local function OnGraze(inst)
 	inst.components.power:DoDelta(math.random(0, 2), false)
 end
 
-local function DebugFunction()
-	if ThePlayer.components.power then
-		ThePlayer.components.power.max = 300
-		ThePlayer.components.power.current = 300
+local function DebugFunction(inst)
+	if inst.components.power then
+		inst.components.power.max = 300
+		inst.components.power.current = 300
 	end
 end	
+
+local function EquippingEvent(inst)
+	if inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) then
+		inst.hatequipped = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat"
+	else
+		inst.hatequipped = false
+	end
+		
+	if inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) then
+		inst.fireimmuned = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == ("armordragonfly" or "armorobsidian")
+	else
+		inst.fireimmuned = false
+	end
+
+	inst.components.upgrader:DoUpgrade(inst)
+end
 
 local function common_init(inst)
 	inst:AddTag("youkai")
@@ -342,15 +356,13 @@ local function common_init(inst)
 	inst:AddTag("yakumoyukari")
 end
 
-local fn = function(inst)
-	
-	inst:AddComponent("upgrader")
+local master_fn = function(inst)
 	
 	inst.health_level = 0
 	inst.hunger_level = 0 
 	inst.sanity_level = 0
 	inst.power_level = 0
-	inst.hatlevel = 1
+	inst.hatlevel = 0
 	
 	inst.regen_cool = 0
 	inst.poison_cool = 0
@@ -487,7 +499,7 @@ local fn = function(inst)
 		return inst.components.eater:EatMEAT(food)
 	end
 
-	
+	inst:AddComponent("upgrader")
 	inst:RemoveTag("notarget")
 	inst:RemoveTag("inspell")
 	inst:RemoveTag("IsDamage")
@@ -499,35 +511,22 @@ local fn = function(inst)
 	
 	inst.OnSave = onsave
 	inst.OnPreLoad = onpreload
-	local function EquippingEvent()
-		if inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) then
-			inst.hatequipped = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat"
-		else
-			inst.hatequipped = false
-		end
-		
-		if inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) then
-			inst.fireimmuned = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == ("armordragonfly" or "armorobsidian")
-		else
-			inst.fireimmuned = false
-		end
-		
-		inst.components.upgrader:DoUpgrade(inst)
-	end
 	
-	inst:ListenForEvent( "debugmode", DebugFunction)
+	inst:ListenForEvent( "debugmode", DebugFunction, inst)
 	inst:ListenForEvent( "hungerdelta", DoHungerUp )
 	inst:ListenForEvent( "healthdelta", GoInvincible )
 	inst:ListenForEvent( "onhitother", OnhitEvent )
 	inst:ListenForEvent( "attacked", OnAttackedEvent, inst )
-	inst:ListenForEvent( "teleported", TelePortDelay )
-	inst:ListenForEvent( "equip", EquippingEvent )
-	inst:ListenForEvent( "unequip", EquippingEvent )
+	inst:ListenForEvent( "teleported", TelePortDelay, inst )
+	inst:ListenForEvent( "hatequip", EquippingEvent )
+	inst:ListenForEvent( "hatunequip", EquippingEvent )
 	inst:ListenForEvent( "grazed", OnGraze )
 	
-	inst:DoTaskInTime(0, function() 
-		EquippingEvent()
-	end)
+	inst.OnLoad = function()
+		EquippingEvent(inst)
+		inst:PushEvent("yukariloaded")
+	end
+
 end
 
-return MakePlayerCharacter("yakumoyukari", prefabs, assets, common_init, fn, start_inv)
+return MakePlayerCharacter("yakumoyukari", prefabs, assets, common_init, master_fn, start_inv)

@@ -1,8 +1,6 @@
 local UIAnim = require "widgets/uianim"
 local Widget = require "widgets/widget"
 local Text = require "widgets/text"
-local Stat = require "widgets/statusdisplays"
-local MoistureMeter = require "widgets/moisturemeter"
 
 local function CombindIsModEnabled(name)
 	for _, moddir in ipairs(KnownModIndex:GetModsToLoad()) do
@@ -15,7 +13,7 @@ end
 
 local yokaibadge = Class(Widget, function(self, owner)
 	Widget._ctor(self, "yokaibadge")
-	self.owner = ThePlayer
+	self.owner = owner
 	
 	self.percent = 0
     self:SetPosition(0,0,0)
@@ -75,8 +73,7 @@ function yokaibadge:PulseGreen()
 	self.pulse:GetAnimState():PlayAnimation("pulse")
 end
 
-function yokaibadge:SetPercent(val, max)
-	self.owner = ThePlayer	
+function yokaibadge:SetPercent(val, max)	
     val = val or self.percent
 	
 	self.power = self.owner.components.power.current

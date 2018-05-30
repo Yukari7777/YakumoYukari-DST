@@ -18,12 +18,6 @@ local function UpdateSound(inst)
     end
 end  
 
-local function firedmg(amount)
-	if ThePlayer.fireimmuned == false and ThePlayer.components.health then
-		ThePlayer.components.health.fire_damage_scale = amount
-	end
-end
-
 local function Ability(inst, owner)
 
 	if owner.components.upgrader:IsHatValid(owner) then
@@ -57,6 +51,8 @@ local function fn()
         owner.AnimState:Show("HAT_HAIR")
         owner.AnimState:Hide("HAIR_NOHAT")
         owner.AnimState:Hide("HAIR") 
+		Ability(inst, owner) 
+		owner:PushEvent("hatequip")
     end
 
     local function onunequiphat(inst, owner)
@@ -64,6 +60,8 @@ local function fn()
         owner.AnimState:Hide("HAT_HAIR")
         owner.AnimState:Show("HAIR_NOHAT")
         owner.AnimState:Show("HAIR") 
+		Ability(inst, owner) 
+		owner:PushEvent("hatunequip")
     end
 
 	local inst = CreateEntity()    
@@ -96,14 +94,6 @@ local function fn()
     inst.components.equippable:SetOnUnequip( onunequiphat )
 	inst.components.equippable.poisonblocker = false	
 	inst.components.equippable.poisongasblocker = false
-	
-	local function CallFn()
-		Ability(inst, ThePlayer) 
-	end
-	
-	inst:DoTaskInTime(0, CallFn)
-	ThePlayer:ListenForEvent( "equip", CallFn )
-	ThePlayer:ListenForEvent( "unequip", CallFn )
 	
 	return inst
 end
