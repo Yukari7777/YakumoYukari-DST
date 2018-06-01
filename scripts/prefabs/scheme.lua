@@ -25,14 +25,21 @@ local function GetIngameName(prefab)
 end
 
 local function onsave(inst, data)
-	inst.components.inventoryitem.owner.hatlevel = inst.hatlevel
+		-- inst.components.inventoryitem.owner.hatlevel = inst.hatlevel
 end
 
 local function onpreload(inst, data)
-	inst.hatlevel = inst.components.inventoryitem.owner.hatlevel
 	if data and data.hatlevel then
 		inst.hatlevel = data.hatlevel
 		data.hatlevel = nil
+	end
+end
+
+local function onload(inst, data)
+
+	if inst.components.inventoryitem.owner then
+		print("now has owner")
+		inst.hatlevel = inst.components.inventoryitem.owner.hatlevel
 	end
 end
 
@@ -264,16 +271,17 @@ local function fn()
 	inst.components.spellcard:SetOnFinish( OnFinish )
 	inst.components.spellcard:SetCondition( false )
 	
-	local function callfn()
+	local function callfn(inst)
 		SetCondition(inst)
 	end
 	
-	inst.OnSave = onsave
-	inst.OnPreLoad = onpreload
+	--inst.OnSave = onsave
+	--inst.OnPreLoad = onpreload
+	--inst.OnLoad = onload
 	
 	inst:ListenForEvent("equip", callfn )
 	inst:ListenForEvent("unequip", callfn )
-	inst:ListenForEvent("yukariloaded", SetCondition)
+	--inst:ListenForEvent("yukariloaded", SetCondition)
 	--inst:DoPeriodicTask(1, callfn)
 	
 	return inst

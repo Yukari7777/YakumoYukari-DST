@@ -11,8 +11,9 @@ local function fn_graze(Sim)
 	local inst = CreateEntity()
 	inst.entity:AddTransform()
 	inst.entity:AddAnimState()
-	
+	inst.entity:AddNetwork()
 	inst.entity:AddSoundEmitter()
+
 	inst.AnimState:SetBank("graze_fx")
     inst.AnimState:SetBuild("graze_fx")
 	inst.AnimState:PlayAnimation("idle")

@@ -1,13 +1,16 @@
-local ActionHandler = GLOBAL.ActionHandler
+local ActionHandler = ActionHandler
 local FRAMES = GLOBAL.FRAMES
 local EventHandler = GLOBAL.EventHandler
 local TimeEvent = GLOBAL.TimeEvent
 local SpawnPrefab = GLOBAL.SpawnPrefab
+local State = GLOBAL.State
+local ACTIONS = ACTIONS
+local Action = GLOBAL.Action
 local Language = GetModConfigData("language")
 
 -- Action Settings for Yukari --
 
-local CREATE = GLOBAL.Action(1, false, true, 14)
+local CREATE = Action({1, false, true})
 CREATE.id = "CREATE"
 CREATE.str = "Teleport"
 CREATE.fn = function(act)
@@ -17,11 +20,11 @@ CREATE.fn = function(act)
     end
 end
 AddAction(CREATE)
-AddComponentAction("USEITEM", "create", function(inst, doer, target) table.insert(actions, GLOBAL.ACTIONS.CREATE) end)
+AddComponentAction("USEITEM", "create", function(inst, doer, target) table.insert(actions, ACTIONS.CREATE) end)
 
-AddStategraphPostInit("wilson", function(Stategraph) -- create Stategraph(override to "SGwilson.lua")
+AddStategraphPostInit("wilson", function(Stategraph)
 	
-	local state = GLOBAL.State{
+	local state = State{
         name = "spawngate",
         tags = {"doing", "busy", "canrotate"},
 
@@ -46,7 +49,7 @@ AddStategraphPostInit("wilson", function(Stategraph) -- create Stategraph(overri
 
 end)
 
-local SPAWNG = GLOBAL.Action(1, false, true, 30)
+local SPAWNG = Action({1, false, true})
 SPAWNG.id = "SPAWNG"
 SPAWNG.str = "Spawn"
 SPAWNG.fn = function(act)
@@ -57,7 +60,7 @@ end
 
 AddStategraphPostInit("wilson", function(Stategraph)
 	
-	local state = GLOBAL.State{
+	local state = State{
         name = "spawnrgate",
         tags = {"doing", "busy", "canrotate"},
 
@@ -83,7 +86,7 @@ AddStategraphPostInit("wilson", function(Stategraph)
 end)
 
 ------------------------------------------------------------------------------------------------------------------------
-local CASTTOHO = GLOBAL.Action(-1, false, true, 20)
+local CASTTOHO = Action({-1, false, true})
 CASTTOHO.id = "CASTTOHO"
 CASTTOHO.str = "castspell"
 CASTTOHO.fn = function(act)
@@ -97,7 +100,7 @@ end
 
 AddStategraphPostInit("wilson", function(Stategraph)
 
-	local state = GLOBAL.State{
+	local state = State{
         name = "casttoho",
         tags = {"doing", "busy", "canrotate"},
 
@@ -147,7 +150,7 @@ AddStategraphPostInit("wilson", function(Stategraph)
 
 end)
 
-local CASTTOHOL = GLOBAL.Action(-1, false, true, 19) -- Light motion
+local CASTTOHOL = Action({-1, false, true}) -- Light motion
 CASTTOHOL.id = "CASTTOHOL"
 CASTTOHOL.str = "castspell"
 CASTTOHOL.fn = function(act)
@@ -161,7 +164,7 @@ end
 
 AddStategraphPostInit("wilson", function(Stategraph)
 
-	local state = GLOBAL.State{
+	local state = State{
         name = "casttohol",
         tags = {"doing", "busy", "canrotate"},
 
@@ -212,7 +215,7 @@ AddStategraphPostInit("wilson", function(Stategraph)
 end)
 
 
-local CASTTOHOH = GLOBAL.Action(-1, false, true, 20) -- Heavy motion
+local CASTTOHOH = Action({-1, false, true}) -- Heavy motion
 CASTTOHOH.id = "CASTTOHOH"
 CASTTOHOH.str = "castspell"
 CASTTOHOH.fn = function(act)
@@ -227,7 +230,7 @@ end
 
 AddStategraphPostInit("wilson", function(Stategraph)
 
-	local state = GLOBAL.State{
+	local state = State{
         name = "casttohoh",
         tags = {"doing", "busy", "canrotate"},
 
@@ -282,7 +285,7 @@ AddStategraphPostInit("wilson", function(Stategraph)
 
 end)
 
-local LAMENT = GLOBAL.Action(-1, false, true, 20) -- Heavy motion
+local LAMENT = Action({-1, false, true}) -- Heavy motion
 LAMENT.id = "LAMENT"
 LAMENT.str = "waiting"
 LAMENT.fn = function(act)
@@ -296,7 +299,7 @@ end
 
 AddStategraphPostInit("wilson", function(Stategraph)
 
-	local state = GLOBAL.State{
+	local state = State{
         name = "lament",
         tags = {"doing", "busy", "canrotate"},
 
@@ -359,16 +362,3 @@ CASTTOHOL.str = "施 法"
 CASTTOHOH.str = "施 法"
 LAMENT.str = "等 待"
 end
-
-AddAction(CREATE) -- Register action
-AddAction(SPAWNG)
-AddAction(CASTTOHO)
-AddAction(CASTTOHOL)
-AddAction(CASTTOHOH)
-AddAction(LAMENT)
-AddStategraphActionHandler("wilson", ActionHandler(CREATE, "spawngate")) -- add action handler
-AddStategraphActionHandler("wilson", ActionHandler(SPAWNG, "spawnrgate"))
-AddStategraphActionHandler("wilson", ActionHandler(CASTTOHO, "casttoho"))
-AddStategraphActionHandler("wilson", ActionHandler(CASTTOHOL, "casttohol"))
-AddStategraphActionHandler("wilson", ActionHandler(CASTTOHOH, "casttohoh"))
-AddStategraphActionHandler("wilson", ActionHandler(LAMENT, "lament"))

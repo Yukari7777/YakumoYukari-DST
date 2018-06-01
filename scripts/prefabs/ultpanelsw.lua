@@ -59,6 +59,7 @@ function MakeUltimateSW(name, value)
 	local function fn()  
 		
 		local inst = CreateEntity()    
+		inst.entity:AddNetwork()
 		local trans = inst.entity:AddTransform()    
 		local anim = inst.entity:AddAnimState()   
 		

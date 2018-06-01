@@ -17,7 +17,6 @@ end
 local function StatusDisplaysInit(class)
 
 	if class.owner.components.power then
-	 
 		class.power = class:AddChild(YokaiBadge(class.owner))
 		-- /////// TEMP Support, only works with default settings. ///////
 		if CombindIsModEnabled("Combined Status") then
@@ -30,7 +29,7 @@ local function StatusDisplaysInit(class)
 			if class.moisturemeter then -- it also checks dlc
 				class.power:SetPosition(-40, -50,0)
 				class.brain:SetPosition(40, -50, 0)
-				class.stomach:SetPosition(-40,17,0) -- default by (-40, 20, 0). Because my youkaibadge's height is little shorter than other badges.
+				class.stomach:SetPosition(-40,17,0)
 			elseif not class.moisturemeter.moisture then
 				class.power:SetPosition(0,-105,0) -- where the moisture widget was.
 			end

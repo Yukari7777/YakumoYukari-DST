@@ -85,6 +85,7 @@ end
 local function fn()  
 
 	local inst = CreateEntity()    
+	inst.entity:AddNetwork()
 	local trans = inst.entity:AddTransform()    
 	local anim = inst.entity:AddAnimState()    
 	local sound = inst.entity:AddSoundEmitter()   
@@ -132,14 +133,13 @@ local function fn()
 	
 	inst.components.equippable:SetOnEquip( OnEquipYukari )    
 	inst.components.equippable:SetOnUnequip( OnUnequipYukari )
+	inst.components.equippable.walkspeedmult = TUNING.CANE_SPEED_MULT
 	
 	inst.entity:AddMiniMapEntity()
     inst.MiniMapEntity:SetIcon("yukariumbre.tex")
 	
-	inst:ListenForEvent("rainstop", function() UpdateSound(inst) end, TheWorld) 
-	inst:ListenForEvent("rainstart", function() UpdateSound(inst) end, TheWorld) 
-	
-	inst.components.equippable.walkspeedmult = TUNING.CANE_SPEED_MULT
+	--inst:ListenForEvent("rainstop", function() UpdateSound(inst) end, TheWorld) 
+	--inst:ListenForEvent("rainstart", function() UpdateSound(inst) end, TheWorld) 
 
 	return inst
 end

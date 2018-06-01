@@ -1,6 +1,6 @@
-Upgrader = Class(function(self, inst) -- hmm.. This is more like upgrade manager..
+Upgrader = Class(function(self, inst)
     self.inst = inst
-	
+
 	self.healthbonus = 0
 	self.hungerbonus = 0
 	self.sanitybonus = 0
@@ -298,12 +298,11 @@ function Upgrader:HatSkillManager(inst)
 end
 
 function Upgrader:DoUpgrade(inst, stat) 
+	print("DoUpgrade "..(tostring(inst.valid) or "not valid inst").." "..(stat or "nostat"))
 	local hunger_percent = inst.components.hunger:GetPercent()
 	local health_percent = inst.components.health:GetPercent()
 	local sanity_percent = inst.components.sanity:GetPercent()
-	if inst.components.power then
-		local power_percent = inst.components.power:GetPercent()
-	end
+	local power_percent = inst.components.power:GetPercent()
 	
 	local difficulty = GetModConfigData("difficulty", "YakumoYukari")
 	local STATUS = TUNING.STATUS_DEFAULT
@@ -360,9 +359,7 @@ function Upgrader:DoUpgrade(inst, stat)
 	inst.components.health:SetPercent(health_percent)
 	inst.components.hunger:SetPercent(hunger_percent)
 	inst.components.sanity:SetPercent(sanity_percent)
-	if inst.components.power then
-		inst.components.power:SetPercent(power_percent)
-	end
+	inst.components.power:SetPercent(power_percent)
 	
 end
 

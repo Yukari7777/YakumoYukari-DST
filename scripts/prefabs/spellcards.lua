@@ -791,6 +791,7 @@ function MakeCard(name)
 	local function commonfn()  
 		
 		local inst = CreateEntity()    
+		inst.entity:AddNetwork()
 		local trans = inst.entity:AddTransform()    
 		local anim = inst.entity:AddAnimState()   
 		

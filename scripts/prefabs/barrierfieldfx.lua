@@ -11,6 +11,7 @@ end
 
 local function fn(Sim)
 	local inst = CreateEntity()
+	inst.entity:AddNetwork()
 	local trans = inst.entity:AddTransform()
     local anim = inst.entity:AddAnimState()
     local sound = inst.entity:AddSoundEmitter()

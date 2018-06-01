@@ -83,14 +83,6 @@ AddMinimapAtlas("images/map_icons/scheme.xml")
 
 ------ Function ------
 
-function MakePowerComponents(inst)
-	if IsYukari and inst.components.power == nil then
-		inst:AddComponent("power")
-	end
-end
-
-AddPlayerPostInit(MakePowerComponents)
-
 function AddSchemeManager(inst)
 	inst:AddComponent("scheme_manager")
 end
@@ -485,23 +477,23 @@ modimport "scripts/actions_yukari.lua"
 modimport "scripts/recipes_yukari.lua"
 modimport "scripts/strings_yukari.lua"
 modimport "scripts/tunings_yukari.lua"
-AddPrefabPostInit("forest", AddSchemeManager) -- Override function AddSchemeManager to prefab "forest"
-AddPrefabPostInit("cave", AddSchemeManager)
-AddPrefabPostInit("world", AddSchemeManager)
-AddPrefabPostInit("bunnyman", BunnymanNormalRetargetFn)
-AddPrefabPostInit("pigman", PigmanNormalRetargetFn)
-AddPrefabPostInit("bat", BatRetargetFn)
-AddPrefabPostInit("bee", BeeRetargetFn)
-AddPrefabPostInit("killerbee", KillerbeeRetargetFn)
-AddPrefabPostInit("frog", FrogRetargetFn)
-AddPrefabPostInit("shadowwatcher", SetInspectable)
-AddPrefabPostInit("shadowskittish", SetInspectable)
-AddPrefabPostInit("shadowskittish_water", SetInspectable)
-AddPrefabPostInit("creepyeyes", SetInspectable)
-AddPrefabPostInit("crawlinghorror", SetInspectable)
-AddPrefabPostInit("terrorbeak", SetInspectable)
-AddPrefabPostInit("swimminghorror", SetInspectable)
-AddPrefabPostInit("crawlingnightmare", SetInspectable)
-AddPrefabPostInit("nightmarebeak", SetInspectable)
-AddComponentPostInit("inventory", InventoryDamage)
-AddComponentPostInit("tool", ToolEfficientFn)
+--AddPrefabPostInit("forest", AddSchemeManager) -- Override function AddSchemeManager to prefab "forest"
+--AddPrefabPostInit("cave", AddSchemeManager)
+--AddPrefabPostInit("world", AddSchemeManager)
+--AddPrefabPostInit("bunnyman", BunnymanNormalRetargetFn)
+--AddPrefabPostInit("pigman", PigmanNormalRetargetFn)
+--AddPrefabPostInit("bat", BatRetargetFn)
+--AddPrefabPostInit("bee", BeeRetargetFn)
+--AddPrefabPostInit("killerbee", KillerbeeRetargetFn)
+--AddPrefabPostInit("frog", FrogRetargetFn)
+--AddPrefabPostInit("shadowwatcher", SetInspectable)
+--AddPrefabPostInit("shadowskittish", SetInspectable)
+--AddPrefabPostInit("shadowskittish_water", SetInspectable)
+--AddPrefabPostInit("creepyeyes", SetInspectable)
+--AddPrefabPostInit("crawlinghorror", SetInspectable)
+--AddPrefabPostInit("terrorbeak", SetInspectable)
+--AddPrefabPostInit("swimminghorror", SetInspectable)
+--AddPrefabPostInit("crawlingnightmare", SetInspectable)
+--AddPrefabPostInit("nightmarebeak", SetInspectable)
+--AddComponentPostInit("inventory", InventoryDamage)
+--AddComponentPostInit("tool", ToolEfficientFn)

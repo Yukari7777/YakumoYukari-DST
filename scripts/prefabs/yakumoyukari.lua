@@ -59,6 +59,7 @@ local function GetStartInv()
 end
 
 local start_inv = GetStartInv()
+--{"scheme", "yukariumbre", "yukarihat",}
 
 local function onsave(inst, data)
 	data.health_level = inst.health_level
@@ -335,6 +336,7 @@ local function DebugFunction(inst)
 end	
 
 local function EquippingEvent(inst)
+	print("hatequip")
 	if inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) then
 		inst.hatequipped = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat"
 	else
@@ -358,6 +360,8 @@ end
 
 local master_fn = function(inst)
 	
+	inst:AddComponent("power")
+
 	inst.health_level = 0
 	inst.hunger_level = 0 
 	inst.sanity_level = 0
@@ -377,6 +381,7 @@ local master_fn = function(inst)
 	
 	inst.soundsname = "willow"
 	inst.MiniMapEntity:SetIcon( "yakumoyukari.tex" )
+	inst.starting_inventory = start_inv -- starting_inventory passed as a parameter here is now deprecated
 	
 	inst.components.sanity:SetMax(75)
 	inst.components.health:SetMaxHealth(80)
@@ -505,6 +510,7 @@ local master_fn = function(inst)
 	inst:RemoveTag("IsDamage")
 	inst.components.health:SetInvincible(false)
 
+	inst.components.upgrader:DoUpgrade(inst)
 	--inst:DoPeriodicTask(1, DebugFunction)
 	inst:DoPeriodicTask(1, CooldownFunction)
 	inst:DoPeriodicTask(1, PeriodicFunction)
@@ -522,11 +528,15 @@ local master_fn = function(inst)
 	inst:ListenForEvent( "hatunequip", EquippingEvent )
 	inst:ListenForEvent( "grazed", OnGraze )
 	
-	inst.OnLoad = function()
-		EquippingEvent(inst)
+	inst.OnLoad = function(inst)
+		inst.valid = true -- debug
 		inst:PushEvent("yukariloaded")
 	end
 
+	if TheNet:GetServerGameMode() == "lavaarena" then
+        event_server_data("lavaarena", "prefabs/yakumoyukari").master_postinit(inst)
+    end
+
 end
 
-return MakePlayerCharacter("yakumoyukari", prefabs, assets, common_init, master_fn, start_inv)
+return MakePlayerCharacter("yakumoyukari", prefabs, assets, common_init, master_fn)
