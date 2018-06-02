@@ -2,9 +2,9 @@ local UIAnim = require "widgets/uianim"
 local Widget = require "widgets/widget"
 local Text = require "widgets/text"
 
-local function CombindIsModEnabled(name)
-	for _, moddir in ipairs(KnownModIndex:GetModsToLoad()) do
-		if KnownModIndex:GetModInfo(moddir).name == "Combined Status"  then
+local function IsModEnabled(modname)
+	for k, v in ipairs(KnownModIndex:GetModsToLoad()) do
+		if KnownModIndex:GetModInfo(v).name == modname  then
 			return true
 		end
 	end
@@ -19,6 +19,7 @@ local yokaibadge = Class(Widget, function(self, owner)
     self:SetPosition(0,0,0)
 
     self.active = false
+	self.combinedmod = IsModEnabled("Combined Status")
 
     self.anim = self:AddChild(UIAnim())
 	   
@@ -46,7 +47,8 @@ local yokaibadge = Class(Widget, function(self, owner)
 	self.num:SetClickable(false)
 	
     self.num:Hide()
-	if CombindIsModEnabled("Combined Status") then
+	
+	if self.combinedmod then
 		self.bg = self:AddChild(Image("images/status_bgs.xml", "status_bgs.tex"))
 		self.bg:SetScale(.4,.43,0)
 		self.bg:SetPosition(-.5, -40, 0)
@@ -84,7 +86,7 @@ function yokaibadge:SetPercent(val, max)
 end
 
 function yokaibadge:OnGainFocus()
-	if CombindIsModEnabled("Combined Status") then
+	if self.combinedmod then
 		self.maxnum:Show()
 	else
 		yokaibadge._base:OnGainFocus(self)
@@ -93,7 +95,7 @@ function yokaibadge:OnGainFocus()
 end
 
 function yokaibadge:OnLoseFocus()
-	if CombindIsModEnabled("Combined Status") then
+	if self.combinedmod then
 		self.maxnum:Hide()
 		self.num:Show()
 	else
@@ -106,7 +108,7 @@ end
 function yokaibadge:OnUpdate(dt)
 	
 	self.num:SetString(tostring(math.floor(self.owner.components.power.current)))
-	if CombindIsModEnabled("Combined Status") then
+	if self.combinedmod then
 		self.maxnum:SetString(tostring(math.floor(self.owner.components.power.max)))
 	end
 	

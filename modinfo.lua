@@ -3,7 +3,8 @@ description = "Yakumo Yukari comes from unknown world to manipulate Don't Starve
 author = "Yakumo Yukari"
 version = "0.1"
 forumthread = ""
-api_version = 10
+api_version = 6
+api_version_dst = 10
 
 dst_compatible = true
 dont_starve_compatible = false

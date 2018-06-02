@@ -1,4 +1,4 @@
-local ActionHandler = ActionHandler
+local ActionHandler = GLOBAL.ActionHandler
 local FRAMES = GLOBAL.FRAMES
 local EventHandler = GLOBAL.EventHandler
 local TimeEvent = GLOBAL.TimeEvent
@@ -10,22 +10,24 @@ local Language = GetModConfigData("language")
 
 -- Action Settings for Yukari --
 
-local CREATE = Action({1, false, true})
-CREATE.id = "CREATE"
-CREATE.str = "Teleport"
-CREATE.fn = function(act)
-	print(act.pos, act.target)
-    if act.invobject and act.invobject.components.makegate then
-        return act.invobject.components.makegate:Create(act.pos, act.doer)
-    end
+local UTELEPORT = Action({1, false, true})
+	UTELEPORT.id = "UTELEPORT"
+	UTELEPORT.str = "Teleport"
+	UTELEPORT.fn = function(act)
+		print(act.pos, act.target)
+		if act.invobject ~= nil and act.invobject.components.makegate ~= nil then
+			return act.invobject.components.makegate:Teleport(act.pos, act.doer)
+		end
+	end
+
+local function action_teleport(inst, doer, target, actions, right)
+	table.insert(actions, ACTIONS.UTELEPORT)
 end
-AddAction(CREATE)
-AddComponentAction("USEITEM", "create", function(inst, doer, target) table.insert(actions, ACTIONS.CREATE) end)
 
 AddStategraphPostInit("wilson", function(Stategraph)
 	
-	local state = State{
-        name = "spawngate",
+	local state = State {
+        name = "uteleport",
         tags = {"doing", "busy", "canrotate"},
 
         onenter = function(inst)
@@ -43,11 +45,18 @@ AddStategraphPostInit("wilson", function(Stategraph)
                 inst.sg:GoToState("idle") 
             end ),
         },
+
+
     }
 	
-	Stategraph.states["spawngate"] = state
+	Stategraph.states["uteleport"] = state
 
 end)
+
+AddAction(UTELEPORT)
+AddComponentAction("USEITEM", "uteleport", action_teleport)
+AddStategraphActionHandler("wilson", ActionHandler(UTELEPORT, "uteleport"))
+
 
 local SPAWNG = Action({1, false, true})
 SPAWNG.id = "SPAWNG"
@@ -60,7 +69,7 @@ end
 
 AddStategraphPostInit("wilson", function(Stategraph)
 	
-	local state = State{
+	local state = State {
         name = "spawnrgate",
         tags = {"doing", "busy", "canrotate"},
 
@@ -100,7 +109,7 @@ end
 
 AddStategraphPostInit("wilson", function(Stategraph)
 
-	local state = State{
+	local state = State {
         name = "casttoho",
         tags = {"doing", "busy", "canrotate"},
 
@@ -164,7 +173,7 @@ end
 
 AddStategraphPostInit("wilson", function(Stategraph)
 
-	local state = State{
+	local state = State {
         name = "casttohol",
         tags = {"doing", "busy", "canrotate"},
 
@@ -230,7 +239,7 @@ end
 
 AddStategraphPostInit("wilson", function(Stategraph)
 
-	local state = State{
+	local state = State {
         name = "casttohoh",
         tags = {"doing", "busy", "canrotate"},
 
@@ -299,7 +308,7 @@ end
 
 AddStategraphPostInit("wilson", function(Stategraph)
 
-	local state = State{
+	local state = State {
         name = "lament",
         tags = {"doing", "busy", "canrotate"},
 
@@ -355,7 +364,7 @@ AddStategraphPostInit("wilson", function(Stategraph)
 end)
 
 if Language == "chinese" then
-CREATE.str = "传 送"
+UTELEPORT.str = "传 送"
 SPAWNG.str = "生 成"
 CASTTOHO.str = "施 法"
 CASTTOHOL.str = "施 法"

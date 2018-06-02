@@ -52,7 +52,7 @@ function MakeGate:SpawnEffect(inst)
 	fx.Transform:SetPosition(pt.x, pt.y, pt.z)
 end
 
-function MakeGate:Create(pt, caster) 
+function MakeGate:Teleport(pt, caster)
 
 	if self:CanMakeToPoint(pt) == false then
 		return false
