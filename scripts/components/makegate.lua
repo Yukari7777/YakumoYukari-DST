@@ -22,28 +22,7 @@ function MakeGate:GetBlinkPoint()
 end
 
 function MakeGate:CanMakeToPoint(pt)
-    local ground = TheWorld
-    if ground then
-		local tile = ground.Map:GetTileAtPoint(pt.x, pt.y, pt.z)
-		return tile ~= GROUND.IMPASSIBLE and tile < GROUND.UNDERGROUND
-	end
-	return false
-end
-
-function MakeGate:CollectPointActions(doer, pos, actions, right)
-	if right then
-		local equip = doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
-		if self.target_position then
-			pos = self.target_position
-		end
-		if self:CanMakeToPoint(pos) then
-			if equip and equip.isunfolded == false then
-				table.insert(actions, ACTIONS.CREATE)
-			elseif equip and equip.isunfolded then
-				table.insert(actions, ACTIONS.SPAWNG)
-			end
-		end
-	end
+	return TheWorld.Map:IsAboveGroundAtPoint(pt:Get()) and not TheWorld.Map:IsGroundTargetBlocked(pt)
 end
 
 function MakeGate:SpawnEffect(inst)
@@ -54,9 +33,9 @@ end
 
 function MakeGate:Teleport(pt, caster)
 
-	if self:CanMakeToPoint(pt) == false then
-		return false
-	end
+	--if self:CanMakeToPoint(pt) == false then
+	--	return false
+	--end
 	if caster.components.power and caster.components.power.current > 15 then
 		if self.onusefn == nil then
 			return false

@@ -17,7 +17,7 @@ local function fn_graze(Sim)
 	inst.AnimState:SetBank("graze_fx")
     inst.AnimState:SetBuild("graze_fx")
 	inst.AnimState:PlayAnimation("idle")
-	inst.persists = false --handled in a special way
+	inst.persists = false -- handled in a special way
 	inst:AddTag("NOCLICK")
 	inst:AddTag("FX")
 	
@@ -25,7 +25,7 @@ local function fn_graze(Sim)
 	physics:SetMass(0)
     physics:SetCapsule(0, 0)
 	
-	inst:AddComponent("locomotor") -- this is the only way to move graze fx, i think.
+	inst:AddComponent("locomotor")
 	inst.components.locomotor.runspeed = math.random(50) / 10
 	inst.components.locomotor:RunInDirection(math.random(36) * 10)
 	inst.components.locomotor:RunForward()

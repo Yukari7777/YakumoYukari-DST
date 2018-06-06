@@ -1,61 +1,83 @@
 local ActionHandler = GLOBAL.ActionHandler
 local FRAMES = GLOBAL.FRAMES
+local EQUIPSLOTS = GLOBAL.EQUIPSLOTS
 local EventHandler = GLOBAL.EventHandler
 local TimeEvent = GLOBAL.TimeEvent
 local SpawnPrefab = GLOBAL.SpawnPrefab
 local State = GLOBAL.State
-local ACTIONS = ACTIONS
+local ACTIONS = GLOBAL.ACTIONS
 local Action = GLOBAL.Action
+local TheWorld = GLOBAL.TheWorld
 local Language = GetModConfigData("language")
 
 -- Action Settings for Yukari --
 
-local UTELEPORT = Action({1, false, true})
-	UTELEPORT.id = "UTELEPORT"
-	UTELEPORT.str = "Teleport"
-	UTELEPORT.fn = function(act)
-		print(act.pos, act.target)
-		if act.invobject ~= nil and act.invobject.components.makegate ~= nil then
-			return act.invobject.components.makegate:Teleport(act.pos, act.doer)
-		end
+local UTELEPORT = AddAction("UTELEPORT", "Teleport", function(act)
+	if act.invobject and act.invobject.components.makegate then
+		return act.invobject.components.makegate:Teleport(act.pos, act.doer)
 	end
-
-local function action_teleport(inst, doer, target, actions, right)
-	table.insert(actions, ACTIONS.UTELEPORT)
-end
-
-AddStategraphPostInit("wilson", function(Stategraph)
-	
-	local state = State {
-        name = "uteleport",
-        tags = {"doing", "busy", "canrotate"},
-
-        onenter = function(inst)
-            inst.AnimState:PlayAnimation("atk")
-            inst.SoundEmitter:PlaySound("dontstarve/wilson/attack_weapon")
-        end,
-
-        timeline = 
-        {
-            TimeEvent(8*FRAMES, function(inst) inst:PerformBufferedAction() end),
-        },
-
-        events = {
-            EventHandler("animover", function(inst)
-                inst.sg:GoToState("idle") 
-            end ),
-        },
-
-
-    }
-	
-	Stategraph.states["uteleport"] = state
-
 end)
 
-AddAction(UTELEPORT)
-AddComponentAction("USEITEM", "uteleport", action_teleport)
-AddStategraphActionHandler("wilson", ActionHandler(UTELEPORT, "uteleport"))
+-- local UTELEPORT = Action({priority = 10, distance = 14, mount_valid = false})
+--UTELEPORT.id = "SPAWNG"
+--UTELEPORT.str = "Spawn"
+--UTELEPORT.fn = function(act)
+--    if act.invobject and act.invobject.components.makegate then
+--		return act.invobject.components.makegate:Teleport(act.pos, act.doer)
+--	end
+--end
+--AddAction(UTELEPORT)
+
+local utele = State({ -- for host
+    name = "utele",
+    tags = {"doing", "busy", "canrotate"},
+
+    onenter = function(inst)
+		-- if inst.components.rider:IsRiding() then
+		-- end
+		inst.components.locomotor:Stop()
+        inst.AnimState:PlayAnimation("atk_pre") -- Todo : do without bring something
+        inst.AnimState:PushAnimation("atk", false)
+        inst.SoundEmitter:PlaySound("dontstarve/wilson/attack_weapon")
+    end,
+
+    timeline = 
+    {
+        TimeEvent(8*FRAMES, function(inst) inst:PerformBufferedAction() end),
+    },
+
+    events = {
+        EventHandler("animqueueover", function(inst)
+            if inst.AnimState:AnimDone() then
+                inst.sg:GoToState("idle")
+            end
+        end),
+    },
+})
+
+AddStategraphState("wilson", utele)
+AddStategraphState("wilson_client", utele)
+
+AddStategraphActionHandler("wilson", ActionHandler(ACTIONS.UTELEPORT, "utele"))
+AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.UTELEPORT, "utele"))
+
+local function action_teleport(inst, doer, pos, actions, right)
+	if right then
+		local equip = doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) -- Todo : do without bring something
+
+		if equip and inst.components.makegate:CanMakeToPoint(pos) then
+			if equip.isunfolded then
+				table.insert(actions, ACTIONS.SPAWNG)
+			else
+				table.insert(actions, ACTIONS.UTELEPORT)
+			end
+		end
+	end
+end
+
+AddComponentAction("POINT", "makegate", action_teleport)
+
+
 
 
 local SPAWNG = Action({1, false, true})

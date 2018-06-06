@@ -31,6 +31,10 @@ function spellcard:SetCondition(fn)
 	self.othercondition = fn
 end
 
+function spellcard:SetAction(act)
+	self.action = act
+end
+
 function spellcard:GetLevel(inst, index)
 	if index == 1 then
 		return inst.health_level
@@ -74,16 +78,6 @@ function spellcard:CanCast(doer, target, pos, inst)
 
 	return self.spell ~= nil
 
-end
-
-function spellcard:SetAction(act)
-	self.action = act
-end
-
-function spellcard:CollectInventoryActions(doer, actions)
-	if self:CanCast(doer) and self.isusableitem then
-		table.insert(actions, self.action)
-	end
 end
 
 return spellcard

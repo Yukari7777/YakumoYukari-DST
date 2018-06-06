@@ -18,7 +18,7 @@ local function StatusDisplaysInit(class)
 
 	if class.owner.components.power then
 		class.power = class:AddChild(YokaiBadge(class.owner))
-		-- /////// TEMP Support, only works with default settings. ///////
+		-- /////// only works with default settings. ///////
 		if CombindIsModEnabled("Combined Status") then
 			class.brain:SetPosition(0, 35, 0)
 			class.stomach:SetPosition(-62, 35, 0)
@@ -26,7 +26,7 @@ local function StatusDisplaysInit(class)
 			class.power:SetScale(.9,.9,.9)
 			class.power:SetPosition(-62, -50, 0)
 		else
-			if class.moisturemeter then -- it also checks dlc
+			if class.moisturemeter then
 				class.power:SetPosition(-40, -50,0)
 				class.brain:SetPosition(40, -50, 0)
 				class.stomach:SetPosition(-40,17,0)
