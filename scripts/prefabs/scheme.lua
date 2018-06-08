@@ -243,16 +243,17 @@ end
 
 local function fn()  
 
-	local inst = CreateEntity()    
-	local trans = inst.entity:AddTransform()    
-	local anim = inst.entity:AddAnimState()    
-	local sound = inst.entity:AddSoundEmitter() 
+	local inst = CreateEntity() 
+	
+	inst.entity:AddTransform()    
+	inst.entity:AddAnimState()    
+	inst.entity:AddSoundEmitter() 
 
 	MakeInventoryPhysics(inst)
 	
-	anim:SetBank("spell")    
-	anim:SetBuild("spell")    
-	anim:PlayAnimation("idle")    
+	inst.AnimState:SetBank("spell")    
+	inst.AnimState:SetBuild("spell")    
+	inst.AnimState:PlayAnimation("idle")    
 
 	inst:AddTag("irreplaceable")
 	inst:AddTag("spellcard")
@@ -260,7 +261,6 @@ local function fn()
 	
 	inst:AddComponent("inventoryitem")   
 	inst.components.inventoryitem.atlasname = "images/inventoryimages/scheme.xml" 
-	local owner = inst.components.inventoryitem.owner
 	
 	inst.entity:AddMiniMapEntity()
     inst.MiniMapEntity:SetIcon("scheme.tex") 

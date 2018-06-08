@@ -352,15 +352,27 @@ local function EquippingEvent(inst)
 	inst.components.upgrader:DoUpgrade(inst)
 end
 
-local function common_init(inst)
+local function common_init(inst) -- things before SetPristine()
 	inst:AddTag("youkai")
 	inst:AddTag("yakumoga")
 	inst:AddTag("yakumoyukari")
+	
+	inst:RemoveTag("notarget")
+	inst:RemoveTag("inspell")
+	inst:RemoveTag("IsDamage")
+	
+	STRINGS.NAMES.SHADOWWATCHER = "Watcher"
+	STRINGS.NAMES.SHADOWSKITTISH = "Shadow Creature"
+	STRINGS.NAMES.SHADOWSKITTISH_WATER = "Shadow Creature"
+	STRINGS.NAMES.CREEPYEYES = "Eyes"
+	-- TUNING.HAMMER_DAMAGE = 10
 end
 
-local master_fn = function(inst)
+local master_postinit = function(inst) -- after SetPristine()
 	
 	inst:AddComponent("power")
+	inst:AddComponent("upgrader")
+	inst.components.upgrader:DoUpgrade(inst)
 
 	inst.health_level = 0
 	inst.hunger_level = 0 
@@ -381,23 +393,16 @@ local master_fn = function(inst)
 	
 	inst.soundsname = "willow"
 	inst.MiniMapEntity:SetIcon( "yakumoyukari.tex" )
-	inst.starting_inventory = start_inv -- starting_inventory passed as a parameter here is now deprecated
+	inst.starting_inventory = start_inv -- starting_inventory passed as a parameter is now deprecated
 	
 	inst.components.sanity:SetMax(75)
 	inst.components.health:SetMaxHealth(80)
+	inst.components.health:SetInvincible(false)
 	inst.components.hunger:SetMax(150)
+	inst.components.hunger.hungerrate = 1.5 * TUNING.WILSON_HUNGER_RATE
 	inst.components.builder.science_bonus = 1
 	
     inst.components.combat.damagemultiplier = 1.2
-	
-	--local day_time = TUNING.SEG_TIME * TUNING.DAY_SEGS_DEFAULT
-	inst.components.hunger.hungerrate = 1.5 * TUNING.WILSON_HUNGER_RATE
-	--TUNING.MOISTURE_SANITY_PENALTY_MAX = -100/(day_time*2) -- default * 3
-	-- TUNING.HAMMER_DAMAGE = 10
-	STRINGS.NAMES.SHADOWWATCHER = "Watcher"
-	STRINGS.NAMES.SHADOWSKITTISH = "Shadow Creature"
-	STRINGS.NAMES.SHADOWSKITTISH_WATER = "Shadow Creature"
-	STRINGS.NAMES.CREEPYEYES = "Eyes"
 	
 	RECIPETABS['TOUHOU'] = {str = "TOUHOU", sort= 10, icon = "touhoutab.tex", icon_atlas = "images/inventoryimages/touhoutab.xml"}
 	
@@ -504,16 +509,9 @@ local master_fn = function(inst)
 		return inst.components.eater:EatMEAT(food)
 	end
 
-	inst:AddComponent("upgrader")
-	inst:RemoveTag("notarget")
-	inst:RemoveTag("inspell")
-	inst:RemoveTag("IsDamage")
-	inst.components.health:SetInvincible(false)
-
-	inst.components.upgrader:DoUpgrade(inst)
-	--inst:DoPeriodicTask(1, DebugFunction)
 	inst:DoPeriodicTask(1, CooldownFunction)
 	inst:DoPeriodicTask(1, PeriodicFunction)
+	--inst:DoPeriodicTask(1, DebugFunction)
 	
 	inst.OnSave = onsave
 	inst.OnPreLoad = onpreload
@@ -539,4 +537,4 @@ local master_fn = function(inst)
 
 end
 
-return MakePlayerCharacter("yakumoyukari", prefabs, assets, common_init, master_fn)
+return MakePlayerCharacter("yakumoyukari", prefabs, assets, common_init, master_postinit)

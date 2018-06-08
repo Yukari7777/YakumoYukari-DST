@@ -18,17 +18,11 @@ local UTELEPORT = AddAction("UTELEPORT", "Teleport", function(act)
 	end
 end)
 
--- local UTELEPORT = Action({priority = 10, distance = 14, mount_valid = false})
---UTELEPORT.id = "SPAWNG"
---UTELEPORT.str = "Spawn"
---UTELEPORT.fn = function(act)
---    if act.invobject and act.invobject.components.makegate then
---		return act.invobject.components.makegate:Teleport(act.pos, act.doer)
---	end
---end
---AddAction(UTELEPORT)
+UTELEPORT.priority = 10
+UTELEPORT.distance = 14
+UTELEPORT.mount_valid = false
 
-local utele = State({ -- for host
+local utele = State({ -- server
     name = "utele",
     tags = {"doing", "busy", "canrotate"},
 
@@ -36,7 +30,7 @@ local utele = State({ -- for host
 		-- if inst.components.rider:IsRiding() then
 		-- end
 		inst.components.locomotor:Stop()
-        inst.AnimState:PlayAnimation("atk_pre") -- Todo : do without bring something
+        inst.AnimState:PlayAnimation("atk_pre")
         inst.AnimState:PushAnimation("atk", false)
         inst.SoundEmitter:PlaySound("dontstarve/wilson/attack_weapon")
     end,
@@ -63,7 +57,7 @@ AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.UTELEPORT, "ut
 
 local function action_teleport(inst, doer, pos, actions, right)
 	if right then
-		local equip = doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) -- Todo : do without bring something
+		local equip = doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
 
 		if equip and inst.components.makegate:CanMakeToPoint(pos) then
 			if equip.isunfolded then

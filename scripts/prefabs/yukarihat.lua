@@ -7,17 +7,6 @@ local assets=
 
 prefabs = {}
 
-local function UpdateSound(inst)
-    local soundShouldPlay = (TheWorld.state.israining and inst.components.equippable:IsEquipped() and inst.upgraded)
-    if soundShouldPlay ~= inst.SoundEmitter:PlayingSound("umbrellarainsound") then
-        if soundShouldPlay then
-		    inst.SoundEmitter:PlaySound("dontstarve/rain/rain_on_umbrella", "umbrellarainsound") 
-        else
-		    inst.SoundEmitter:KillSound("umbrellarainsound")
-		end
-    end
-end  
-
 local function Ability(inst, owner)
 
 	if owner.components.upgrader:IsHatValid(owner) then
@@ -65,19 +54,27 @@ local function fn()
     end
 
 	local inst = CreateEntity()    
-	inst.entity:AddNetwork()
-	local trans = inst.entity:AddTransform()    
-	local anim = inst.entity:AddAnimState()    
-	local sound = inst.entity:AddSoundEmitter()   
+	
+	inst.entity:AddTransform()    
+	inst.entity:AddAnimState()    
+	inst.entity:AddSoundEmitter()  
+	inst.entity:AddNetwork()	
+	inst.entity:AddMiniMapEntity()
+	
+	inst.MiniMapEntity:SetIcon("yukarihat.tex")
 	
 	MakeInventoryPhysics(inst)    
 		
-	anim:SetBank("yukarihat")    
-	anim:SetBuild("yukarihat")    
-	anim:PlayAnimation("idle")    
+	inst.AnimState:SetBank("yukarihat")    
+	inst.AnimState:SetBuild("yukarihat")    
+	inst.AnimState:PlayAnimation("idle")    
 
 	inst:AddTag("hat")
 	inst:AddTag("irreplaceable")
+	
+	inst.entity:SetPristine()
+	
+	
 	inst:AddComponent("inspectable")        
 	
 	inst:AddComponent("inventoryitem")   
@@ -85,9 +82,6 @@ local function fn()
 	
 	inst:AddComponent("waterproofer")
 	inst.components.waterproofer:SetEffectiveness(0)
-	
-	inst.entity:AddMiniMapEntity()
-    inst.MiniMapEntity:SetIcon("yukarihat.tex")
 	
 	inst:AddComponent("equippable")    
 	inst.components.equippable.equipslot = EQUIPSLOTS.HEAD

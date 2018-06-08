@@ -18,7 +18,7 @@ local function UpdateSound(inst)
 		    inst.SoundEmitter:KillSound("umbrellarainsound")
 		end
     end
-end  
+end 
 
 local function onuse(staff, pos, caster)
 
@@ -44,7 +44,6 @@ local function OnUnequipYukari(inst, owner)
 	owner.AnimState:Hide("ARM_carry")        
 	owner.AnimState:Show("ARM_normal")
 	owner.DynamicShadow:SetSize(1.3, 0.6)	
-	UpdateSound(inst)
 	
 	inst.isunfolded = false
 	inst.components.weapon:SetDamage(6)
@@ -64,7 +63,6 @@ local function unfoldit(inst)
 		inst.components.waterproofer:SetEffectiveness(0)
 		
 		inst.isunfolded = false
-		UpdateSound(inst)
 	else
 		owner:PushEvent("unequip", {item=inst, eslot=EQUIPSLOTS.HANDS})
 		owner:PushEvent("equip", {item=inst, eslot=EQUIPSLOTS.HANDS})
@@ -75,7 +73,6 @@ local function unfoldit(inst)
 		inst.components.waterproofer:SetEffectiveness(1)
 		
 		inst.isunfolded = true
-		UpdateSound(inst)
 	end
 	
 	inst.components.useableitem.inuse = false
@@ -84,29 +81,36 @@ end
 
 local function fn()  
 
-	local inst = CreateEntity()    
+	local inst = CreateEntity()   
+	
 	inst.entity:AddNetwork()
-	local trans = inst.entity:AddTransform()    
-	local anim = inst.entity:AddAnimState()    
-	local sound = inst.entity:AddSoundEmitter()   
+	inst.entity:AddTransform()    
+	inst.entity:AddAnimState()    
+	inst.entity:AddSoundEmitter()  
+	inst.entity:AddMiniMapEntity()
+	
+    inst.MiniMapEntity:SetIcon("yukariumbre.tex")	
 	
 	MakeInventoryPhysics(inst)     
 	
-	anim:SetBank("yukariumbre")    
-	anim:SetBuild("yukariumbre")    
-	anim:PlayAnimation("idle")  
+	inst.AnimState:SetBank("yukariumbre")    
+	inst.AnimState:SetBuild("yukariumbre")    
+	inst.AnimState:PlayAnimation("idle")  
 
 	inst:AddTag("nopunch")
 	inst:AddTag("umbrella")
 	inst:AddTag("irreplaceable")
+	
+	inst.entity:SetPristine()
+	
+	
+	inst.isunfolded = false
 	
 	inst:AddComponent("waterproofer")
 	inst.components.waterproofer:SetEffectiveness(0)
 	
 	inst:AddComponent("makegate")
 	inst.components.makegate.onusefn = onuse
-	
-	inst.isunfolded = false
 	
 	inst:AddComponent("insulator")
     inst.components.insulator:SetSummer()
@@ -117,29 +121,22 @@ local function fn()
     end
     inst.components.reticule.ease = true
 	
-	inst:AddComponent("inspectable")        
+	inst:AddComponent("inspectable")     
+	
 	inst:AddComponent("inventoryitem") 
+	inst.components.inventoryitem.imagename = "yukariumbre"    
+	inst.components.inventoryitem.atlasname = "images/inventoryimages/yukariumbre.xml"  
 	
 	inst:AddComponent("weapon")
     inst.components.weapon:SetDamage(6)
 	
-	inst.components.inventoryitem.imagename = "yukariumbre"    
-	inst.components.inventoryitem.atlasname = "images/inventoryimages/yukariumbre.xml"  
-	
 	inst:AddComponent("equippable")  
-	
-	inst:AddComponent("useableitem")
-    inst.components.useableitem:SetOnUseFn(unfoldit)
-	
 	inst.components.equippable:SetOnEquip( OnEquipYukari )    
 	inst.components.equippable:SetOnUnequip( OnUnequipYukari )
 	inst.components.equippable.walkspeedmult = TUNING.CANE_SPEED_MULT
 	
-	inst.entity:AddMiniMapEntity()
-    inst.MiniMapEntity:SetIcon("yukariumbre.tex")
-	
-	--inst:ListenForEvent("rainstop", function() UpdateSound(inst) end, TheWorld) 
-	--inst:ListenForEvent("rainstart", function() UpdateSound(inst) end, TheWorld) 
+	inst:AddComponent("useableitem")
+    inst.components.useableitem:SetOnUseFn(unfoldit)
 
 	return inst
 end
