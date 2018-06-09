@@ -24,9 +24,9 @@ local function onuse(staff, pos, caster)
 
     if caster.components.power then
 		if staff.isunfolded then
-			caster.components.power:DoDelta(-50, false)
+			caster.components.power:DoDelta(-75, false)
 		else
-			caster.components.power:DoDelta(-15, false)
+			caster.components.power:DoDelta(-33, false)
 		end
     end
 
@@ -102,6 +102,10 @@ local function fn()
 	inst:AddTag("irreplaceable")
 	
 	inst.entity:SetPristine()
+
+	if not TheWorld.ismastersim then
+        return inst
+    end
 	
 	
 	inst.isunfolded = false

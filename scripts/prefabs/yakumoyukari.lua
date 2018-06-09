@@ -69,7 +69,7 @@ local function onsave(inst, data)
 	data.regen_cool = inst.regen_cool
 	data.poison_cool = inst.poison_cool
 	data.invin_cool = inst.invin_cool
-	data.graze = inst.graze
+	data.grazecnt = inst.grazecnt
 	data.skilltree = inst.components.upgrader.ability
 	data.hatskill = inst.components.upgrader.hatskill
 	data.hatlevel = inst.hatlevel
@@ -87,9 +87,10 @@ local function onpreload(inst, data)
 			inst.regen_cool = data.regen_cool or 0 
 			inst.poison_cool = data.poison_cool or 0 
 			inst.invin_cool = data.invin_cool or 0 
-			inst.graze = data.graze or 0
+			inst.grazecnt = data.grazecnt or 0
 			inst.hatlevel = data.hatlevel or 1
-		
+			inst.components.upgrader:DoUpgrade(inst)
+
 			if data.skilltree then
 				inst.components.upgrader.ability = data.skilltree
 			end
@@ -109,6 +110,10 @@ local function onpreload(inst, data)
 		end
 	end
 	
+end
+
+local function onload(inst, data)
+	inst.istelevalid = true
 end
 
 local function OnhitEvent(inst, data)
@@ -172,22 +177,9 @@ function DoHungerUp(inst, data)
 	if inst:HasTag("inspell") then 
 		return
 	end
-	local Hunger = inst.components.hunger
-	
-	if Hunger then
-	
-		if inst.components.upgrader.powerupvalue == 1 then
-			inst.components.combat.damagemultiplier = 1.2 + math.max(Hunger:GetPercent() - 0.8, 0)
-		elseif inst.components.upgrader.powerupvalue == 2 then	
-			inst.components.combat.damagemultiplier = 1.2 + math.max(Hunger:GetPercent() - 0.6, 0)
-		elseif inst.components.upgrader.powerupvalue == 3 then
-			inst.components.combat.damagemultiplier = 1.2 + math.max(Hunger:GetPercent() - 0.4, 0)
-		elseif inst.components.upgrader.powerupvalue == 4 then
-			inst.components.combat.damagemultiplier = 1.2 + math.max(Hunger:GetPercent() - 0.2, 0)
-		elseif inst.components.upgrader.powerupvalue == 5 then
-			inst.components.combat.damagemultiplier = 1.2 + Hunger:GetPercent()
-		end
-		
+
+	if inst.components.hunger then
+		inst.components.combat.damagemultiplier = TUNING.DEFAULT_DAMAGE_MULTIPLIER + math.max(Hunger:GetPercent() - (1 - inst.components.upgrader.powerupvalue * 0.2), 0)
 	end
 end
 
@@ -202,12 +194,6 @@ local function InvincibleRegen(inst)
 	if inst.components.health and inst.components.upgrader.emergency then
 		local emergency = inst.components.upgrader.emergency
 		inst.components.health:DoDelta(emergency, nil, nil, true) -- DoDelta(amount, overtime, cause, ignore_invincible)
-	end
-end
-
-local function CurePoison(inst)
-	if inst.components.poisonable and inst.components.upgrader.IsPoisonCure then
-		inst.components.poisonable:Cure(inst)
 	end
 end
 
@@ -231,25 +217,25 @@ function GoInvincible(inst)
 	end
 end
 
-local function GetPoint(pt)
-	local theta = math.random() * 2 * PI
-	local radius = 6 + math.random()*6
-	
-	local result_offset = FindValidPositionByFan(theta, radius, 12, function(offset)
-		local ground = TheWorld
-		local spawn_point = pt + offset
-		if not (ground.Map and ground.Map:GetTileAtPoint(spawn_point.x, spawn_point.y, spawn_point.z) == GROUND.IMPASSABLE) then
-			return true
-		end
-		return false
-	end)
-	
-	if result_offset then
-		return pt+result_offset
-	end
-end
-
 local function PeriodicFunction(inst, data)
+	
+	local function GetPoint(pt)
+		local theta = math.random() * 2 * PI
+		local radius = 6 + math.random() * 6
+	
+		local result_offset = FindValidPositionByFan(theta, radius, 12, function(offset)
+			local ground = TheWorld
+			local spawn_point = pt + offset
+			if not (ground.Map and ground.Map:GetTileAtPoint(spawn_point.x, spawn_point.y, spawn_point.z) == GROUND.IMPASSABLE) then
+				return true
+			end
+			return false
+		end)
+	
+		if result_offset then
+			return pt+result_offset
+		end
+	end
 
 	local Light = inst.entity:AddLight()
 	
@@ -306,15 +292,6 @@ local function CooldownFunction(inst)
 		end
 	end
 	
-	if inst.components.upgrader.IsPoisonCure and inst.components.poisonable --[[Checks SW DLC]] then
-		if inst.poison_cool > 0 then
-			inst.poison_cool = inst.poison_cool - 1
-		elseif inst.poison_cool == 0 and inst.components.poisonable:IsPoisoned() then
-			CurePoison(inst)
-			inst.poison_cool = inst.components.upgrader.curecool
-		end
-	end
-	
 	if inst.invin_cool > 0 then
 		inst.invin_cool = inst.invin_cool - 1
 	elseif inst.invin_cool == 0 then
@@ -323,17 +300,10 @@ local function CooldownFunction(inst)
 	
 end
 
-local function OnGraze(inst)
-	inst.graze = inst.graze + 1
+local function OnGrazed(inst)
+	inst.grazecnt = inst.grazecnt + 1
 	inst.components.power:DoDelta(math.random(0, 2), false)
 end
-
-local function DebugFunction(inst)
-	if inst.components.power then
-		inst.components.power.max = 300
-		inst.components.power.current = 300
-	end
-end	
 
 local function EquippingEvent(inst)
 	print("hatequip")
@@ -352,7 +322,16 @@ local function EquippingEvent(inst)
 	inst.components.upgrader:DoUpgrade(inst)
 end
 
+local function DebugFunction(inst)
+	if inst.components.power then
+		inst.components.power.max = 300
+		inst.components.power.current = 300
+	end
+end	
+
 local function common_init(inst) -- things before SetPristine()
+	inst.MiniMapEntity:SetIcon( "yakumoyukari.tex" )
+
 	inst:AddTag("youkai")
 	inst:AddTag("yakumoga")
 	inst:AddTag("yakumoyukari")
@@ -372,27 +351,24 @@ local master_postinit = function(inst) -- after SetPristine()
 	
 	inst:AddComponent("power")
 	inst:AddComponent("upgrader")
-	inst.components.upgrader:DoUpgrade(inst)
 
 	inst.health_level = 0
 	inst.hunger_level = 0 
 	inst.sanity_level = 0
 	inst.power_level = 0
-	inst.hatlevel = 0
+	inst.hatlevel = 1
 	
 	inst.regen_cool = 0
 	inst.poison_cool = 0
 	inst.invin_cool = 0
-	inst.graze = 0
+	inst.grazecnt = 0
 	
-	inst.dodgechance = 0.2
+	inst.dodgechance = TUNING.DEFAULT_GRAZE_RATE
 	
-	inst.istelevalid = true
 	inst.fireimmuned = false
 	inst.hatequipped = false
 	
 	inst.soundsname = "willow"
-	inst.MiniMapEntity:SetIcon( "yakumoyukari.tex" )
 	inst.starting_inventory = start_inv -- starting_inventory passed as a parameter is now deprecated
 	
 	inst.components.sanity:SetMax(75)
@@ -400,9 +376,8 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.components.health:SetInvincible(false)
 	inst.components.hunger:SetMax(150)
 	inst.components.hunger.hungerrate = 1.5 * TUNING.WILSON_HUNGER_RATE
+	inst.components.combat.damagemultiplier = TUNING.DEFAULT_DAMAGE_MULTIPLIER
 	inst.components.builder.science_bonus = 1
-	
-    inst.components.combat.damagemultiplier = 1.2
 	
 	RECIPETABS['TOUHOU'] = {str = "TOUHOU", sort= 10, icon = "touhoutab.tex", icon_atlas = "images/inventoryimages/touhoutab.xml"}
 	
@@ -498,11 +473,13 @@ local master_postinit = function(inst) -- after SetPristine()
 			
 			if food.prefab == "monstermeat" 
 			or food.prefab == "monsterlasagna" then
-				food.components.edible.healthvalue = -20			
+				food.components.edible.healthvalue = -20	
+				DoPowerRestore(inst, 5)
 				
 			elseif food.prefab == "monstermeat_dried"
 			or food.prefab == "cookedmonstermeat" then
 				food.components.edible.healthvalue = -3
+				DoPowerRestore(inst, 3)
 			end
 			
 		end
@@ -515,6 +492,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	
 	inst.OnSave = onsave
 	inst.OnPreLoad = onpreload
+	inst.OnLoad = onload
 	
 	inst:ListenForEvent( "debugmode", DebugFunction, inst)
 	inst:ListenForEvent( "hungerdelta", DoHungerUp )
@@ -524,7 +502,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:ListenForEvent( "teleported", TelePortDelay, inst )
 	inst:ListenForEvent( "hatequip", EquippingEvent )
 	inst:ListenForEvent( "hatunequip", EquippingEvent )
-	inst:ListenForEvent( "grazed", OnGraze )
+	inst:ListenForEvent( "grazed", OnGrazed )
 	
 	inst.OnLoad = function(inst)
 		inst.valid = true -- debug

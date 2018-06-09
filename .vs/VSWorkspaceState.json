@@ -3,8 +3,7 @@
     "",
     "\\scripts",
     "\\scripts\\components",
-    "\\scripts\\prefabs",
-    "\\scripts\\widgets"
+    "\\scripts\\prefabs"
   ],
   "SelectedNode": "\\scripts\\actions_yukari.lua",
   "PreviewInSolutionExplorer": false

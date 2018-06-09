@@ -21,7 +21,6 @@ Upgrader = Class(function(self, inst)
 
 	self.emergency = nil
 	
-	self.IsPoisonCure = false
 	self.IsDamage = false
 	self.IsVampire = false
 	self.IsAOE = false
@@ -33,7 +32,6 @@ Upgrader = Class(function(self, inst)
 	self.CanbeInvincible = false
 	self.WaterProofed = false
 	self.FireResist = false
-	self.PoisonResist = false
 	self.GodTelepoirt = false
 	
 	self.ability = {}
@@ -107,7 +105,6 @@ function Upgrader:SkillManager(inst)
 	end
 	
 	if skill[1][3] then
-		inst.components.upgrader.IsPoisonCure = true
 		inst.components.upgrader.healthbonus = 50
 		inst.components.upgrader.regenamount = 2
 		inst.components.upgrader.regencool = 60
@@ -270,7 +267,6 @@ function Upgrader:HatSkillManager(inst)
 		
 		if skill[4] then
 			inst.components.upgrader.FireResist = true
-			inst.components.upgrader.PoisonResist = true
 			inst.components.upgrader.SightDistance = 2
 			inst.components.upgrader.hatpowerbonus = 50
 			inst.components.upgrader.hatbonusspeed = 1
@@ -288,7 +284,6 @@ function Upgrader:HatSkillManager(inst)
 	else
 		inst.components.upgrader.WaterProofed = false
 		inst.components.upgrader.FireResist = false
-		inst.components.upgrader.PoisonResist = false
 		inst.components.upgrader.GodTelepoirt = false
 		inst.components.upgrader.SightDistance = 0
 		inst.components.upgrader.hatpowerbonus = 0
@@ -318,7 +313,7 @@ function Upgrader:DoUpgrade(inst, stat)
 			inst.HUD.controls.status.heart:PulseGreen()
 			inst.HUD.controls.status.heart:ScaleTo(1.3,1,.7)
 			inst.components.health.maxhealth = STATUS.DEFAULT_HP + inst.health_level * STATUS.HP_RATE + self.healthbonus + math.max(0, (inst.health_level - 30) * 7.5)
-			inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_UPGRADE_HEALTH")) -- will add random more talk
+			inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_UPGRADE_HEALTH"))
 		elseif stat == 2 then
 			inst.hunger_level = inst.hunger_level + 1
 			inst.HUD.controls.status.stomach:PulseGreen()

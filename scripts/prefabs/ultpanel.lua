@@ -23,8 +23,8 @@ function MakeUltimate(name, value)
 		elseif difficulty == "hard" then ultreq = 30 end
 		
 		local str = {}
-			str[1] = "I can now evade from death.."
-			str[2] = "Now I have the World's power."
+			str[1] = "I can now evade death.."
+			str[2] = "Now I have power of TheWorld."
 			str[3] = "The world is beginning to show with new sights."
 			str[4] = "Yes... this is my power I had."
 		if language == "chinese" then

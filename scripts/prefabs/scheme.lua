@@ -24,26 +24,7 @@ local function GetIngameName(prefab)
 	return STRINGS.NAMES[string.upper(prefab)]
 end
 
-local function onsave(inst, data)
-		-- inst.components.inventoryitem.owner.hatlevel = inst.hatlevel
-end
-
-local function onpreload(inst, data)
-	if data and data.hatlevel then
-		inst.hatlevel = data.hatlevel
-		data.hatlevel = nil
-	end
-end
-
-local function onload(inst, data)
-
-	if inst.components.inventoryitem.owner then
-		print("now has owner")
-		inst.hatlevel = inst.components.inventoryitem.owner.hatlevel
-	end
-end
-
-local function GetBackpack()
+local function GetBackpack(inst)
 	local backpack
 	local Chara = inst.components.inventoryitem.owner
 	
@@ -61,15 +42,10 @@ end
 
 local function GetTable(inst)
 	local difficulty = GetModConfigData("difficulty", "YakumoYukari")
-	local hatlevel = inst.hatlevel or 1
+	local hatlevel = inst.components.inventoryitem.owner.hatlevel
 	local list = {}
 	
 	if hatlevel < 5 then
-		-- if SaveGameIndex:IsModeShipwrecked() then
-			-- list = Ingredients_sw[hatlevel]
-		-- else
-			-- list = Ingredients[hatlevel]
-		-- end
 		list = Ingredients[hatlevel]
 		if list[1][2] >= 20 then
 			for i = 1, table.maxn(list), 1 do 
@@ -81,9 +57,9 @@ local function GetTable(inst)
 	return list
 end
 
-local function CountInventoryItem(prefab)
+local function CountInventoryItem(inst, prefab)
 	local inventory = inst.components.inventoryitem.owner.components.inventory
-	local backpack = GetBackpack()
+	local backpack = GetBackpack(inst)
 	local count = 0
 	
 	for k,v in pairs(inventory.itemslots) do
@@ -115,9 +91,9 @@ local function GetStr(inst)
 	local list = GetTable(inst)
 	local Language = GetModConfigData("language", "YakumoYukari")
 	local text = ""
-	if inst.hatlevel < 5 then
+	if inst.components.inventoryitem.owner.hatlevel < 5 then
 		for i = 1, table.maxn(list), 1 do
-			text = text.."\n"..GetIngameName(list[i][1]).." - "..CountInventoryItem(list[i][1]).." / "..list[i][2]
+			text = text.."\n"..GetIngameName(list[i][1]).." - "..CountInventoryItem(inst, list[i][1]).." / "..list[i][2]
 		end
 	else
 		if Language == "chinese" then
@@ -134,9 +110,9 @@ local function GetCondition(inst)
 	local list = GetTable(inst)
 	local condition = true
 	
-	if inst.hatlevel < 5 then 
+	if inst.components.inventoryitem.owner.hatlevel < 5 then 
 		for i = 1, #list, 1 do 
-			condition = condition and ( CountInventoryItem(list[i][1]) >= list[i][2] )
+			condition = condition and ( CountInventoryItem(inst, list[i][1]) >= list[i][2] )
 		end
 	else
 		condition = false
@@ -146,7 +122,7 @@ local function GetCondition(inst)
 end
 
 local function SetDesc(inst)
-	local CurrentLevel = inst.hatlevel
+	local CurrentLevel = inst.components.inventoryitem.owner.hatlevel
 	local condition = GetCondition(inst)
 	local Language = GetModConfigData("language", "YakumoYukari")
 		
@@ -171,7 +147,7 @@ local function SetDesc(inst)
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.SCHEME = str
 end
 
-local function SetCondition(inst)
+local function SetState(inst)
 	local condition = GetCondition(inst)
 	inst.components.spellcard:SetCondition( condition )
 	SetDesc(inst)
@@ -233,9 +209,8 @@ end
 
 local function OnFinish(inst)
 	local Chara = inst.components.inventoryitem.owner
-	inst.hatlevel = inst.hatlevel + 1
-	Chara.hatlevel = inst.hatlevel
-	SetCondition(inst)
+	Chara.hatlevel = Chara.hatlevel + 1
+	SetState(inst)
 	Chara.components.upgrader:AbilityManager(Chara)
 	Chara.components.upgrader:DoUpgrade(Chara)
 	Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_HATUPGRADE"))
@@ -248,6 +223,8 @@ local function fn()
 	inst.entity:AddTransform()    
 	inst.entity:AddAnimState()    
 	inst.entity:AddSoundEmitter() 
+	inst.entity:AddMiniMapEntity()
+    inst.MiniMapEntity:SetIcon("scheme.tex") 
 
 	MakeInventoryPhysics(inst)
 	
@@ -257,13 +234,17 @@ local function fn()
 
 	inst:AddTag("irreplaceable")
 	inst:AddTag("spellcard")
+
+	inst.entity:SetPristine()
+
+	if not TheWorld.ismastersim then
+        return inst
+    end
+
 	inst:AddComponent("inspectable")    
 	
 	inst:AddComponent("inventoryitem")   
 	inst.components.inventoryitem.atlasname = "images/inventoryimages/scheme.xml" 
-	
-	inst.entity:AddMiniMapEntity()
-    inst.MiniMapEntity:SetIcon("scheme.tex") 
 	
 	inst:AddComponent("spellcard")
 	inst.components.spellcard.name = "scheme"
@@ -271,18 +252,7 @@ local function fn()
 	inst.components.spellcard:SetOnFinish( OnFinish )
 	inst.components.spellcard:SetCondition( false )
 	
-	local function callfn(inst)
-		SetCondition(inst)
-	end
-	
-	--inst.OnSave = onsave
-	--inst.OnPreLoad = onpreload
-	--inst.OnLoad = onload
-	
-	inst:ListenForEvent("equip", callfn )
-	inst:ListenForEvent("unequip", callfn )
-	--inst:ListenForEvent("yukariloaded", SetCondition)
-	--inst:DoPeriodicTask(1, callfn)
+	inst:DoPeriodicTask(1, SetState)
 	
 	return inst
 end

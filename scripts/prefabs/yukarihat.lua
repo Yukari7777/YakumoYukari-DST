@@ -73,6 +73,10 @@ local function fn()
 	inst:AddTag("irreplaceable")
 	
 	inst.entity:SetPristine()
+
+	if not TheWorld.ismastersim then
+        return inst
+    end
 	
 	
 	inst:AddComponent("inspectable")        

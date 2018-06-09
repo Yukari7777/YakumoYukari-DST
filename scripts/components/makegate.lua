@@ -1,7 +1,7 @@
 local MakeGate = Class(function(self, inst)
     self.inst = inst
 	self.onusefn = nil
-    self.distance_controller = 13 
+    self.distance_controller = 7 
 end)
 
 function MakeGate:GetBlinkPoint()

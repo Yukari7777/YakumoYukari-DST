@@ -477,6 +477,8 @@ modimport "scripts/actions_yukari.lua"
 modimport "scripts/recipes_yukari.lua"
 modimport "scripts/strings_yukari.lua"
 modimport "scripts/tunings_yukari.lua"
+--AddComponentPostInit("inventory", InventoryDamage)
+--AddComponentPostInit("tool", ToolEfficientFn)
 --AddPrefabPostInit("forest", AddSchemeManager) -- Override function AddSchemeManager to prefab "forest"
 --AddPrefabPostInit("cave", AddSchemeManager)
 --AddPrefabPostInit("world", AddSchemeManager)
@@ -495,5 +497,3 @@ modimport "scripts/tunings_yukari.lua"
 --AddPrefabPostInit("swimminghorror", SetInspectable)
 --AddPrefabPostInit("crawlingnightmare", SetInspectable)
 --AddPrefabPostInit("nightmarebeak", SetInspectable)
---AddComponentPostInit("inventory", InventoryDamage)
---AddComponentPostInit("tool", ToolEfficientFn)
