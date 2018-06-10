@@ -179,7 +179,7 @@ function DoHungerUp(inst, data)
 	end
 
 	if inst.components.hunger then
-		inst.components.combat.damagemultiplier = TUNING.DEFAULT_DAMAGE_MULTIPLIER + math.max(Hunger:GetPercent() - (1 - inst.components.upgrader.powerupvalue * 0.2), 0)
+		inst.components.combat.damagemultiplier = TUNING.YDEFAULT.DEFAULT_DAMAGE_MULTIPLIER + math.max(inst.components.hunger:GetPercent() - (1 - inst.components.upgrader.powerupvalue * 0.2), 0)
 	end
 end
 
@@ -332,6 +332,17 @@ end
 local function common_init(inst) -- things before SetPristine()
 	inst.MiniMapEntity:SetIcon( "yakumoyukari.tex" )
 
+	inst.health_level = 0
+	inst.hunger_level = 0 
+	inst.sanity_level = 0
+	inst.power_level = 0
+	inst.hatlevel = 1
+	
+	inst.regen_cool = 0
+	inst.poison_cool = 0
+	inst.invin_cool = 0
+	inst.grazecnt = 0
+
 	inst:AddTag("youkai")
 	inst:AddTag("yakumoga")
 	inst:AddTag("yakumoyukari")
@@ -351,19 +362,8 @@ local master_postinit = function(inst) -- after SetPristine()
 	
 	inst:AddComponent("power")
 	inst:AddComponent("upgrader")
-
-	inst.health_level = 0
-	inst.hunger_level = 0 
-	inst.sanity_level = 0
-	inst.power_level = 0
-	inst.hatlevel = 1
 	
-	inst.regen_cool = 0
-	inst.poison_cool = 0
-	inst.invin_cool = 0
-	inst.grazecnt = 0
-	
-	inst.dodgechance = TUNING.DEFAULT_GRAZE_RATE
+	inst.dodgechance = TUNING.YDEFAULT.DEFAULT_GRAZE_RATE
 	
 	inst.fireimmuned = false
 	inst.hatequipped = false
@@ -376,7 +376,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.components.health:SetInvincible(false)
 	inst.components.hunger:SetMax(150)
 	inst.components.hunger.hungerrate = 1.5 * TUNING.WILSON_HUNGER_RATE
-	inst.components.combat.damagemultiplier = TUNING.DEFAULT_DAMAGE_MULTIPLIER
+	inst.components.combat.damagemultiplier = TUNING.YDEFAULT.DEFAULT_DAMAGE_MULTIPLIER
 	inst.components.builder.science_bonus = 1
 	
 	RECIPETABS['TOUHOU'] = {str = "TOUHOU", sort= 10, icon = "touhoutab.tex", icon_atlas = "images/inventoryimages/touhoutab.xml"}

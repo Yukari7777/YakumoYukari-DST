@@ -12,8 +12,7 @@ local spellcard = Class(function(self, inst)
 	self.maxlevel = nil
 	
 	self.isusableitem = true
-	self.canuseonpoint = false
-	self.canuseontargets = false
+	self.isdangeritem = false
 	self.tick = 0
 	
 	self.action = ACTIONS.CASTTOHO

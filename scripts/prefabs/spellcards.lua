@@ -792,19 +792,27 @@ function MakeCard(name)
 		
 		local inst = CreateEntity()    
 		inst.entity:AddNetwork()
-		local trans = inst.entity:AddTransform()    
-		local anim = inst.entity:AddAnimState()   
+		inst.entity:AddTransform()    
+		inst.entity:AddAnimState()   
 		
 		MakeInventoryPhysics(inst, owner)   
 		
-		anim:SetBank("spell")    
-		anim:SetBuild("spell")    
-		anim:PlayAnimation("idle")    
-		
-		inst:AddComponent("finiteuses")
-		inst.components.finiteuses:SetOnFinished( onfinished )
+		inst.AnimState:SetBank("spell")    
+		inst.AnimState:SetBuild("spell")    
+		inst.AnimState:PlayAnimation("idle")    
 		
 		inst:AddTag("spellcard")
+
+		inst.entity:SetPristine()
+
+		if not TheWorld.ismastersim then
+			return inst
+		end
+
+
+		inst:AddComponent("finiteuses")
+		inst.components.finiteuses:SetOnFinished( onfinished )
+
 		inst:AddComponent("inspectable")        
 		
 		inst:AddComponent("inventoryitem") 
@@ -814,32 +822,32 @@ function MakeCard(name)
 		
 		inst:AddComponent("spellcard")
 		inst.components.spellcard.name = name
+		inst.components.spellcard.isdangeritem = false -- is it dangerous to use on server
 		
-		local fn = nil
 		if name == "test" then
-			fn = test(inst, owner)
+			spellfn = test(inst, owner)
 		elseif name == "mesh" then
-			fn = mesh(inst, owner)
+			spellfn = mesh(inst, owner)
 		elseif name == "away" then
-			fn = away(inst, owner)
+			spellfn = away(inst, owner)
 		elseif name == "necro" then
-			fn = necro(inst, owner)
+			spellfn = necro(inst, owner)
 		elseif name == "curse" then
-			fn = curse(inst, owner)
+			spellfn = curse(inst, owner)
 		elseif name == "balance" then
-			fn = balance(inst, owner)
+			spellfn = balance(inst, owner)
 		elseif name == "laplace" then
-			fn = laplace(inst, owner)
+			spellfn = laplace(inst, owner)
 		elseif name == "butter" then
-			fn = butter(inst, owner)
+			spellfn = butter(inst, owner)
 		elseif name == "bait" then
-			fn = bait(inst, owner)
+			spellfn = bait(inst, owner)
 		elseif name == "addictive" then
-			fn = addictive(inst, owner)
+			spellfn = addictive(inst, owner)
 		elseif name == "lament" then
-			fn = lament(inst, owner)
+			spellfn = lament(inst, owner)
 		elseif name == "matter" then
-			fn = matter(inst, owner)
+			spellfn = matter(inst, owner)
 		end
 		
 		return inst

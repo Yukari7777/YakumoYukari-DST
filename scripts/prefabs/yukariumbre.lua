@@ -10,6 +10,7 @@ local assets=
 prefabs = {}
 
 local function UpdateSound(inst)
+	-- inst:WatchWorldState("israining", boolean)
     local soundShouldPlay = (TheWorld.state.israining and inst.components.equippable:IsEquipped() and inst.isunfolded)
     if soundShouldPlay ~= inst.SoundEmitter:PlayingSound("umbrellarainsound") then
         if soundShouldPlay then

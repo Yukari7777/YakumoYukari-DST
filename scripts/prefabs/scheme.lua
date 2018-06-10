@@ -148,9 +148,11 @@ local function SetDesc(inst)
 end
 
 local function SetState(inst)
-	local condition = GetCondition(inst)
-	inst.components.spellcard:SetCondition( condition )
-	SetDesc(inst)
+	if inst.components.inventoryitem.owner ~= nil then 
+		local condition = GetCondition(inst)
+		inst.components.spellcard:SetCondition( condition )
+		SetDesc(inst)
+	end
 end
 
 local function DoUpgrade(inst)
