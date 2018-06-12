@@ -1,5 +1,11 @@
-Upgrader = Class(function(self, inst)
+local Upgrader = Class(function(self, inst)
     self.inst = inst
+
+	self.health_level = 0
+	self.hunger_level = 0
+	self.sanity_level = 0
+	self.power_level = 0
+	self.hatlevel = 1
 
 	self.healthbonus = 0
 	self.hungerbonus = 0
@@ -51,19 +57,15 @@ Upgrader = Class(function(self, inst)
 	
 end)
 
-function GetUpgradeCount(G)
-	return {G.health_level, G.hunger_level, G.sanity_level, G.power_level}
-end
-
-function Upgrader:IsHatValid(inst)
-	return inst.hatequipped 
+function Upgrader:IsHatValid()
+	return false-- self.inst.components.inventory ~= nil and self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat"
 end
 
 function Upgrader:AbilityManager(inst)
 
-	local ability = inst.components.upgrader.ability
-	local hatskill = inst.components.upgrader.hatskill
-	local level = GetUpgradeCount(inst)
+	local ability = self.ability
+	local hatskill = self.hatskill
+	local level = {self.health_level, self.hunger_level, self.sanity_level, self.power_level}
 	local point = {5, 10, 17, 25}
 
 	for i = 1, 4, 1 do
@@ -74,20 +76,20 @@ function Upgrader:AbilityManager(inst)
 		end
 	end
 
-	for i = 1, inst.hatlevel, 1 do
+	for i = 1, self.hatlevel, 1 do
 		hatskill[i] = true
 	end
 	
-	inst.components.upgrader:SkillManager(inst)
-	inst.components.upgrader:HatSkillManager(inst)
+	self:SkillManager(inst)
+	self:HatSkillManager(inst)
 end
 
 function Upgrader:SkillManager(inst)
 
-	local skill = inst.components.upgrader.ability
+	local skill = self.ability
 	
 	if skill[1][1] then
-		inst.components.upgrader.healthbonus = 10
+		self.healthbonus = 10
 		-- TUNING.HEALING_TINY = 2
 	    -- TUNING.HEALING_SMALL = 5
 	    -- TUNING.HEALING_MEDSMALL = 12
@@ -99,114 +101,113 @@ function Upgrader:SkillManager(inst)
 	end
 	
 	if skill[1][2] then
-		inst.components.upgrader.healthbonus = 30
-		inst.components.upgrader.regenamount = 1
-		inst.components.upgrader.regencool = 60
+		self.healthbonus = 30
+		self.regenamount = 1
+		self.regencool = 60
 	end
 	
 	if skill[1][3] then
-		inst.components.upgrader.healthbonus = 50
-		inst.components.upgrader.regenamount = 2
-		inst.components.upgrader.regencool = 60
-		inst.components.upgrader.curecool = 180
+		self.healthbonus = 50
+		self.regenamount = 2
+		self.regencool = 60
+		self.curecool = 180
 	end
 	
 	if skill[1][4] then
-		inst.components.upgrader.healthbonus = 95
-		inst.components.upgrader.regenamount = 2
-		inst.components.upgrader.regencool = 30
-		inst.components.upgrader.curecool = 120
+		self.healthbonus = 95
+		self.regenamount = 2
+		self.regencool = 30
+		self.curecool = 120
 	end
 	
 	if skill[1][5] then	
-		inst.components.upgrader.InvincibleLearned = true
-		inst.components.upgrader.regenamount = 4
-		inst.components.upgrader.regencool = 30
-		inst.components.upgrader.curecool = 80
+		self.InvincibleLearned = true
+		self.regenamount = 4
+		self.regencool = 30
+		self.curecool = 80
 	end
 	
 	if skill[1][6] then
-		inst.components.upgrader.IsVampire = true  
+		self.IsVampire = true  
 	end
 	
 	if skill[2][1] then
-		inst.components.upgrader.hungerbonus = 25
-		inst.components.upgrader.powerupvalue = 1
+		self.hungerbonus = 25
+		self.powerupvalue = 1
 		inst.components.temperature.inherentinsulation = TUNING.INSULATION_TINY
 		inst.components.temperature.inherentsummerinsulation = TUNING.INSULATION_TINY
 	end
 	
 	if skill[2][2] then
-		inst.components.upgrader.hungerbonus = 50
-		inst.components.upgrader.powerupvalue = 2
+		self.hungerbonus = 50
+		self.powerupvalue = 2
 		inst.components.temperature.inherentinsulation = TUNING.INSULATION_SMALL
 		inst.components.temperature.inherentsummerinsulation = TUNING.INSULATION_SMALL
 	end
 	
 	if skill[2][3] then
-		inst.components.upgrader.hungerbonus = 75
-		inst.components.upgrader.powerupvalue = 3
+		self.hungerbonus = 75
+		self.powerupvalue = 3
 		inst.components.temperature.inherentinsulation = TUNING.INSULATION_MED
 		inst.components.temperature.inherentsummerinsulation = TUNING.INSULATION_MED
 	end
 	
 	if skill[2][4] then
-		inst.components.upgrader.hungerbonus = 100
-		inst.components.upgrader.powerupvalue = 4
+		self.hungerbonus = 100
+		self.powerupvalue = 4
 		inst.components.temperature.inherentinsulation = TUNING.INSULATION_LARGE
 		inst.components.temperature.inherentsummerinsulation = TUNING.INSULATION_LARGE
 	end
 	
 	if skill[2][5] then
-		inst.components.upgrader.IsDamage = true
-		inst.components.upgrader.powerupvalue = 5
+		self.IsDamage = true
+		self.powerupvalue = 5
 	end	
 	
 	if skill[2][6] then
-		inst.components.upgrader.IsAOE = true
+		self.IsAOE = true
 	end
 	
 	if skill[3][1] then	
-		inst.components.sanity.
-		_aura_mult = 0.9
+		inst.components.sanity.neg_aura_mult = 0.9
 	end
 	
 	if skill[3][2] then
-		inst.components.upgrader.ResistDark = true
-		inst.components.upgrader.sanitybonus = 25
+		self.ResistDark = true
+		self.sanitybonus = 25
 		inst.components.sanity.neg_aura_mult = 0.7
 	end
 	
 	if skill[3][3] then
-		inst.components.upgrader.sanitybonus = 50
-		inst.components.upgrader.ResistCave = true		
+		self.sanitybonus = 50
+		self.ResistCave = true		
 		inst.components.sanity.neg_aura_mult = 0.5
 	end
 	
 	if skill[3][4] then
-		inst.components.upgrader.sanitybonus = 75	
+		self.sanitybonus = 75	
 		inst.components.sanity.neg_aura_mult = 0.3
 	end
 	
 	if skill[3][5] then
-		inst.components.upgrader.NightVision = true
+		self.NightVision = true
 	end	
 	
 	if skill[3][6] then
-		inst.components.upgrader.IsFight = true
+		self.IsFight = true
 		inst.components.sanity.neg_aura_mult = 0.1
 	end	
 	
 	if skill[4][1] then
-		inst.components.upgrader.bonusspeed = 1
-		inst.components.upgrader.powerbonus = 25
-		inst.components.upgrader.powergenbonus = 0.25
+		self.bonusspeed = 1
+		self.powerbonus = 25
+		self.powergenbonus = 0.25
 	end
 	
 	if skill[4][2] then
 		inst:RemoveTag("youkai")
-		inst.components.upgrader.powerbonus = 50
-		inst.components.upgrader.powergenbonus = 0.5
+		self.powerbonus = 50
+		self.powergenbonus = 0.5
 		-- TUNING.NIGHTSWORD_USES = 140
 		-- TUNING.ARMOR_SANITY = 1000
 	    -- TUNING.ICESTAFF_USES = 25
@@ -222,15 +223,15 @@ function Upgrader:SkillManager(inst)
 	end
 	
 	if skill[4][3] then
-		inst.components.upgrader.powerbonus = 75
-		inst.components.upgrader.bonusspeed = 2
-		inst.components.upgrader.powergenbonus = 1
+		self.powerbonus = 75
+		self.bonusspeed = 2
+		self.powergenbonus = 1
 	end
 	
 	if skill[4][4] then
 		inst:AddTag("realyoukai")
-		inst.components.upgrader.powerbonus = 175
-		inst.components.upgrader.bonusspeed = 3
+		self.powerbonus = 175
+		self.bonusspeed = 3
 	end
 	
 	if skill[4][5] then
@@ -239,8 +240,8 @@ function Upgrader:SkillManager(inst)
 	end
 	
 	if skill[4][6] then
-		inst.components.upgrader.IsEfficient = true
-		inst.components.upgrader.bonusspeed = 4
+		self.IsEfficient = true
+		self.bonusspeed = 4
 		inst.components.moisture.baseDryingRate = 0.5
 	end
 	
@@ -248,47 +249,47 @@ end
 
 function Upgrader:HatSkillManager(inst)
 
-	local IsValid = inst.components.upgrader:IsHatValid(inst)
+	local IsValid = self.IsHatValid()
 
 	if IsValid then
-		local skill = inst.components.upgrader.hatskill
+		local skill = self.hatskill
 		
 		if skill[2] then
-			inst.components.upgrader.SightDistance = 1
-			inst.components.upgrader.hatdodgechance = 0.1
+			self.SightDistance = 1
+			self.hatdodgechance = 0.1
 		end
 		
 		if skill[3] then
-			inst.components.upgrader.WaterProofed = true
-			inst.components.upgrader.hatpowerbonus = 20
-			inst.components.upgrader.hatdodgechance = 0.2
-			inst.components.upgrader.dtmult = 1.5
+			self.WaterProofed = true
+			self.hatpowerbonus = 20
+			self.hatdodgechance = 0.2
+			self.dtmult = 1.5
 		end
 		
 		if skill[4] then
-			inst.components.upgrader.FireResist = true
-			inst.components.upgrader.SightDistance = 2
-			inst.components.upgrader.hatpowerbonus = 50
-			inst.components.upgrader.hatbonusspeed = 1
-			inst.components.upgrader.hatdodgechance = 0.3
-			inst.components.upgrader.dtmult = 1.7
+			self.FireResist = true
+			self.SightDistance = 2
+			self.hatpowerbonus = 50
+			self.hatbonusspeed = 1
+			self.hatdodgechance = 0.3
+			self.dtmult = 1.7
 		end
 		
 		if skill[5] then
-			inst.components.upgrader.hatpowerbonus = 100
-			inst.components.upgrader.dtmult = 2.5
-			inst.components.upgrader.hatdodgechance = 0.4
-			inst.components.upgrader.GodTelepoirt = true
+			self.hatpowerbonus = 100
+			self.dtmult = 2.5
+			self.hatdodgechance = 0.4
+			self.GodTelepoirt = true
 		end
 		
 	else
-		inst.components.upgrader.WaterProofed = false
-		inst.components.upgrader.FireResist = false
-		inst.components.upgrader.GodTelepoirt = false
-		inst.components.upgrader.SightDistance = 0
-		inst.components.upgrader.hatpowerbonus = 0
-		inst.components.upgrader.hatdodgechance = 0
-		inst.components.upgrader.dtmult = 1.2
+		self.WaterProofed = false
+		self.FireResist = false
+		self.GodTelepoirt = false
+		self.SightDistance = 0
+		self.hatpowerbonus = 0
+		self.hatdodgechance = 0
+		self.dtmult = 1.2
 	end
 end
 
@@ -309,53 +310,53 @@ function Upgrader:DoUpgrade(inst, stat)
 	
 	if stat then
 		if stat == 1 then
-			inst.health_level = inst.health_level + 1
+			self.health_level = self.health_level + 1
 			inst.HUD.controls.status.heart:PulseGreen()
 			inst.HUD.controls.status.heart:ScaleTo(1.3,1,.7)
-			inst.components.health.maxhealth = STATUS.DEFAULT_HP + inst.health_level * STATUS.HP_RATE + self.healthbonus + math.max(0, (inst.health_level - 30) * 7.5)
+			inst.components.health.maxhealth = STATUS.DEFAULT_HP + self.health_level * STATUS.HP_RATE + self.healthbonus + math.max(0, (self.health_level - 30) * 7.5)
 			inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_UPGRADE_HEALTH"))
 		elseif stat == 2 then
-			inst.hunger_level = inst.hunger_level + 1
+			self.hunger_level = self.hunger_level + 1
 			inst.HUD.controls.status.stomach:PulseGreen()
 			inst.HUD.controls.status.stomach:ScaleTo(1.3,1,.7)
-			inst.components.hunger.hungerrate = math.max( 0, (STATUS.DEFAULT_HR - inst.hunger_level * STATUS.HR_RATE - math.max(0, (inst.hunger_level - 30) * 0.025 )) * TUNING.WILSON_HUNGER_RATE )
+			inst.components.hunger.hungerrate = math.max( 0, (STATUS.DEFAULT_HR - self.hunger_level * STATUS.HR_RATE - math.max(0, (self.hunger_level - 30) * 0.025 )) * TUNING.WILSON_HUNGER_RATE )
 			inst.components.hunger.max = STATUS.DEFAULT_HU + self.hungerbonus
 			inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_UPGRADE_HUNGER"))
 		elseif stat == 3 then
-			inst.sanity_level = inst.sanity_level + 1
+			self.sanity_level = self.sanity_level + 1
 			inst.HUD.controls.status.brain:PulseGreen()
 			inst.HUD.controls.status.brain:ScaleTo(1.3,1,.7)
-			inst.components.sanity.max = STATUS.DEFAULT_SN + inst.sanity_level * STATUS.SN_RATE + self.sanitybonus + math.max(0, (inst.sanity_level - 30) * 5)
+			inst.components.sanity.max = STATUS.DEFAULT_SN + self.sanity_level * STATUS.SN_RATE + self.sanitybonus + math.max(0, (self.sanity_level - 30) * 5)
 			inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_UPGRADE_SANITY"))
 		elseif stat == 4 then
-			inst.power_level = inst.power_level + 1
+			self.power_level = self.power_level + 1
 			inst.HUD.controls.status.power:PulseGreen()
 			inst.HUD.controls.status.power:ScaleTo(1.3,1,.7)
-			inst.components.power.max = STATUS.DEFAULT_PW + inst.power_level * STATUS.PO_RATE + self.powerbonus + self.hatpowerbonus + math.max(0, (inst.power_level - 30) * 5)
-			inst.components.power.regenrate = STATUS.DEFAULT_PR + inst.power_level * STATUS.PR_RATE + self.powergenbonus
+			inst.components.power.max = STATUS.DEFAULT_PW + self.power_level * STATUS.PO_RATE + self.powerbonus + self.hatpowerbonus + math.max(0, (self.power_level - 30) * 5)
+			inst.components.power.regenrate = STATUS.DEFAULT_PR + self.power_level * STATUS.PR_RATE + self.powergenbonus
 			inst.components.locomotor.walkspeed = 4 + self.bonusspeed + self.hatbonusspeed
 			inst.components.locomotor.runspeed = 6 + self.bonusspeed + self.hatbonusspeed
 			inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_UPGRADE_POWER"))	
 		end	
 	else 
-		inst.components.health.maxhealth = STATUS.DEFAULT_HP + inst.health_level * STATUS.HP_RATE + self.healthbonus + math.max(0, (inst.health_level - 30) * 7.5)
-		inst.components.hunger.hungerrate = math.max( 0, (STATUS.DEFAULT_HR - inst.hunger_level * STATUS.HR_RATE - math.max(0, (inst.hunger_level - 30) * 0.025 )) ) * TUNING.WILSON_HUNGER_RATE 
+		inst.components.health.maxhealth = STATUS.DEFAULT_HP + self.health_level * STATUS.HP_RATE + self.healthbonus + math.max(0, (self.health_level - 30) * 7.5)
+		inst.components.hunger.hungerrate = math.max( 0, (STATUS.DEFAULT_HR - self.hunger_level * STATUS.HR_RATE - math.max(0, (self.hunger_level - 30) * 0.025 )) ) * TUNING.WILSON_HUNGER_RATE 
 		inst.components.hunger.max = STATUS.DEFAULT_HU + self.hungerbonus
-		inst.components.sanity.max = STATUS.DEFAULT_SN + inst.sanity_level * STATUS.SN_RATE + self.sanitybonus + math.max(0, (inst.sanity_level - 30) * 5)
+		inst.components.sanity.max = STATUS.DEFAULT_SN + self.sanity_level * STATUS.SN_RATE + self.sanitybonus + math.max(0, (self.sanity_level - 30) * 5)
 		if inst.components.power then
-			inst.components.power.max = STATUS.DEFAULT_PW + inst.power_level * STATUS.PO_RATE + self.powerbonus + self.hatpowerbonus + math.max(0, (inst.power_level - 30) * 5)
-			inst.components.power.regenrate = STATUS.DEFAULT_PR + inst.power_level * STATUS.PR_RATE + self.powergenbonus
+			inst.components.power.max = STATUS.DEFAULT_PW + self.power_level * STATUS.PO_RATE + self.powerbonus + self.hatpowerbonus + math.max(0, (self.power_level - 30) * 5)
+			inst.components.power.regenrate = STATUS.DEFAULT_PR + self.power_level * STATUS.PR_RATE + self.powergenbonus
 		end
 		inst.components.locomotor.walkspeed = 4 + self.bonusspeed + self.hatbonusspeed
 		inst.components.locomotor.runspeed = 6 + self.bonusspeed + self.hatbonusspeed
 	end
 	
-	inst.components.upgrader:AbilityManager(inst)
 	inst.components.health:SetPercent(health_percent)
 	inst.components.hunger:SetPercent(hunger_percent)
 	inst.components.sanity:SetPercent(sanity_percent)
 	inst.components.power:SetPercent(power_percent)
-	
+	self:AbilityManager(inst)
+
 end
 
 return Upgrader

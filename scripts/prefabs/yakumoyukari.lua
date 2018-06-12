@@ -62,33 +62,32 @@ local start_inv = GetStartInv()
 --{"scheme", "yukariumbre", "yukarihat",}
 
 local function onsave(inst, data)
-	data.health_level = inst.health_level
-	data.hunger_level = inst.hunger_level
-	data.sanity_level = inst.sanity_level
-	data.power_level = inst.power_level
 	data.regen_cool = inst.regen_cool
 	data.poison_cool = inst.poison_cool
 	data.invin_cool = inst.invin_cool
 	data.grazecnt = inst.grazecnt
-	data.skilltree = inst.components.upgrader.ability
-	data.hatskill = inst.components.upgrader.hatskill
-	data.hatlevel = inst.hatlevel
+	data.health_level = inst.components.upgrader.health_level
+	data.hunger_level = inst.components.upgrader.hunger_level
+	data.sanity_level = inst.components.upgrader.sanity_level
+	data.power_level = inst.components.upgrader.power_level
+	data.skilltree = inst.components.upgrader.components.upgrader.ability
+	data.hatskill = inst.components.upgrader.components.upgrader.hatskill
+	data.hatlevel = inst.components.upgrader.hatlevel
 end
 
 local function onpreload(inst, data)
 	
 	if data then
 		if inst.components.power then
-		
-			inst.health_level = data.health_level or 0 
-			inst.hunger_level = data.hunger_level or 0
-			inst.sanity_level = data.sanity_level or 0 
-			inst.power_level = data.power_level or 0	
 			inst.regen_cool = data.regen_cool or 0 
 			inst.poison_cool = data.poison_cool or 0 
 			inst.invin_cool = data.invin_cool or 0 
 			inst.grazecnt = data.grazecnt or 0
-			inst.hatlevel = data.hatlevel or 1
+			inst.components.upgrader.health_level = data.health_level or 0 
+			inst.components.upgrader.hunger_level = data.hunger_level or 0
+			inst.components.upgrader.sanity_level = data.sanity_level or 0 
+			inst.components.upgrader.power_level = data.power_level or 0	
+			inst.components.upgrader.hatlevel = data.hatlevel or 1
 			inst.components.upgrader:DoUpgrade(inst)
 
 			if data.skilltree then
@@ -308,7 +307,7 @@ end
 local function EquippingEvent(inst)
 	print("hatequip")
 	if inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) then
-		inst.hatequipped = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat"
+		inst.hatequipped = inst.components.inventory ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat"
 	else
 		inst.hatequipped = false
 	end
@@ -332,16 +331,15 @@ end
 local function common_init(inst) -- things before SetPristine()
 	inst.MiniMapEntity:SetIcon( "yakumoyukari.tex" )
 
-	inst.health_level = 0
-	inst.hunger_level = 0 
-	inst.sanity_level = 0
-	inst.power_level = 0
-	inst.hatlevel = 1
-	
+	inst:AddComponent("upgrader")
+
 	inst.regen_cool = 0
 	inst.poison_cool = 0
 	inst.invin_cool = 0
 	inst.grazecnt = 0
+
+	inst.fireimmuned = false
+	inst.hatequipped = false
 
 	inst:AddTag("youkai")
 	inst:AddTag("yakumoga")
@@ -361,12 +359,8 @@ end
 local master_postinit = function(inst) -- after SetPristine()
 	
 	inst:AddComponent("power")
-	inst:AddComponent("upgrader")
 	
 	inst.dodgechance = TUNING.YDEFAULT.DEFAULT_GRAZE_RATE
-	
-	inst.fireimmuned = false
-	inst.hatequipped = false
 	
 	inst.soundsname = "willow"
 	inst.starting_inventory = start_inv -- starting_inventory passed as a parameter is now deprecated
@@ -513,6 +507,7 @@ local master_postinit = function(inst) -- after SetPristine()
         event_server_data("lavaarena", "prefabs/yakumoyukari").master_postinit(inst)
     end
 
+	print("Yukari masterinit loaded")
 end
 
 return MakePlayerCharacter("yakumoyukari", prefabs, assets, common_init, master_postinit)

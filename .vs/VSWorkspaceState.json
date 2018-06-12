@@ -5,6 +5,6 @@
     "\\scripts\\components",
     "\\scripts\\prefabs"
   ],
-  "SelectedNode": "\\scripts\\actions_yukari.lua",
+  "SelectedNode": "\\scripts\\prefabs\\yakumoyukari.lua",
   "PreviewInSolutionExplorer": false
 }

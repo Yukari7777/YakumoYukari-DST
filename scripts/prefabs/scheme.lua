@@ -4,8 +4,6 @@ local assets=
 	Asset("ATLAS", "images/inventoryimages/scheme.xml"),    
 }
 
-prefabs = {}
-
 local Ingredients = {
 	{{"rocks", 40}, {"log", 40}},
 	{{"silk", 30}, {"pigskin", 20}, {"tentaclespots", 10}, {"strawhat", 1}},
@@ -41,17 +39,13 @@ local function GetBackpack(inst)
 end
 
 local function GetTable(inst)
-	local difficulty = GetModConfigData("difficulty", "YakumoYukari")
-	local hatlevel = inst.components.inventoryitem.owner.hatlevel
+	--local difficulty = GetModConfigData("difficulty", "YakumoYukari")
+	local owner = inst.components.inventoryitem.owner
+	local hatlevel = owner.components.upgrader.hatlevel
 	local list = {}
 	
 	if hatlevel < 5 then
 		list = Ingredients[hatlevel]
-		if list[1][2] >= 20 then
-			for i = 1, table.maxn(list), 1 do 
-				list[i][2] = math.ceil(list[i][2] * 0.25)
-			end
-		end
 	end
 	
 	return list
@@ -90,9 +84,11 @@ end
 local function GetStr(inst)
 	local list = GetTable(inst)
 	local Language = GetModConfigData("language", "YakumoYukari")
+	local owner = inst.components.inventoryitem.owner
+	local hatlevel = owner.components.upgrader.hatlevel
 	local text = ""
-	if inst.components.inventoryitem.owner.hatlevel < 5 then
-		for i = 1, table.maxn(list), 1 do
+	if hatlevel < 5 then
+		for i = 1, #list, 1 do
 			text = text.."\n"..GetIngameName(list[i][1]).." - "..CountInventoryItem(inst, list[i][1]).." / "..list[i][2]
 		end
 	else
@@ -109,8 +105,10 @@ end
 local function GetCondition(inst)
 	local list = GetTable(inst)
 	local condition = true
-	
-	if inst.components.inventoryitem.owner.hatlevel < 5 then 
+	local owner = inst.components.inventoryitem.owner
+	local hatlevel = owner.components.upgrader.hatlevel
+
+	if hatlevel < 5 then 
 		for i = 1, #list, 1 do 
 			condition = condition and ( CountInventoryItem(inst, list[i][1]) >= list[i][2] )
 		end
@@ -122,7 +120,8 @@ local function GetCondition(inst)
 end
 
 local function SetDesc(inst)
-	local CurrentLevel = inst.components.inventoryitem.owner.hatlevel
+	local owner = inst.components.inventoryitem.owner
+	local CurrentLevel = owner.components.upgrader.hatlevel
 	local condition = GetCondition(inst)
 	local Language = GetModConfigData("language", "YakumoYukari")
 		
@@ -148,7 +147,7 @@ local function SetDesc(inst)
 end
 
 local function SetState(inst)
-	if inst.components.inventoryitem.owner ~= nil then 
+	if inst.components.inventoryitem:IsHeld() then
 		local condition = GetCondition(inst)
 		inst.components.spellcard:SetCondition( condition )
 		SetDesc(inst)
@@ -161,10 +160,9 @@ local function DoUpgrade(inst)
 	local list = GetTable(inst)
 	local backpack = GetBackpack()
 	
-	for i = 1, table.maxn(list), 1 do
+	for i = 1, #list, 1 do
 		local function consume(item, left_count, backpack)
 		
-			local Chara = inst.components.inventoryitem.owner
 			local Inventory = Chara.components.inventory
 			for k,v in pairs(Inventory.itemslots) do
 				if v.prefab == item then
@@ -259,4 +257,4 @@ local function fn()
 	return inst
 end
 	
-return Prefab("common/inventory/scheme", fn, assets, prefabs)
+return Prefab("common/inventory/scheme", fn, assets)

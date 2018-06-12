@@ -197,7 +197,7 @@ local function InventoryDamage(self)
 		end
 		-- custom damage reduction
 		if self.inst.prefab == "yakumoyukari" then
-			if Chara.components.upgrader:IsHatValid(Chara) then
+			if Chara.components.upgrader:IsHatValid() then
 				local hatabsorb = 0
 				for i = 2, 5, 1 do
 					if Chara.components.upgrader.hatskill[i] then
