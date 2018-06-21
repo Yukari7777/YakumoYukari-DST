@@ -41,7 +41,7 @@ end
 local function GetTable(inst)
 	--local difficulty = GetModConfigData("difficulty", "YakumoYukari")
 	local owner = inst.components.inventoryitem.owner
-	local hatlevel = owner.components.upgrader.hatlevel
+	local hatlevel = owner.components.upgrader and owner.components.upgrader.hatlevel
 	local list = {}
 	
 	if hatlevel < 5 then
@@ -238,7 +238,7 @@ local function fn()
 	inst.entity:SetPristine()
 
 	if not TheWorld.ismastersim then
-        return inst
+		return inst
     end
 
 	inst:AddComponent("inspectable")    

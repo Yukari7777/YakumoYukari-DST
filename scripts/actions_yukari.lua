@@ -11,7 +11,6 @@ local TheWorld = GLOBAL.TheWorld
 local TIMEOUT = 2
 local Language = GetModConfigData("language")
 
--- Action Settings for Yukari --
 
 local UTELE = AddAction("UTELE", "Teleport", function(act)
 	if act.invobject and act.invobject.components.makegate then

@@ -104,7 +104,7 @@ local function fn()
 	
 	inst.entity:SetPristine()
 
-	if not TheWorld.ismastersim then
+    if not TheWorld.ismastersim then
         return inst
     end
 	
