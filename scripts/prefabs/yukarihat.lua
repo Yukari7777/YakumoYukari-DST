@@ -1,11 +1,9 @@
-local assets=
+local assets =
 {   
 	Asset("ANIM", "anim/yukarihat.zip"),    
 	Asset("ANIM", "anim/yukarihat_swap.zip"),    
 	Asset("ATLAS", "images/inventoryimages/yukarihat.xml"),    
 }
-
-prefabs = {}
 
 local function Ability(inst, owner)
 
@@ -57,9 +55,9 @@ local function fn()
 	
 	inst.entity:AddTransform()    
 	inst.entity:AddAnimState()    
-	inst.entity:AddNetwork()	
 	inst.entity:AddSoundEmitter()  
 	inst.entity:AddMiniMapEntity()
+	inst.entity:AddNetwork()	
 	
 	inst.MiniMapEntity:SetIcon("yukarihat.tex")
 	
@@ -73,7 +71,7 @@ local function fn()
 	inst:AddTag("irreplaceable")
 	
 	inst.entity:SetPristine()
-
+	
 	if not TheWorld.ismastersim then
 		return inst
     end
@@ -97,4 +95,4 @@ local function fn()
 	return inst
 end
 	
-return Prefab("common/inventory/yukarihat", fn, assets, prefabs)
+return Prefab("common/inventory/yukarihat", fn, assets)

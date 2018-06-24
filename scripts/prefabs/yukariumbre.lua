@@ -1,4 +1,4 @@
-local assets=
+local assets =
 {   
 	Asset("ANIM", "anim/yukariumbre.zip"),    
 	Asset("ANIM", "anim/swap_yukariumbre.zip"),   
@@ -6,8 +6,6 @@ local assets=
 	Asset("ATLAS", "images/inventoryimages/yukariumbre.xml"),    
 	Asset("IMAGE", "images/inventoryimages/yukariumbre.tex"),
 }
-
-prefabs = {}
 
 local function UpdateSound(inst)
 	-- inst:WatchWorldState("israining", boolean)
@@ -86,9 +84,9 @@ local function fn()
 	
 	inst.entity:AddTransform()    
 	inst.entity:AddAnimState()    
-	inst.entity:AddNetwork()
 	inst.entity:AddSoundEmitter()  
 	inst.entity:AddMiniMapEntity()
+	inst.entity:AddNetwork()
 	
     inst.MiniMapEntity:SetIcon("yukariumbre.tex")	
 	
@@ -146,4 +144,4 @@ local function fn()
 	return inst
 end
 	
-return Prefab("common/inventory/yukariumbre", fn, assets, prefabs)
+return Prefab("common/inventory/yukariumbre", fn, assets)

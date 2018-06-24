@@ -1,13 +1,14 @@
 local require = GLOBAL.require
 local TUNING = GLOBAL.TUNING
+local KnownModIndex = GLOBAL.KnownModIndex
 
 local YokaiBadge = require "widgets/yokaibadge"
 
 table.insert(Assets, Asset("ANIM", "anim/power.zip"))
 
-local function CombindIsModEnabled(name)
-	for _, moddir in ipairs(GLOBAL.KnownModIndex:GetModsToLoad()) do
-		if GLOBAL.KnownModIndex:GetModInfo(moddir).name == "Combined Status"  then
+local function IsModEnabled(modname)
+	for k, v in ipairs(KnownModIndex:GetModsToLoad()) do
+		if KnownModIndex:GetModInfo(v).name == modname  then
 			return true
 		end
 	end
@@ -19,7 +20,7 @@ local function StatusDisplaysInit(class)
 	if class.owner.components.power then
 		class.power = class:AddChild(YokaiBadge(class.owner))
 		-- /////// only works with default settings. ///////
-		if CombindIsModEnabled("Combined Status") then
+		if IsModEnabled("Combined Status") then
 			class.brain:SetPosition(0, 35, 0)
 			class.stomach:SetPosition(-62, 35, 0)
 			class.heart:SetPosition(62, 35, 0)
@@ -35,7 +36,6 @@ local function StatusDisplaysInit(class)
 			end
 		end
 
-		
 		class.power.anim:GetAnimState():SetBank("health")
 		class.power.anim:GetAnimState():SetBuild("sprint")
 		class.power:SetPercent(class.owner.components.power:GetPercent(), class.owner.components.power.max)

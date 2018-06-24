@@ -564,10 +564,6 @@ function MakeCard(name)
 				for i=1, #list, 1 do
 					if list[i][5] == nil then
 						table.insert(loot, list[i])
-					elseif SaveGameIndex:IsModeShipwrecked() then
-						if list[i][5] == "sw" then
-							table.insert(loot, list[i])
-						end
 					else
 						if list[i][5] == "rog" then
 							table.insert(loot, list[i])
@@ -791,11 +787,11 @@ function MakeCard(name)
 	local function commonfn()  
 		
 		local inst = CreateEntity()    
-		inst.entity:AddNetwork()
 		inst.entity:AddTransform()    
 		inst.entity:AddAnimState()   
+		inst.entity:AddNetwork()
 		
-		MakeInventoryPhysics(inst, owner)   
+		MakeInventoryPhysics(inst)   
 		
 		inst.AnimState:SetBank("spell")    
 		inst.AnimState:SetBuild("spell")    

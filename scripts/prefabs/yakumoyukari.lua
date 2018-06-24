@@ -33,10 +33,11 @@ local assets = {
 		Asset( "ATLAS", "images/avatars/avatar_yakumoyukari.xml"),
 		Asset( "ATLAS", "images/avatars/avatar_ghost_yakumoyukari.xml"),
 }
-local prefabs = {
-	"scheme",
-	"yukariumbre",
-	"yukarihat",
+
+local prefabs = { -- deps; should be a list of prefabs that it wants to have loaded in order to be able to create prefab.
+	--"scheme",
+	--"yukariumbre",
+	--"yukarihat",
 }
 
 -- Custom starting items
@@ -51,9 +52,11 @@ local function GetStartInv()
 				"scheme",
 				"yukariumbre",
 				"yukarihat",}
-	else return {"scheme",
-				"yukariumbre",
-				"yukarihat",}
+	else return {
+				-- "scheme",
+				-- "yukariumbre",
+				"yukarihat",
+				}
 	end
 end
 
@@ -371,7 +374,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.components.combat.damagemultiplier = TUNING.YDEFAULT.DAMAGE_MULTIPLIER
 	inst.components.builder.science_bonus = 1
 	
-	RECIPETABS['TOUHOU'] = {str = "TOUHOU", sort= 10, icon = "touhoutab.tex", icon_atlas = "images/inventoryimages/touhoutab.xml"}
+	--RECIPETABS['TOUHOU'] = {str = "TOUHOU", sort= 10, icon = "touhoutab.tex", icon_atlas = "images/inventoryimages/touhoutab.xml"}
 	
 	inst.components.eater.EatMEAT = inst.components.eater.Eat
 	function inst.components.eater:Eat( food )
@@ -501,9 +504,11 @@ local master_postinit = function(inst) -- after SetPristine()
 		inst:PushEvent("yukariloaded")
 	end
 
-	if TheNet:GetServerGameMode() == "lavaarena" then
-        event_server_data("lavaarena", "prefabs/yakumoyukari").master_postinit(inst)
-    end
+	--if TheNet:GetServerGameMode() == "lavaarena" then
+    --    event_server_data("lavaarena", "prefabs/yakumoyukari").master_postinit(inst)
+    --elseif TheNet:GetServerGameMode() == "quagmire" then
+    --    event_server_data("quagmire", "prefabs/yakumoyukari").master_postinit(inst)
+    --end
 
 	print("Yukari masterinit loaded")
 end
