@@ -222,6 +222,7 @@ local function fn()
 	
 	inst.entity:AddTransform()    
 	inst.entity:AddAnimState()    
+	inst.entity:AddNetwork()	
 	inst.entity:AddSoundEmitter() 
 	inst.entity:AddMiniMapEntity()
     inst.MiniMapEntity:SetIcon("scheme.tex") 

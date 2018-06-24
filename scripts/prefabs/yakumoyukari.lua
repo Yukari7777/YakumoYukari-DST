@@ -37,7 +37,6 @@ local prefabs = {
 	"scheme",
 	"yukariumbre",
 	"yukarihat",
-	"scheme"
 }
 
 -- Custom starting items

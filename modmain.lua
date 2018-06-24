@@ -439,8 +439,7 @@ end
 
 function DoDebug_1()
 	if ThePlayer and ThePlayer:HasTag("yakumoyukari") then 
-		if not IsPaused() 
-		and not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
+		if not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
 		and TheInput:IsKeyDown(GLOBAL.KEY_SHIFT) then 
 			DebugUpgrade() 
 		end
@@ -449,8 +448,7 @@ end
 
 function DoDebug_2()
 	if ThePlayer and ThePlayer:HasTag("yakumoyukari") then 
-		if not IsPaused() 
-		and not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
+		if not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
 		and TheInput:IsKeyDown(GLOBAL.KEY_SHIFT) then 
 			DebugAbility() 
 		end
@@ -459,8 +457,7 @@ end
 
 function DoDebug_3()
 	if ThePlayer and ThePlayer:HasTag("yakumoyukari") then 
-		if not IsPaused() 
-		and not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
+		if not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
 		and TheInput:IsKeyDown(GLOBAL.KEY_SHIFT) then 
 			DebugCooltime() 
 		end

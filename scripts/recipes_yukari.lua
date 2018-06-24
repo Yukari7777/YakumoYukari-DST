@@ -1,12 +1,11 @@
 local Recipe = GLOBAL.Recipe
 local RECIPETABS = GLOBAL.RECIPETABS
--- local RECIPE_GAME_TYPE = GLOBAL.RECIPE_GAME_TYPE
 local TECH = GLOBAL.TECH
 local IsDLCEnabled = GLOBAL.IsDLCEnabled
 
 AddClassPostConstruct("widgets/crafttabs", function(inst)
     if inst.prefab == "yakumoyukari" then
-	GLOBAL.RECIPETABS['TOUHOU'] = {str = "TOUHOU", sort = 10, icon = "touhoutab.tex", icon_atlas = "images/inventoryimages/touhoutab.xml"}
+		RECIPETABS['TOUHOU'] = {str = "TOUHOU", sort = 10, icon = "touhoutab.tex", icon_atlas = "images/inventoryimages/touhoutab.xml"}
     end
 end)
 

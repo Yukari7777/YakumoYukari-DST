@@ -84,9 +84,9 @@ local function fn()
 
 	local inst = CreateEntity()   
 	
-	inst.entity:AddNetwork()
 	inst.entity:AddTransform()    
 	inst.entity:AddAnimState()    
+	inst.entity:AddNetwork()
 	inst.entity:AddSoundEmitter()  
 	inst.entity:AddMiniMapEntity()
 	
@@ -105,7 +105,7 @@ local function fn()
 	inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
-        return inst
+		return inst
     end
 	
 	

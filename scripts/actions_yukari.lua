@@ -174,7 +174,7 @@ local function action_umbre(inst, doer, pos, actions, right)
 	end
 end
 
-AddComponentAction("POINT", "makegate", action_umbre)
+--AddComponentAction("POINT", "makegate", action_umbre)
 
 ------------------------------------------------------------------------------------------------------------------------
 local CASTTOHO = AddAction("CASTTOHO", "castspell", function(act)

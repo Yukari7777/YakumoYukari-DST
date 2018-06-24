@@ -57,8 +57,8 @@ local function fn()
 	
 	inst.entity:AddTransform()    
 	inst.entity:AddAnimState()    
-	inst.entity:AddSoundEmitter()  
 	inst.entity:AddNetwork()	
+	inst.entity:AddSoundEmitter()  
 	inst.entity:AddMiniMapEntity()
 	
 	inst.MiniMapEntity:SetIcon("yukarihat.tex")
@@ -75,7 +75,7 @@ local function fn()
 	inst.entity:SetPristine()
 
 	if not TheWorld.ismastersim then
-        return inst
+		return inst
     end
 	
 	
