@@ -92,11 +92,7 @@ local function GetStr(inst)
 			text = text.."\n"..GetIngameName(list[i][1]).." - "..CountInventoryItem(inst, list[i][1]).." / "..list[i][2]
 		end
 	else
-		if Language == "chinese" then
-			text = "\n升 级 完 成"
-		else
-			text = "\nUpgrade Finished"
-		end
+		text = "\n"..STRINGS.YUKARI_UPGRADE_FINISHED
 	end
 	
 	return text
@@ -119,38 +115,28 @@ local function GetCondition(inst)
 	return condition
 end
 
-local function SetDesc(inst)
+local function GetStatus(inst)
 	local owner = inst.components.inventoryitem.owner
 	local CurrentLevel = owner.components.upgrader.hatlevel
 	local condition = GetCondition(inst)
-	local Language = GetModConfigData("language", "YakumoYukari")
-		
+
 	local function IsHanded()
-		local hands = inst.components.inventoryitem.owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
-		if hands and condition then
-			if Language == "chinese" then
-				return "\n我 手 里 必 须 拿 点 东 西."
-			else
-				return "\nI should bring something on my hand."
-			end
-		else
-			return ""
-		end
+		return inst.components.inventoryitem.owner ~= nil and 
+		inst.components.inventoryitem.owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil and 
+		condition and 
+		"\n"..STRINGS.YUKARI_SHOULD_BRING_SOMETHING or ""
 	end
-	
-	local str = "Current Level - "..CurrentLevel..GetStr(inst)..IsHanded()
-	if Language == "chinese" then 
-		str = "目 前 的 等 级 - "..CurrentLevel..GetStr(inst)..IsHanded()
-	end
-	
-	STRINGS.CHARACTERS.GENERIC.DESCRIBE.SCHEME = str
+
+	return STRINGS.YUKARI_CURRENT_LEVEL.." - "..CurrentLevel..GetStr(inst)..IsHanded()
 end
 
 local function SetState(inst)
-	if inst.components.inventoryitem:IsHeld() then
+	if inst.components.inventoryitem:IsHeld() then -- temp
+		local owner = inst.components.inventoryitem.owner
+		local CurrentLevel = owner.components.upgrader.hatlevel
 		local condition = GetCondition(inst)
+
 		inst.components.spellcard:SetCondition( condition )
-		SetDesc(inst)
 	end
 end
 
@@ -233,7 +219,6 @@ local function fn()
 	inst.AnimState:SetBuild("spell")    
 	inst.AnimState:PlayAnimation("idle")    
 
-	inst:AddTag("irreplaceable")
 	inst:AddTag("spellcard")
 
 	inst.entity:SetPristine()
@@ -243,6 +228,7 @@ local function fn()
     end
 
 	inst:AddComponent("inspectable")    
+	inst.components.inspectable.getstatus = GetStatus
 	
 	inst:AddComponent("inventoryitem")   
 	inst.components.inventoryitem.atlasname = "images/inventoryimages/scheme.xml" 
@@ -253,7 +239,7 @@ local function fn()
 	inst.components.spellcard:SetOnFinish( OnFinish )
 	inst.components.spellcard:SetCondition( false )
 	
-	inst:DoPeriodicTask(1, SetState)
+	inst:DoPeriodicTask(1, SetState) -- temp
 	
 	return inst
 end

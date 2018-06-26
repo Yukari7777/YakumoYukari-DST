@@ -98,13 +98,12 @@ local function fn()
 
 	inst:AddTag("nopunch")
 	inst:AddTag("umbrella")
-	inst:AddTag("irreplaceable")
 	
-	inst.entity:SetPristine()
-
-    if not TheWorld.ismastersim then
+	if not TheWorld.ismastersim then
 		return inst
     end
+
+	inst.entity:SetPristine()
 	
 	
 	inst.isunfolded = false

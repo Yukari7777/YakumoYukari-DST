@@ -3,11 +3,11 @@ local RECIPETABS = GLOBAL.RECIPETABS
 local TECH = GLOBAL.TECH
 local IsDLCEnabled = GLOBAL.IsDLCEnabled
 
---AddClassPostConstruct("widgets/crafttabs", function(inst)
-  --  if inst.prefab == "yakumoyukari" then
-	--	RECIPETABS['TOUHOU'] = {str = "TOUHOU", sort = 10, icon = "touhoutab.tex", icon_atlas = "images/inventoryimages/touhoutab.xml"}
-    --end
---end)
+AddClassPostConstruct("widgets/crafttabs", function(inst)
+    if inst.prefab == "yakumoyukari" then
+		RECIPETABS['TOUHOU'] = {str = "TOUHOU", sort = 10, icon = "touhoutab.tex", icon_atlas = "images/inventoryimages/touhoutab.xml"}
+    end
+end)
 
 local function RecipePostInit(yakumoyukari)
 	

@@ -38,8 +38,8 @@ local function fn()
         owner.AnimState:Show("HAT_HAIR")
         owner.AnimState:Hide("HAIR_NOHAT")
         owner.AnimState:Hide("HAIR") 
-		Ability(inst, owner) 
-		owner:PushEvent("hatequip")
+		--Ability(inst, owner) 
+		--owner:PushEvent("hatequip")
     end
 
     local function onunequiphat(inst, owner)
@@ -47,8 +47,8 @@ local function fn()
         owner.AnimState:Hide("HAT_HAIR")
         owner.AnimState:Show("HAIR_NOHAT")
         owner.AnimState:Show("HAIR") 
-		Ability(inst, owner) 
-		owner:PushEvent("hatunequip")
+		--Ability(inst, owner) 
+		--owner:PushEvent("hatunequip")
     end
 
 	local inst = CreateEntity()    
@@ -68,13 +68,12 @@ local function fn()
 	inst.AnimState:PlayAnimation("idle")    
 
 	inst:AddTag("hat")
-	inst:AddTag("irreplaceable")
-	
-	inst.entity:SetPristine()
 	
 	if not TheWorld.ismastersim then
 		return inst
     end
+
+	inst.entity:SetPristine()
 	
 	
 	inst:AddComponent("inspectable")        

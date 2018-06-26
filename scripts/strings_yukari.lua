@@ -84,6 +84,10 @@ STRINGS.NAMES.SPELLCARD_MATTER = "Universe of Matter and Antimatter"
 STRINGS.RECIPE_DESC.SPELLCARD_MATTER = "Repairs all physical items"
 STRINGS.CHARACTERS.GENERIC.DESCRIBE.SPELLCARD_MATTER = "Repairs all of physical items in my inventory. \nPower Cost - 150"
 
+STRINGS.YUKARI_UPGRADE_FINISHED = "Upgrade Finished"
+STRINGS.YUKARI_SHOULD_BRING_SOMETHING = "I should bring something on my hands."
+STRINGS.YUKARI_CURRENT_LEVEL = "Current Level"
+
 if Language == "chinese" then
 
 STRINGS.NAMES.YUKARIUMBRE = "紫 的 阳 伞"
@@ -168,4 +172,8 @@ STRINGS.NAMES.SPELLCARD_MATTER = "物 质 与 反 物 质 的 宇 宙"
 STRINGS.RECIPE_DESC.SPELLCARD_MATTER = "修 复 战 斗 装 备"
 STRINGS.CHARACTERS.GENERIC.DESCRIBE.SPELLCARD_MATTER = "修 复 身 上 所 有 的 战 具. 消 耗 - 150"
 	
+STRINGS.YUKARI_UPGRADE_FINISHED = "升 级 完 成"
+STRINGS.YUKARI_SHOULD_BRING_SOMETHING = "我 手 里 必 须 拿 点 东 西."
+STRINGS.YUKARI_CURRENT_LEVEL = "目 前 的 等 级"
+
 end
