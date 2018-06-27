@@ -46,28 +46,28 @@ function spellcard:GetLevel(inst, index)
 	end
 end
 
-function spellcard:CastSpell(target, pos)
+function spellcard:CastSpell(target)
 	if self.spell then
-		self.spell(self.inst, target, pos)
+		self.spell(self.inst, target)
 		
 		if self.onfinish then
-			self.onfinish(self.inst, target, pos)
+			self.onfinish(self.inst, target)
 		end
 	end
 end
 
-function spellcard:CanCast(doer, target, pos, inst)
+function spellcard:CanCast(doer)
 
-	local hands = doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
-	local currentpower = doer.components.power:GetCurrent()
-	
-	if hands then
-		return false
-	else
-		if self.costpower then
-			if currentpower >= self.costpower then else
-				return false
-			end
+	if doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil then -- todo : use "read" motion in order to delete this.
+		doer.components.talker:Say(STRINGS.YUKARI_SHOULD_BRING_SOMETHING)
+		--return false
+	end
+
+	if self.costpower then
+		if --doer.components.power == nil or
+		doer.components.power:GetCurrent() < self.costpower then
+			doer.components.talker:Say(STRINGS.YUKARI_NEED_POWER)
+			--return false
 		end
 	end
 	

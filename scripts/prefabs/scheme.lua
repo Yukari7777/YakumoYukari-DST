@@ -127,7 +127,9 @@ local function GetStatus(inst)
 		"\n"..STRINGS.YUKARI_SHOULD_BRING_SOMETHING or ""
 	end
 
-	return STRINGS.YUKARI_CURRENT_LEVEL.." - "..CurrentLevel..GetStr(inst)..IsHanded()
+	owner.components.talker:Say( STRINGS.YUKARI_CURRENT_LEVEL.." - "..CurrentLevel..GetStr(inst)..IsHanded() )
+
+	-- return STRINGS.YUKARI_CURRENT_LEVEL.." - "..CurrentLevel..GetStr(inst)..IsHanded()
 end
 
 local function SetState(inst)
@@ -195,10 +197,10 @@ end
 
 local function OnFinish(inst)
 	local Chara = inst.components.inventoryitem.owner
-	Chara.hatlevel = Chara.hatlevel + 1
-	SetState(inst)
+	Chara.components.upgrader.hatlevel = Chara.components.upgrader.hatlevel + 1
 	Chara.components.upgrader:AbilityManager(Chara)
 	Chara.components.upgrader:DoUpgrade(Chara)
+	SetState(inst)
 	Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_HATUPGRADE"))
 end
 
@@ -219,7 +221,7 @@ local function fn()
 	inst.AnimState:SetBuild("spell")    
 	inst.AnimState:PlayAnimation("idle")    
 
-	inst:AddTag("spellcard")
+	inst:AddTag("scheme")
 
 	inst.entity:SetPristine()
 
@@ -228,7 +230,7 @@ local function fn()
     end
 
 	inst:AddComponent("inspectable")    
-	inst.components.inspectable.getstatus = GetStatus
+	inst.components.inspectable.SetDescription = GetStatus
 	
 	inst:AddComponent("inventoryitem")   
 	inst.components.inventoryitem.atlasname = "images/inventoryimages/scheme.xml" 

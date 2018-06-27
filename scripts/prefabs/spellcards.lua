@@ -18,6 +18,8 @@ function MakeCard(name)
 		inst.components.finiteuses:SetMaxUses(3)
 		inst.components.finiteuses:SetUses(3)
 		inst.components.spellcard:SetSpellFn(function()
+			owner = inst.components.inventoryitem.owner
+
 			if owner.components.health then
 				owner.components.health:DoDelta(20)
 			end
@@ -814,36 +816,37 @@ function MakeCard(name)
 		inst:AddComponent("inventoryitem") 
 		inst.components.inventoryitem.imagename = fname    
 		inst.components.inventoryitem.atlasname = "images/inventoryimages/"..fname..".xml"   
-		local owner = inst.components.inventoryitem.owner
 		
 		inst:AddComponent("spellcard")
 		inst.components.spellcard.name = name
 		inst.components.spellcard.isdangeritem = false -- is it dangerous to use on server
 		
+		local owner = inst.components.inventoryitem.owner
+
 		if name == "test" then
-			spellfn = test(inst, owner)
+			test(inst)
 		elseif name == "mesh" then
-			spellfn = mesh(inst, owner)
+			mesh(inst, owner)
 		elseif name == "away" then
-			spellfn = away(inst, owner)
+			away(inst, owner)
 		elseif name == "necro" then
-			spellfn = necro(inst, owner)
+			necro(inst, owner)
 		elseif name == "curse" then
-			spellfn = curse(inst, owner)
+			curse(inst, owner)
 		elseif name == "balance" then
-			spellfn = balance(inst, owner)
+			balance(inst, owner)
 		elseif name == "laplace" then
-			spellfn = laplace(inst, owner)
+			laplace(inst, owner)
 		elseif name == "butter" then
-			spellfn = butter(inst, owner)
+			butter(inst, owner)
 		elseif name == "bait" then
-			spellfn = bait(inst, owner)
+			bait(inst, owner)
 		elseif name == "addictive" then
-			spellfn = addictive(inst, owner)
+			addictive(inst, owner)
 		elseif name == "lament" then
-			spellfn = lament(inst, owner)
+			lament(inst, owner)
 		elseif name == "matter" then
-			spellfn = matter(inst, owner)
+			matter(inst, owner)
 		end
 		
 		return inst

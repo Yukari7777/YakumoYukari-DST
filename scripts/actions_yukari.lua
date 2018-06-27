@@ -180,11 +180,8 @@ AddComponentAction("POINT", "makegate", action_umbre)
 local CASTTOHO = AddAction("CASTTOHO", "castspell", function(act)
 	local item = act.invobject or act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
 
-	if item and item.components.spellcard and item.components.spellcard:CanCast(act.doer, act.target, act.pos) then
-		item.components.spellcard:CastSpell(act.target, act.pos)
-		return true
-	else
-		return false
+	if item and item.components.spellcard and item.components.spellcard:CanCast(act.doer) then
+		return item.components.spellcard:CastSpell(act.target)
 	end
 end)
 
@@ -192,7 +189,7 @@ CASTTOHO.priority = -1
 CASTTOHO.rmb = true
 CASTTOHO.mount_valid = false
 
-local casttoho = State({
+local casttoho = State({ -- todo : use "read" motion
     name = "casttoho",
     tags = {"doing", "busy", "canrotate"},
 
@@ -287,6 +284,14 @@ AddStategraphState("wilson", casttoho)
 AddStategraphState("wilson_client", casttohoc)
 AddStategraphActionHandler("wilson", ActionHandler(ACTIONS.CASTTOHO, "casttoho"))
 AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.CASTTOHO, "casttohoc"))
+
+
+local function spell_inv(inst, doer, actions, right)
+        if doer:HasTag("yakumoyukari") then
+            table.insert(actions, ACTIONS.CASTTOHO)
+        end
+end
+AddComponentAction("INVENTORY", "spellcard", spell_inv)
 
 
 local CASTTOHOH = AddAction("CASTTOHOH", "castspell", function(act) -- necro fantasia
