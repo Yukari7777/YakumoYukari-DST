@@ -9,16 +9,16 @@ function MakeCard(name)
 		Asset("IMAGE", "images/inventoryimages/"..fname..".tex"),
 	}
 
-	local function onfinished(inst, owner)
+	local function onfinished(inst)
 		inst:Remove()
 	end
 		
-	local function test(inst, owner)
+	local function test(inst)
 		inst.components.spellcard.costpower = 5
 		inst.components.finiteuses:SetMaxUses(3)
 		inst.components.finiteuses:SetUses(3)
 		inst.components.spellcard:SetSpellFn(function()
-			owner = inst.components.inventoryitem.owner
+			local owner = inst.components.inventoryitem.owner
 
 			if owner.components.health then
 				owner.components.health:DoDelta(20)
@@ -27,14 +27,17 @@ function MakeCard(name)
 				owner.components.power:DoDelta(-5, false)
 			end
 			inst.components.finiteuses:Use(1)
+
+			return true
 		end)
 	end
 	
-	local function mesh(inst, owner)
+	local function mesh(inst)
 		inst.components.spellcard.costpower = 60
 		inst.components.finiteuses:SetMaxUses(3)
 		inst.components.finiteuses:SetUses(3)
 		inst.components.spellcard:SetSpellFn(function()
+			local owner = inst.components.inventoryitem.owner
 			if owner.components.sanity then
 				local amount = owner.components.sanity:GetMaxSanity() * owner.components.sanity:GetPercent()
 				owner.components.sanity:SetPercent(1)
@@ -44,10 +47,11 @@ function MakeCard(name)
 				owner.components.power:DoDelta(-60, false)
 			end
 			inst.components.finiteuses:Use(1)
+			return true
 		end)
 	end
 	
-	local function away(inst, owner)
+	local function away(inst)
 		inst.components.spellcard.costpower = 50
 		inst.components.finiteuses:SetMaxUses(5)
 		inst.components.finiteuses:SetUses(5)
@@ -56,6 +60,7 @@ function MakeCard(name)
 		inst.IsInvisible = nil
 		inst.Duration = 0
 		inst.components.spellcard:SetSpellFn(function()
+			local owner = inst.components.inventoryitem.owner
 			if inst.IsInvisible == true then
 				inst.Duration = inst.Duration + 10
 				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_INVINCIBILITY_DURATION"))
@@ -95,26 +100,29 @@ function MakeCard(name)
 					owner.components.power:DoDelta(-50, false)
 				end
 				inst.components.finiteuses:Use(1)
+				return true
 			end
 		end)
 	end
 	
-	local function necro(inst, owner)
+	local function necro(inst)
 		inst:RemoveComponent("finiteuses")
 		inst.components.spellcard.action = ACTIONS.CASTTOHOH
-		inst.components.spellcard.costpower = 300
+		inst.components.spellcard.costpower = 0
 		inst.components.spellcard:SetSpellFn(function()
+			local owner = inst.components.inventoryitem.owner
 			local x,y,z = owner.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x, y, z, 40)
 			local Language = GetModConfigData("language", "YakumoYukari")
-			SetSharedLootTable('nodrop', {})
+			SetSharedLootTable('nodrop', nil)
 			
 			for k,v in pairs(ents) do
 				if v.components.health and not v:HasTag("yakumoga") then
 					if v.components.lootdropper and not v:HasTag("epic") then
-						v.components.lootdropper.numrandomloot = 0 -- Delete item drop.
-						v.components.lootdropper:SetLoot({})
-						v.components.lootdropper:SetChanceLootTable('nodrop')
+						v.components.lootdropper.loot = nil -- ISSUE : some prefabs still has loots.
+						v.components.lootdropper.chanceloot = nil
+						v.components.lootdropper.randomloot = nil
+						v.components.lootdropper.numrandomloot = nil
 					end
 					v.components.health:DoDelta(-2147483647)
 				end
@@ -144,7 +152,7 @@ function MakeCard(name)
 				end
 				
 			end
-			-- TODO : Delete moleworm, crab pile -> sand pile
+			-- TODO : Delete moleworm
 			if owner.components.power then
 				owner.components.power:DoDelta(-300, false)
 			end
@@ -158,19 +166,19 @@ function MakeCard(name)
 				str[2] = "在 虚 空 中 永 眠 吧.."
 				str[3] = "你 什 么 都 不 是.."
 			end
-			owner.components.talker:Say(str[math.random(3)])
+			owner.components.talker:Say(str[math.random(3)], 3, nil, nil, true)
 			inst:Remove()
 		end)
 	end
 	
-	local function curse(inst, owner)
+	local function curse(inst)
 		inst.components.spellcard.costpower = 50
 		inst.components.finiteuses:SetMaxUses(3)
 		inst.components.finiteuses:SetUses(3)
 		inst.Duration = 0
 		inst.Activated = nil
 		inst.components.spellcard:SetSpellFn(function()
-			
+			local owner = inst.components.inventoryitem.owner
 			local old_dmg = owner.components.combat.damagemultiplier
 			local old_speed = owner.components.upgrader.bonusspeed
 			local isfast = 1
@@ -223,15 +231,16 @@ function MakeCard(name)
 				end
 				inst.components.finiteuses:Use(1)
 			end
-			
+			return true
 		end)
 	end
 		
-	local function balance(inst, owner)
+	local function balance(inst)
 		inst.components.spellcard.costpower = 100
 		inst.components.finiteuses:SetMaxUses(5)
 		inst.components.finiteuses:SetUses(5)
 		inst.components.spellcard:SetSpellFn(function()
+			local owner = inst.components.inventoryitem.owner
 			local x,y,z = owner.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x, y, z, 50)
 			for k,v in pairs(ents) do
@@ -257,10 +266,11 @@ function MakeCard(name)
 				owner.components.power:DoDelta(-100, false)
 			end
 			inst.components.finiteuses:Use(1)
+			return true
 		end)
 	end
 	
-	local function laplace(inst, owner)
+	local function laplace(inst)
 		inst.components.spellcard.costpower = 1
 		table.insert(assets, Asset("IMAGE", "images/colour_cubes/purple_moon_cc.tex"))
 		table.insert(assets, Asset("IMAGE", "images/colour_cubes/mole_vision_on_cc.tex"))
@@ -271,6 +281,7 @@ function MakeCard(name)
 		inst.components.stackable.maxsize = TUNING.STACK_SIZE_LARGEITEM
 		inst.Activated = nil
 		inst.components.spellcard:SetSpellFn(function()
+			local owner = inst.components.inventoryitem.owner
 			if owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) and owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "molehat" then
 				owner.components.talker:Say(GetString(owner.prefab, "ACTIONFAIL_GENERIC"))
 			else
@@ -323,8 +334,10 @@ function MakeCard(name)
 					end
 				end
 			end
+			return true
 		end)
 		inst.components.finiteuses:SetOnFinished(function()
+			local owner = inst.components.inventoryitem.owner
 			if TheWorld and TheWorld.components.colourcubemanager then
 				TheWorld.components.colourcubemanager:SetOverrideColourCube(nil, .5)
 			end
@@ -335,10 +348,11 @@ function MakeCard(name)
 		end)
 	end
 	
-	local function butter(inst, owner)
+	local function butter(inst)
 		inst.components.spellcard.costpower = 80
 		inst:RemoveComponent("finiteuses")
 		inst.components.spellcard:SetSpellFn(function()
+			local owner = inst.components.inventoryitem.owner
 			if not (TheWorld.components.butterflyspawner and TheWorld.components.birdspawner) then
 				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NOSPAWN"))
 			else
@@ -370,30 +384,31 @@ function MakeCard(name)
 		end)
 	end
 	
-	local function bait(inst, owner) -- name : Bewitching Bait
+	local function bait(inst) -- name : Bewitching Bait
 		inst.components.spellcard.costpower = 1
 		inst.components.finiteuses:SetMaxUses(300)
 		inst.components.finiteuses:SetUses(300)
 		inst.Activated = nil
-		local function barrier()
-			if inst.fx then 
-				return inst.fx
-			else
-				local fx = SpawnPrefab("barrierfieldfx")
-				local fx_hitanim = function()
-				fx.AnimState:PlayAnimation("hit")
-				fx.AnimState:PushAnimation("idle_loop")
-				end
-				fx.entity:SetParent(owner.entity)
-				fx.AnimState:SetScale(0.7,0.7,0.7)
-				fx.AnimState:SetMultColour(0.5,0,0.5,0.3)
-				fx.Transform:SetPosition(0, 0.2, 0)
-				inst.fx = fx
-				return fx
-			end
-		end
 		inst.components.spellcard:SetSpellFn(function()
+			local function barrier()
+				if inst.fx then 
+					return inst.fx
+				else
+					local fx = SpawnPrefab("barrierfieldfx")
+					local fx_hitanim = function()
+					fx.AnimState:PlayAnimation("hit")
+					fx.AnimState:PushAnimation("idle_loop")
+					end
+					fx.entity:SetParent(owner.entity)
+					fx.AnimState:SetScale(0.7,0.7,0.7)
+					fx.AnimState:SetMultColour(0.5,0,0.5,0.3)
+					fx.Transform:SetPosition(0, 0.2, 0)
+					inst.fx = fx
+					return fx
+				end
+			end
 			local fx = barrier()
+			local owner = inst.components.inventoryitem.owner
 			if inst.Activated == nil then -- create barrier
 				inst.Activated = true
 				owner:DoPeriodicTask(1, function()
@@ -428,6 +443,7 @@ function MakeCard(name)
 					inst.Activated = true -- enable barrier
 				end
 			end
+			return true
 		end)
 		inst.components.finiteuses:SetOnFinished(function()
 			local fx = inst.fx
@@ -439,10 +455,11 @@ function MakeCard(name)
 		end)
 	end
 	
-	local function addictive(inst, owner)
+	local function addictive(inst)
 		inst.components.spellcard.costpower = 200
 		inst:RemoveComponent("finiteuses")
 		inst.components.spellcard:SetSpellFn(function()
+			local owner = inst.components.inventoryitem.owner
 			local x,y,z = owner.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x, y, z, 60)
 			for k,v in pairs(ents) do
@@ -479,7 +496,7 @@ function MakeCard(name)
 		end)
 	end
 	
-	local function lament(inst, owner) -- Urashima's Box
+	local function lament(inst) -- Urashima's Box
 		inst:RemoveComponent("finiteuses")
 		inst.components.spellcard.costpower = 20
 		inst:AddComponent("stackable")
@@ -557,160 +574,163 @@ function MakeCard(name)
 			{"tallbird", 1, "bad", nil, "rog"},
 			{"mosquito_poison", math.random(3), "bad", nil, "sw"},
 		}
-		local function spawn()
-			if owner.components.kramped.threshold == nil then -- just in case
-				owner.components.kramped.threshold = 50
-			end
-			local function GetLoot(list)
-				local loot = {}
-				for i=1, #list, 1 do
-					if list[i][5] == nil then
-						table.insert(loot, list[i])
-					else
-						if list[i][5] == "rog" then
-							table.insert(loot, list[i])
-						end
-					end
-				end
-				return loot
-			end
-			
-			local function GetPoint(pt)
-				local theta = math.random() * 2 * PI
-				local radius = 6 + math.random() * 6
-				
-				local result_offset = FindValidPositionByFan(theta, radius, 12, function(offset)
-					local ground = GetWorld()
-					local spawn_point = pt + offset
-					if not (ground.Map and ground.Map:GetTileAtPoint(spawn_point.x, spawn_point.y, spawn_point.z) == GROUND.IMPASSABLE) then
-						return true
-					end
-					return false
-				end)
-				
-				if result_offset then
-					return pt+result_offset
-				end
-			end
-			local threshold = owner.components.kramped.threshold
-			local actions = owner.components.kramped.actions
-			local naughtiness = actions / threshold
-			local key, amount, grade, pt, list, loot
-			if count > 1 then
-				owner:DoTaskInTime(0.5, function()
-					if naughtiness < 0.33 then
-						if math.random() < 0.66 then -- 66%, common stuff
-							list = LootTable_c
-						elseif math.random() < 0.66 then -- 21%, good stuff
-							list = LootTable_g
-						elseif math.random() < 0.66 then -- 7%, rare stuff
-							list = LootTable_r
-						else							-- 6%, bad stuff
-							list = LootTable_b
-						end
-					elseif naughtiness < 0.66 then
-						if math.random() < 0.33 then -- 33%, common stuff
-							list = LootTable_c
-						elseif math.random() < 0.1 then -- 6%, good stuff
-							list = LootTable_g
-						else							-- 60%, bad stuff
-							list = LootTable_b
-						end
-					else
-						list = LootTable_b -- 100%, bad stuff
-					end
-					loot = GetLoot(list)
-					key = math.random(#loot)
-					amount = loot[key][2]
-					grade = loot[key][3]
-					local color = {}
-					if grade == "common" then
-						color = {r=0,g=0,b=0,a=0.5}
-					elseif grade == "good" then
-						color = {r=0,g=1,b=0,a=1}
-					elseif grade == "rare" then
-						color = {r=1,g=0,b=1,a=1}
-					elseif grade == "bad" then
-						color = {r=0,g=0,b=0,a=1}
-					end
-					for i = 1, amount do
-						local prefab = SpawnPrefab(loot[key][1]) -- spawn thing
-						prefab:AddTag("spawned")
-						if prefab.components.lootdropper then
-							prefab.components.lootdropper.numrandomloot = 0 -- Delete item drop.
-							prefab.components.lootdropper:SetLoot({})
-							prefab.components.lootdropper:SetChanceLootTable('nodrop')
-						end
-						pt = GetPoint(Vector3(owner.Transform:GetWorldPosition()))
-						if loot[key][4] then
-							loot[key][4](prefab)
-						end
-						local fx = SpawnPrefab("small_puff")
-						fx.AnimState:SetMultColour(color.r, color.g, color.b, color.a)
-						fx.Transform:SetPosition(pt.x, pt.y, pt.z)
-						if grade ~= "bad" then
-							owner.SoundEmitter:PlaySound("soundpack/spell/item")
-						else
-							owner.SoundEmitter:PlaySound("dontstarve/HUD/sanity_down")
-						end
-						prefab.Transform:SetPosition(pt.x, pt.y, pt.z)
-					end
-					count = count - 1
-					spawn()
-				end)
-			elseif count == 1 then
-				owner:DoTaskInTime(1.2, function()
-					local Speech = GetString(owner.prefab, "ANNOUNCE_TRAP_WENT_OFF") -- "Oops"
-					if naughtiness < 0.8 then
-						list = LootTable_b 
-					else
-						list = LootTable_h
-						Speech = "Oh, no"
-					end
-					loot = GetLoot(list)
-					key = math.random(#loot)
-					amount = loot[key][2]
-					grade = loot[key][3]
-					for i = 1, amount do
-						local prefab = SpawnPrefab(loot[key][1])
-						prefab:AddTag("spawned")
-						if prefab.components.lootdropper then
-							prefab.components.lootdropper.numrandomloot = 0 -- Delete item drop.
-							prefab.components.lootdropper:SetLoot({})
-							prefab.components.lootdropper:SetChanceLootTable('nodrop')
-						end
-						pt = GetPoint(Vector3(owner.Transform:GetWorldPosition()))
-						if loot[key][4] then
-							loot[key][4](prefab)
-						end
-						local fx = SpawnPrefab("small_puff")
-						fx.AnimState:SetMultColour(0,0,0,1)
-						fx.Transform:SetPosition(pt.x, pt.y, pt.z)
-						owner.SoundEmitter:PlaySound("dontstarve/HUD/sanity_down")
-						prefab.Transform:SetPosition(pt.x, pt.y, pt.z)
-					end
-					 
-					owner.components.kramped:OnNaughtyAction( math.min(threshold - (actions + 1), math.random(10, 30)) )
-					-- So Naughty points can be gained until 'threshold - 1' so that prevent spawning Krampus.
-					local x,y,z = owner.Transform:GetWorldPosition()
-					local ents = TheSim:FindEntities(x, y, z, 14)
-					for k,v in pairs(ents) do
-						if v.components.combat and v:HasTag("spawned")then
-							v.components.combat.target = owner
-						end
-					end
-					owner:RemoveTag("notarget")
-					count = count - 1
-					owner.components.health:SetInvincible(false)
-					owner.components.playercontroller:Enable(true)
-					owner.components.talker:Say(Speech)
-					inst.Activated = false
-				end)
-			end
-		end
 		inst.components.spellcard:SetSpellFn(function()
+				local owner = inst.components.inventoryitem.owner
+				local function spawn()
+				local owner = inst.components.inventoryitem.owner
+				if owner.components.kramped.threshold == nil then -- just in case
+					owner.components.kramped.threshold = 50
+				end
+				local function GetLoot(list)
+					local loot = {}
+					for i=1, #list, 1 do
+						if list[i][5] == nil then
+							table.insert(loot, list[i])
+						else
+							if list[i][5] == "rog" then
+								table.insert(loot, list[i])
+							end
+						end
+					end
+					return loot
+				end
+			
+				local function GetPoint(pt)
+					local theta = math.random() * 2 * PI
+					local radius = 6 + math.random() * 6
+				
+					local result_offset = FindValidPositionByFan(theta, radius, 12, function(offset)
+						local ground = GetWorld()
+						local spawn_point = pt + offset
+						if not (ground.Map and ground.Map:GetTileAtPoint(spawn_point.x, spawn_point.y, spawn_point.z) == GROUND.IMPASSABLE) then
+							return true
+						end
+						return false
+					end)
+				
+					if result_offset then
+						return pt+result_offset
+					end
+				end
+				local threshold = owner.components.kramped.threshold
+				local actions = owner.components.kramped.actions
+				local naughtiness = actions / threshold
+				local key, amount, grade, pt, list, loot
+				if count > 1 then
+					owner:DoTaskInTime(0.5, function()
+						if naughtiness < 0.33 then
+							if math.random() < 0.66 then -- 66%, common stuff
+								list = LootTable_c
+							elseif math.random() < 0.66 then -- 21%, good stuff
+								list = LootTable_g
+							elseif math.random() < 0.66 then -- 7%, rare stuff
+								list = LootTable_r
+							else							-- 6%, bad stuff
+								list = LootTable_b
+							end
+						elseif naughtiness < 0.66 then
+							if math.random() < 0.33 then -- 33%, common stuff
+								list = LootTable_c
+							elseif math.random() < 0.1 then -- 6%, good stuff
+								list = LootTable_g
+							else							-- 60%, bad stuff
+								list = LootTable_b
+							end
+						else
+							list = LootTable_b -- 100%, bad stuff
+						end
+						loot = GetLoot(list)
+						key = math.random(#loot)
+						amount = loot[key][2]
+						grade = loot[key][3]
+						local color = {}
+						if grade == "common" then
+							color = {r=0,g=0,b=0,a=0.5}
+						elseif grade == "good" then
+							color = {r=0,g=1,b=0,a=1}
+						elseif grade == "rare" then
+							color = {r=1,g=0,b=1,a=1}
+						elseif grade == "bad" then
+							color = {r=0,g=0,b=0,a=1}
+						end
+						for i = 1, amount do
+							local prefab = SpawnPrefab(loot[key][1]) -- spawn thing
+							prefab:AddTag("spawned")
+							if prefab.components.lootdropper then
+								prefab.components.lootdropper.numrandomloot = 0 -- Delete item drop.
+								prefab.components.lootdropper:SetLoot({})
+								prefab.components.lootdropper:SetChanceLootTable('nodrop')
+							end
+							pt = GetPoint(Vector3(owner.Transform:GetWorldPosition()))
+							if loot[key][4] then
+								loot[key][4](prefab)
+							end
+							local fx = SpawnPrefab("small_puff")
+							fx.AnimState:SetMultColour(color.r, color.g, color.b, color.a)
+							fx.Transform:SetPosition(pt.x, pt.y, pt.z)
+							if grade ~= "bad" then
+								owner.SoundEmitter:PlaySound("soundpack/spell/item")
+							else
+								owner.SoundEmitter:PlaySound("dontstarve/HUD/sanity_down")
+							end
+							prefab.Transform:SetPosition(pt.x, pt.y, pt.z)
+						end
+						count = count - 1
+						spawn()
+					end)
+				elseif count == 1 then
+					owner:DoTaskInTime(1.2, function()
+						local Speech = GetString(owner.prefab, "ANNOUNCE_TRAP_WENT_OFF") -- "Oops"
+						if naughtiness < 0.8 then
+							list = LootTable_b 
+						else
+							list = LootTable_h
+							Speech = "Oh, no"
+						end
+						loot = GetLoot(list)
+						key = math.random(#loot)
+						amount = loot[key][2]
+						grade = loot[key][3]
+						for i = 1, amount do
+							local prefab = SpawnPrefab(loot[key][1])
+							prefab:AddTag("spawned")
+							if prefab.components.lootdropper then
+								prefab.components.lootdropper.numrandomloot = 0 -- Delete item drop.
+								prefab.components.lootdropper:SetLoot({})
+								prefab.components.lootdropper:SetChanceLootTable('nodrop')
+							end
+							pt = GetPoint(Vector3(owner.Transform:GetWorldPosition()))
+							if loot[key][4] then
+								loot[key][4](prefab)
+							end
+							local fx = SpawnPrefab("small_puff")
+							fx.AnimState:SetMultColour(0,0,0,1)
+							fx.Transform:SetPosition(pt.x, pt.y, pt.z)
+							owner.SoundEmitter:PlaySound("dontstarve/HUD/sanity_down")
+							prefab.Transform:SetPosition(pt.x, pt.y, pt.z)
+						end
+					 
+						owner.components.kramped:OnNaughtyAction( math.min(threshold - (actions + 1), math.random(10, 30)) )
+						-- So Naughty points can be gained until 'threshold - 1' so that prevent spawning Krampus.
+						local x,y,z = owner.Transform:GetWorldPosition()
+						local ents = TheSim:FindEntities(x, y, z, 14)
+						for k,v in pairs(ents) do
+							if v.components.combat and v:HasTag("spawned")then
+								v.components.combat.target = owner
+							end
+						end
+						owner:RemoveTag("notarget")
+						count = count - 1
+						owner.components.health:SetInvincible(false)
+						owner.components.playercontroller:Enable(true)
+						owner.components.talker:Say(Speech)
+						inst.Activated = false
+					end)
+				end
+			end
+
 			if inst.Activated then
-				owner.components.talker:Say(GetString(owner.prefab, "ACTIONFAIL_GENERIC"))
+				return false--owner.components.talker:Say(GetString(owner.prefab, "ACTIONFAIL_GENERIC"))
 			else
 				inst.Activated = true
 				
@@ -731,16 +751,18 @@ function MakeCard(name)
 				spawn()
 				inst.components.stackable:Get():Remove()
 			end
+			return true
 		end)
 	end
 	
-	local function matter(inst, owner) -- Universe of Matter and Antimatter
+	local function matter(inst) -- Universe of Matter and Antimatter
 		inst.components.spellcard.costpower = 150
 		inst.components.finiteuses:SetMaxUses(2)
 		inst.components.finiteuses:SetUses(2)
 		inst:AddComponent("stackable")
 		inst.components.stackable.maxsize = TUNING.STACK_SIZE_LARGEITEM
 		inst.components.spellcard:SetSpellFn(function()
+			local owner = inst.components.inventoryitem.owner
 			local Inventory = owner.components.inventory
 			
 			local function repair(v)
@@ -783,6 +805,7 @@ function MakeCard(name)
 				owner.components.power:DoDelta(-150, false)
 			end
 			inst.components.finiteuses:Use(1)
+			return true
 		end)
 	end
 	
@@ -820,33 +843,31 @@ function MakeCard(name)
 		inst:AddComponent("spellcard")
 		inst.components.spellcard.name = name
 		inst.components.spellcard.isdangeritem = false -- is it dangerous to use on server
-		
-		local owner = inst.components.inventoryitem.owner
 
 		if name == "test" then
 			test(inst)
 		elseif name == "mesh" then
-			mesh(inst, owner)
+			mesh(inst)
 		elseif name == "away" then
-			away(inst, owner)
+			away(inst)
 		elseif name == "necro" then
-			necro(inst, owner)
+			necro(inst)
 		elseif name == "curse" then
-			curse(inst, owner)
+			curse(inst)
 		elseif name == "balance" then
-			balance(inst, owner)
+			balance(inst)
 		elseif name == "laplace" then
-			laplace(inst, owner)
+			laplace(inst)
 		elseif name == "butter" then
-			butter(inst, owner)
+			butter(inst)
 		elseif name == "bait" then
-			bait(inst, owner)
+			bait(inst)
 		elseif name == "addictive" then
-			addictive(inst, owner)
+			addictive(inst)
 		elseif name == "lament" then
-			lament(inst, owner)
+			lament(inst)
 		elseif name == "matter" then
-			matter(inst, owner)
+			matter(inst)
 		end
 		
 		return inst

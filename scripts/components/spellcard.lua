@@ -60,21 +60,21 @@ function spellcard:CanCast(doer)
 
 	if doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil then -- todo : use "read" motion in order to delete this.
 		doer.components.talker:Say(STRINGS.YUKARI_SHOULD_BRING_SOMETHING)
-		--return false
+		return false
 	end
-
+	
 	if self.costpower then
 		if --doer.components.power == nil or
 		doer.components.power:GetCurrent() < self.costpower then
 			doer.components.talker:Say(STRINGS.YUKARI_NEED_POWER)
-			--return false
+			return false
 		end
 	end
 	
 	if self.othercondition ~= nil then
 		return self.othercondition
 	end
-
+	
 	return self.spell ~= nil
 
 end

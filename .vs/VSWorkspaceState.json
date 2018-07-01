@@ -3,9 +3,7 @@
     "",
     "\\scripts",
     "\\scripts\\components",
-    "\\scripts\\prefabs",
-    "\\scripts\\screens",
-    "\\scripts\\widgets"
+    "\\scripts\\prefabs"
   ],
   "SelectedNode": "\\scripts\\prefabs\\scheme.lua",
   "PreviewInSolutionExplorer": false

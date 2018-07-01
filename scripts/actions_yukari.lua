@@ -181,7 +181,8 @@ local CASTTOHO = AddAction("CASTTOHO", "castspell", function(act)
 	local item = act.invobject or act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
 
 	if item and item.components.spellcard and item.components.spellcard:CanCast(act.doer) then
-		return item.components.spellcard:CastSpell(act.target)
+		item.components.spellcard:CastSpell(act.target)
+		return true--item.components.spellcard:CastSpell(act.target)
 	end
 end)
 
