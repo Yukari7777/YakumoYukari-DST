@@ -16,7 +16,7 @@ local function GetIngameName(prefab)
 	return STRINGS.NAMES[string.upper(prefab)]
 end
 
-local function GetIndex(inst)
+local function GetIndex(inst) -- enum..
 	local utype = inst.components.spellcard.name
 	if utype == "healthpanel" then return 1
 	elseif utype == "hungerpanel" then return 2
@@ -25,18 +25,17 @@ local function GetIndex(inst)
 	end
 end
 
-local function GetStatLevel(index)
-	if index == 1 then return ThePlayer.health_level
-	elseif index == 2 then return ThePlayer.hunger_level
-	elseif index == 3 then return ThePlayer.sanity_level
-	elseif index == 4 then return ThePlayer.power_level
+local function GetStatLevel(inst, index)
+	if index == 1 then return inst.components.inventoryitem.owner.components.upgrader.health_level
+	elseif index == 2 then return inst.components.inventoryitem.owner.components.upgrader.hunger_level
+	elseif index == 3 then return inst.components.inventoryitem.owner.components.upgrader.sanity_level
+	elseif index == 4 then return inst.components.inventoryitem.owner.components.upgrader.power_level
 	end
 end
 
-local function GetIngreCount(index)
-	-- this contains Ingredient's formula
+local function GetIngreCount(inst, index)
 	local difficulty = GetModConfigData("difficulty", "YakumoYukari")
-	local level = (GetStatLevel(index) or 0) + 1
+	local level = GetStatLevel(inst, index) + 1
 	
 	local a = math.ceil(level * 0.7) + math.min(1, math.floor(level/10)) * math.floor(1.155 ^ (level - 10) ) -- 25 / 267 - 18 / 159
 	local b = math.min(1, math.floor(level/10)) * math.floor(1.1336 ^ (level - 10) + 0.2 * (level - 10) ) -- 9 / 64 - 5 / 28 
@@ -52,18 +51,9 @@ local function GetIngreCount(index)
 	
 end
 
-local function GetTable(index)
-	-- if SaveGameIndex:IsModeShipwrecked() then
-		-- return Ingredients_sw[index]
-	-- else
-		-- return Ingredients[index]
-	-- end
-	return Ingredients[index]
-end
-
-local function GetBackpack()
-	local Chara = ThePlayer
+local function GetBackpack(inst)
 	local backpack
+	local Chara = inst.components.inventoryitem.owner
 	
 	if EQUIPSLOTS.BACK and Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.BACK) then -- check if backpack slot mod is enabled.
 		backpack = Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.BACK)
@@ -77,9 +67,10 @@ local function GetBackpack()
 	end
 end
 
-local function CountInventoryItem(prefab)
-	local inventory = ThePlayer.components.inventory
-	local backpack = GetBackpack()
+local function CountInventoryItem(inst, prefab)
+	local owner = inst.components.inventoryitem.owner
+	local inventory = owner.components.inventory
+	local backpack = GetBackpack(inst)
 	local count = 0
 	
 	for k,v in pairs(inventory.itemslots) do
@@ -107,108 +98,91 @@ local function CountInventoryItem(prefab)
 	return count
 end
 
-local function GetStr(index)
-	local items = GetTable(index)
-	local count = GetIngreCount(index)
-	local CurrentLevel = GetStatLevel(index) or 0
-	local Language = GetModConfigData("language", "YakumoYukari")
+local function GetMaxLevel()
 	local difficulty = GetModConfigData("difficulty", "YakumoYukari")
-	local maxlevel = 25
+
+	local maxlevel = TUNING.YDEFAULT.UPGRADE_MAX
 	if difficulty == "easy" then
-		maxlevel = 20
+		maxlevel = TUNING.YDEFAULT.UPGRADE_MAX - 5
 	elseif difficulty == "hard" then
-		maxlevel = math.huge -- um... 
+		maxlevel = math.huge 
 	end
-	local text = ""
+
+	return maxlevel
+end
+
+local function GetItemCount(inst, index)
+	local items = Ingredients[index]
+	local count = GetIngreCount(inst, index)
+	local currentLevel = GetStatLevel(inst, index)
+	local maxlevel = GetMaxLevel()
 	
-	if CurrentLevel < maxlevel then
+	local text = ""
+	if currentLevel < maxlevel then
 		for i = 1, 3, 1 do
 			if count[i] > 0 then
-				text = text.."\n"..GetIngameName(items[i]).." - "..CountInventoryItem(items[i]).." / "..count[i]
+				text = text.."\n"..GetIngameName(items[i]).." - "..CountInventoryItem(inst, items[i]).." / "..count[i]
 			end
 		end
 	else
-		if Language == "chinese" then
-			text = "\n升 级 完 成"
-		else
-			text = "\nUpgrade Finished"
-		end
+		text = "\n"..STRINGS.YUKARI_UPGRADE_FINISHED
 	end
 
 	return text
 end
 
-local function GetCondition(index)
+local function GetCondition(inst, index)
 
-	local items = GetTable(index)
-	local count = GetIngreCount(index)
-	local CurrentLevel = GetStatLevel(index) or 0
-	local difficulty = GetModConfigData("difficulty", "YakumoYukari")
-	local maxlevel = 25
-	if difficulty == "easy" then
-		maxlevel = 20
-	elseif difficulty == "hard" then
-		maxlevel = math.huge
-	end
+	local items = Ingredients[index]
+	local count = GetIngreCount(inst, index)
+	local currentLevel = GetStatLevel(inst, index)
+	local maxlevel = GetMaxLevel()
+
 	local condition = true
-	
-	if CurrentLevel < maxlevel then 
+	if currentLevel < maxlevel then 
 		for i = 1, 3, 1 do 
-			condition = condition and ( CountInventoryItem(items[i]) >= count[i] )
+			condition = condition and ( CountInventoryItem(inst, items[i]) >= count[i] )
 		end	
 	else
 		condition = false 
 	end
 	
 	return condition
-	
 end
 
-local function SetDesc(index)
-	local CurrentLevel = GetStatLevel(index) or 0
-	local condition = GetCondition(index)
+local function SetDesc(inst, index)
+	local currentLevel = GetStatLevel(inst, index)
+	local condition = GetCondition(inst, index)
 	local Language = GetModConfigData("language", "YakumoYukari")
 		
 	local function IsHanded()
-		local hands = ThePlayer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
+		local hands = inst.components.inventoryitem.owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
 		if hands and condition then
-			if Language == "chinese" then
-				return "\n我 手 里 必 须 拿 点 东 西."
-			else
-				return "\nI should bring something on my hand."
-			end
+			return "\n"..STRINGS.YUKARI_SHOULD_BRING_SOMETHING
 		else
 			return ""
 		end
 	end
 	
-	local str = "Current Level - "..CurrentLevel..GetStr(index)..IsHanded()
-	if Language == "chinese" then 
-		str = "目 前 的 等 级 - "..CurrentLevel..GetStr(index)..IsHanded()
-	end
+	local str = STRINGS.YUKARI_CURRENT_LEVEL.." - "..currentLevel..GetItemCount(inst, index)..IsHanded()
 	
-	if index == 1 then STRINGS.CHARACTERS.GENERIC.DESCRIBE.HEALTHPANEL = str
-	elseif index == 2 then STRINGS.CHARACTERS.GENERIC.DESCRIBE.HUNGERPANEL = str
-	elseif index == 3 then STRINGS.CHARACTERS.GENERIC.DESCRIBE.SANITYPANEL = str
-	elseif index == 4 then STRINGS.CHARACTERS.GENERIC.DESCRIBE.POWERPANEL = str
-	end
+	inst.components.inspectable:SetDescription(str)
 	
 end
 
-local function SetCondition(inst)
+local function SetState(inst)
 	local index = GetIndex(inst)
-	local condition = GetCondition(index)
+	local condition = GetCondition(inst, index)
 	inst.components.spellcard:SetCondition( condition )
-	SetDesc(index)
+	SetDesc(inst, index)
 end
 
 local function DoUpgrade(inst)
-	
-	local backpack = GetBackpack()
-	local Chara = ThePlayer
+	local backpack = GetBackpack(inst)
+	local Chara = inst.components.inventoryitem.owner
 	local index = GetIndex(inst)
-	local items = GetTable(index)
-	local count = GetIngreCount(index)
+	local items = Ingredients[index]
+	local count = GetIngreCount(inst, index)
 	local inventory = Chara.components.inventory
 	
 	for i = 1, 3, 1 do
@@ -256,11 +230,9 @@ local function DoUpgrade(inst)
 	end
 	
 	Chara.components.upgrader:DoUpgrade(Chara, index)
-	
 end
 
 function MakePanel(iname)
-
 	local fname = iname.."panel"
 	local fup = string.upper(iname).."UP"
 	
@@ -274,17 +246,25 @@ function MakePanel(iname)
 	local function fn()  
 
 		local inst = CreateEntity()    
-		inst.entity:AddNetwork()
-		local trans = inst.entity:AddTransform()    
-		local anim = inst.entity:AddAnimState()    		
+		inst.entity:AddTransform()    
+		inst.entity:AddAnimState()    
+		inst.entity:AddNetwork()		
 		
 		MakeInventoryPhysics(inst)   
 		
-		anim:SetBank(fname)    
-		anim:SetBuild(fname)    
-		anim:PlayAnimation("idle")   
+		inst.AnimState:SetBank(fname)    
+		inst.AnimState:SetBuild(fname)    
+		inst.AnimState:PlayAnimation("idle")   
 
 		inst:AddTag("spellcard")
+
+		if not TheWorld.ismastersim then
+			return inst
+		end
+
+		inst.entity:SetPristine()
+
+
 		inst:AddComponent("inspectable")			
 		
 		inst:AddComponent("inventoryitem") 
@@ -296,7 +276,7 @@ function MakePanel(iname)
 		inst.components.spellcard:SetSpellFn( DoUpgrade )
 		inst.components.spellcard:SetCondition( false )
 		
-		inst:DoPeriodicTask(1, SetCondition)
+		inst:DoPeriodicTask(1, SetState) -- temp
 		
 		return inst
 	end

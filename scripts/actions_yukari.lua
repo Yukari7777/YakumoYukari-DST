@@ -8,6 +8,7 @@ local State = GLOBAL.State
 local ACTIONS = GLOBAL.ACTIONS
 local Action = GLOBAL.Action
 local TheWorld = GLOBAL.TheWorld
+-- local TUNING = GLOBAL.TUNING
 local TIMEOUT = 2
 local Language = GetModConfigData("language")
 
@@ -164,12 +165,10 @@ local function action_umbre(inst, doer, pos, actions, right)
 	if right then
 		local equip = doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
 
-		if equip and inst.components.makegate:CanMakeToPoint(pos) then
-			if equip.isunfolded then
-				table.insert(actions, ACTIONS.SPAWNG)
-			else
-				table.insert(actions, ACTIONS.UTELE)
-			end
+		if equip.isunfolded and inst.components.makegate:CanSpell(doer, 75, pos) then
+			table.insert(actions, ACTIONS.SPAWNG)
+		elseif equip.isunfolded == false and inst.components.makegate:CanSpell(doer, 33, pos) then
+			table.insert(actions, ACTIONS.UTELE)
 		end
 	end
 end
@@ -182,7 +181,7 @@ local CASTTOHO = AddAction("CASTTOHO", "castspell", function(act)
 
 	if item and item.components.spellcard then
 		item.components.spellcard:CastSpell(act.target)
-		return true--item.components.spellcard:CastSpell(act.target)
+		return true
 	end
 end)
 
@@ -297,14 +296,12 @@ end
 AddComponentAction("INVENTORY", "spellcard", spell_inv)
 
 
-local CASTTOHOH = AddAction("CASTTOHOH", "castspell", function(act) -- necro fantasia
+local CASTTOHOH = AddAction("CASTTOHOH", "castspell", function(act) -- necro fantasia, ultupgrade
 	local item = act.invobject or act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
 
 	if item and item.components.spellcard and item.components.spellcard:CanCast(act.doer, act.target, act.pos) then
 		item.components.spellcard:CastSpell(act.target, act.pos)
 		return true
-	else
-		return false
 	end
 end)
 

@@ -1639,7 +1639,7 @@ return {
 		
 	DESCRIBE_LOWPOWER = "I don't have enough power!",
 	DESCRIBE_NOSKILL = "I have no skills.",
-	DESCRIBE_INVINCIBILITY_DURATION = "Invisible duration is increased.",
+	DESCRIBE_INVINCIBILITY_DURATION = "Invisible duration has been increased.",
 	DESCRIBE_CLOAKING = "They don't know where I am.",
 	DESCRIBE_DECLOAKING = "I'm not invisible anymore!",
 	DESCRIBE_CANNOTRESIST = "I can't resist more if I do this.",
@@ -1657,7 +1657,7 @@ return {
 	DESCRIBE_INVINCIBILITY_DONE = "I'm no longer invincible.",
 	DESCRIBE_UPGRADE_FREE = "\nFree to Upgrade",
 	DESCRIBE_UPGRADE_HEALTH = "My heart is mighter.",
-	DESCRIBE_UPGRADE_HUNGER = "Maybe I got less starvation.",
+	DESCRIBE_UPGRADE_HUNGER = "My Stomach is tougher",
 	DESCRIBE_UPGRADE_SANITY = "Things are getting.. fresh!",
-	DESCRIBE_UPGRADE_POWER = "I can feel my insdie power is grown.",
+	DESCRIBE_UPGRADE_POWER = "I can feel my inner power is getting grown.",
 }

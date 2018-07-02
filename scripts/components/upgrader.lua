@@ -294,7 +294,6 @@ function Upgrader:HatSkillManager(inst)
 end
 
 function Upgrader:DoUpgrade(inst, stat) 
-	print("DoUpgrade "..(tostring(inst.valid) or "not valid inst").." "..(stat or "nostat"))
 	local hunger_percent = inst.components.hunger:GetPercent()
 	local health_percent = inst.components.health:GetPercent()
 	local sanity_percent = inst.components.sanity:GetPercent()

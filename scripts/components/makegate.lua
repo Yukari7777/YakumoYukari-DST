@@ -31,18 +31,26 @@ function MakeGate:SpawnEffect(inst)
 	fx.Transform:SetPosition(pt.x, pt.y, pt.z)
 end
 
-function MakeGate:Teleport(pt, caster)
-
-	--if self:CanMakeToPoint(pt) == false then
-	--	return false
-	--end
-	if caster.components.power and caster.components.power.current > 15 then
+function MakeGate:CanSpell(caster, cost, pt)
+	if self:CanMakeToPoint(pt) == false then
+		return false
+	end
+	if caster.components.power and caster.components.power.current >= cost then
 		if self.onusefn == nil then
 			return false
 		end
 	else
 		return false
 	end
+
+	return true
+end
+
+function MakeGate:Teleport(pt, caster)
+	if not self:CanSpell(caster, TUNING.YDEFAULT.TELEPORT_POWER_COST, pt) then
+		return false
+	end
+	
 	self:SpawnEffect(caster)
 	caster.SoundEmitter:PlaySound("dontstarve/common/staff_blink")
 	caster:Hide()
@@ -58,15 +66,7 @@ function MakeGate:Teleport(pt, caster)
 end
 
 function MakeGate:RCreate(pt, caster)
-
-	if self:CanMakeToPoint(pt) == false then
-		return false
-	end
-	if caster.components.power and caster.components.power.current >= 50 then
-		if self.onusefn == nil then
-			return false
-		end
-	else
+	if not self:CanSpell(caster, TUNING.YDEFAULT.TELEPORT_POWER_COST, pt) then
 		return false
 	end
 

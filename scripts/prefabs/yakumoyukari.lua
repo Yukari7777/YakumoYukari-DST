@@ -80,7 +80,6 @@ end
 local function onpreload(inst, data)
 	
 	if data then
-		print("data.hatlevel = "..data.hatlevel)
 		if inst.components.power then
 			inst.regen_cool = data.regen_cool or 0 
 			inst.poison_cool = data.poison_cool or 0 
@@ -325,10 +324,12 @@ local function EquippingEvent(inst)
 end
 
 local function DebugFunction(inst)
-	if inst.components.power then
-		inst.components.power.max = 300
-		inst.components.power.current = 300
-	end
+	inst:DoPeriodicTask(1, function()
+		if inst.components.power then
+			inst.components.power.max = 300
+			inst.components.power.current = 300
+		end
+	end)
 end	
 
 local function common_init(inst) -- things before SetPristine()
@@ -483,7 +484,6 @@ local master_postinit = function(inst) -- after SetPristine()
 
 	inst:DoPeriodicTask(1, CooldownFunction)
 	inst:DoPeriodicTask(1, PeriodicFunction)
-	--inst:DoPeriodicTask(1, DebugFunction)
 	
 	inst.OnSave = onsave
 	inst.OnPreLoad = onpreload
@@ -500,7 +500,6 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:ListenForEvent( "grazed", OnGrazed )
 	
 	inst.OnLoad = function(inst)
-		inst.valid = true -- debug
 		inst:PushEvent("yukariloaded")
 	end
 

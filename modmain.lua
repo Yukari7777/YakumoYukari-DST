@@ -470,10 +470,10 @@ TheInput:AddKeyDownHandler(110, DoDebug_3)
 
 -------------------------------
 modimport "scripts/power_init.lua" -- load "scripts/power_init.lua"
+modimport "scripts/tunings_yukari.lua"
+modimport "scripts/strings_yukari.lua"
 modimport "scripts/actions_yukari.lua"
 modimport "scripts/recipes_yukari.lua"
-modimport "scripts/strings_yukari.lua"
-modimport "scripts/tunings_yukari.lua"
 --AddComponentPostInit("inventory", InventoryDamage)
 --AddComponentPostInit("tool", ToolEfficientFn)
 --AddPrefabPostInit("forest", AddSchemeManager) -- Override function AddSchemeManager to prefab "forest"
