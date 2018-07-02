@@ -1,4 +1,4 @@
-local spellcard = Class(function(self, inst)
+local Spellcard = Class(function(self, inst)
 	self.inst = inst
 	self.spell = nil
 	self.onfinish = nil
@@ -18,35 +18,35 @@ local spellcard = Class(function(self, inst)
 	self.action = ACTIONS.CASTTOHO
 end)
 
-function spellcard:SetSpellFn(fn)
+function Spellcard:SetSpellFn(fn)
 	self.spell = fn
 end
 
-function spellcard:SetOnFinish(fn)
+function Spellcard:SetOnFinish(fn)
 	self.onfinish = fn
 end
 
-function spellcard:SetCondition(fn)
+function Spellcard:SetCondition(fn)
 	self.othercondition = fn
 end
 
-function spellcard:SetAction(act)
+function Spellcard:SetAction(act)
 	self.action = act
 end
 
-function spellcard:GetLevel(inst, index)
+function Spellcard:GetLevel(inst, index)
 	if index == 1 then
-		return inst.health_level
+		return inst.components.upgrader.health_level
 	elseif index == 2 then
-		return inst.hunger_level
+		return inst.components.upgrader.hunger_level
 	elseif index == 3 then
-		return inst.sanity_level
+		return inst.components.upgrader.sanity_level
 	elseif index == 4 then
-		return inst.power_level
+		return inst.components.upgrader.power_level
 	end
 end
 
-function spellcard:CastSpell(target)
+function Spellcard:CastSpell(target)
 	if self.spell then
 		self.spell(self.inst, target)
 		
@@ -56,21 +56,29 @@ function spellcard:CastSpell(target)
 	end
 end
 
-function spellcard:CanCast(doer)
+function Spellcard:AddDesc(script)
+	if self.inst.components.inspectable ~= nil then 
+		local desc = self.inst.components.inspectable:GetDescription(self.inst.components.inventoryitem.owner)
+		if not string.find(desc, script) then
+			self.inst.components.inspectable:SetDescription( desc.."\n"..script )
+		end
+	end
+end
 
+function Spellcard:CanCast(doer)
+	
 	if doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil then -- todo : use "read" motion in order to delete this.
-		doer.components.talker:Say(STRINGS.YUKARI_SHOULD_BRING_SOMETHING)
+		self:AddDesc(STRINGS.YUKARI_SHOULD_BRING_SOMETHING)
 		return false
 	end
 	
 	if self.costpower then
-		if --doer.components.power == nil or
-		doer.components.power:GetCurrent() < self.costpower then
-			doer.components.talker:Say(STRINGS.YUKARI_NEED_POWER)
+		if doer.components.power:GetCurrent() < self.costpower then
+			self:AddDesc(STRINGS.YUKARI_NEED_POWER)
 			return false
 		end
 	end
-	
+
 	if self.othercondition ~= nil then
 		return self.othercondition
 	end
@@ -79,4 +87,4 @@ function spellcard:CanCast(doer)
 
 end
 
-return spellcard
+return Spellcard

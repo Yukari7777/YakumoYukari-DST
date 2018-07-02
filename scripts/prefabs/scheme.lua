@@ -116,7 +116,7 @@ local function GetCondition(inst)
 end
 
 local function GetStatus(inst)
-	local owner = inst.components.inventoryitem.owner
+	local owner = inst.components.inventoryitem ~= nil and inst.components.inventoryitem.owner
 	local CurrentLevel = owner.components.upgrader.hatlevel
 	local condition = GetCondition(inst)
 
@@ -126,10 +126,8 @@ local function GetStatus(inst)
 		condition and 
 		"\n"..STRINGS.YUKARI_SHOULD_BRING_SOMETHING or ""
 	end
-
-	owner.components.talker:Say( STRINGS.YUKARI_CURRENT_LEVEL.." - "..CurrentLevel..GetStr(inst)..IsHanded() )
-
-	-- return STRINGS.YUKARI_CURRENT_LEVEL.." - "..CurrentLevel..GetStr(inst)..IsHanded()
+	
+	return STRINGS.YUKARI_CURRENT_LEVEL.." - "..CurrentLevel..GetStr(inst)..IsHanded()
 end
 
 local function SetState(inst)
@@ -137,7 +135,7 @@ local function SetState(inst)
 		local owner = inst.components.inventoryitem.owner
 		local CurrentLevel = owner.components.upgrader.hatlevel
 		local condition = GetCondition(inst)
-
+		inst.components.inspectable:SetDescription( GetStatus(inst) )
 		inst.components.spellcard:SetCondition( condition )
 	end
 end
@@ -146,7 +144,7 @@ local function DoUpgrade(inst)
 
 	local Chara = inst.components.inventoryitem.owner
 	local list = GetTable(inst)
-	local backpack = GetBackpack()
+	local backpack = GetBackpack(inst)
 	
 	for i = 1, #list, 1 do
 		local function consume(item, left_count, backpack)
@@ -230,7 +228,6 @@ local function fn()
     end
 
 	inst:AddComponent("inspectable")    
-	inst.components.inspectable.SetDescription = GetStatus
 	
 	inst:AddComponent("inventoryitem")   
 	inst.components.inventoryitem.atlasname = "images/inventoryimages/scheme.xml" 

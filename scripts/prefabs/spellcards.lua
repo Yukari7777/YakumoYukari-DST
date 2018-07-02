@@ -108,7 +108,7 @@ function MakeCard(name)
 	local function necro(inst)
 		inst:RemoveComponent("finiteuses")
 		inst.components.spellcard.action = ACTIONS.CASTTOHOH
-		inst.components.spellcard.costpower = 0
+		inst.components.spellcard.costpower = 300
 		inst.components.spellcard:SetSpellFn(function()
 			local owner = inst.components.inventoryitem.owner
 			local x,y,z = owner.Transform:GetWorldPosition()

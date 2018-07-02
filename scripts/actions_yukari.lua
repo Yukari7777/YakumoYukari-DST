@@ -180,7 +180,7 @@ AddComponentAction("POINT", "makegate", action_umbre)
 local CASTTOHO = AddAction("CASTTOHO", "castspell", function(act)
 	local item = act.invobject or act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
 
-	if item and item.components.spellcard and item.components.spellcard:CanCast(act.doer) then
+	if item and item.components.spellcard then
 		item.components.spellcard:CastSpell(act.target)
 		return true--item.components.spellcard:CastSpell(act.target)
 	end
@@ -288,7 +288,9 @@ AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.CASTTOHO, "cas
 
 
 local function spell_inv(inst, doer, actions, right)
-        if doer:HasTag("yakumoyukari") then
+        if doer:HasTag("yakumoyukari") 
+		and inst.components.spellcard ~= nil
+		and inst.components.spellcard:CanCast(doer) then
             table.insert(actions, ACTIONS.CASTTOHO)
         end
 end
@@ -414,20 +416,6 @@ AddStategraphState("wilson", casttohoh)
 AddStategraphState("wilson_client", casttohohc)
 AddStategraphActionHandler("wilson", ActionHandler(ACTIONS.CASTTOHOH, "casttohoh"))
 AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.CASTTOHOH, "casttohohc"))
-
-
-local function action_spell(inst, doer, target, actions, right)
-	if right and not inst.components.spellcard.isdangeritem then
-		if inst.components.spellcard.action == ACTIONS.CASTTOHOH then
-			table.insert(actions, ACTIONS.CASTTOHOH)
-		else
-			table.insert(actions, ACTIONS.CASTTOHO)
-		end
-	end
-end
-
-AddComponentAction("USEITEM", "spellcard", action_spell)
-
 
 if Language == "chinese" then
 UTELEPORT.str = "´« ËÍ"
