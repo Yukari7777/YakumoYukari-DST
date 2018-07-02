@@ -56,6 +56,7 @@ local ThePlayer = GLOBAL.ThePlayer
 local GetString = GLOBAL.GetString
 local TheInput = GLOBAL.TheInput
 local IsPaused = GLOBAL.IsPaused
+local EQUIPSLOTS = GLOBAL.EQUIPSLOTS
 local Inspect = GetModConfigData("inspect")
 local Language = GetModConfigData("language")
 local FindEntity = GLOBAL.FindEntity
@@ -119,12 +120,12 @@ TheInput:AddKeyDownHandler(116, GodTelePort)
 
 ---------------- OVERRIDE -----------------
 
-local function InventoryDamage(self)
+local function OnTakeDamage(self)
 	local function NewTakeDamage(self, damage, attacker, weapon, ...)
 		-- GRAZE MECHANISM
-		local Chara = ThePlayer
+		local Chara = self.inst
 		if self.inst.prefab == "yakumoyukari" then
-			local totaldodge = Chara.dodgechance + Chara.components.upgrader.hatdodgechance
+			local totaldodge = Chara.components.upgrader.dodgechance + Chara.components.upgrader.hatdodgechance
 			if math.random() < totaldodge then
 				local pt = GLOBAL.Vector3(Chara.Transform:GetWorldPosition())
 				for i = 1, math.random(3,5), 1 do
@@ -136,52 +137,65 @@ local function InventoryDamage(self)
 				return 0
 			end
 		end
-		--check resistance
-		for k,v in pairs(self.equipslots) do
-			if v.components.resistance and v.components.resistance:HasResistance(attacker, weapon) then
+
+		local absorbers = {}
+
+		for k, v in pairs(self.equipslots) do
+			if v.components.resistance ~= nil and
+				v.components.resistance:HasResistance(attacker, weapon) and
+				v.components.resistance:ShouldResistDamage() then
+				v.components.resistance:ResistDamage(damage)
 				return 0
+			elseif v.components.armor ~= nil then
+				absorbers[v.components.armor] = v.components.armor:GetAbsorption(attacker, weapon)
 			end
 		end
-		--check specialised armor
-		for k,v in pairs(self.equipslots) do
-			if v.components.armor and v.components.armor.tags then
-				damage = v.components.armor:TakeDamage(damage, attacker, weapon)
-				if damage <= 0 then
-					return 0
-				end
+
+		-- print("Incoming damage", damage)
+
+		local absorbed_percent = 0
+		local total_absorption = 0
+		for armor, amt in pairs(absorbers) do
+			-- print("\t", armor.inst, "absorbs", amt)
+			absorbed_percent = math.max(amt, absorbed_percent)
+			total_absorption = total_absorption + amt
+		end
+
+		local absorbed_damage = damage * absorbed_percent
+		local leftover_damage = damage - absorbed_damage
+
+		-- print("\tabsorbed%", absorbed_percent, "total_absorption", total_absorption, "absorbed_damage", absorbed_damage, "leftover_damage", leftover_damage)
+
+		if total_absorption > 0 then
+			ProfileStatsAdd("armor_absorb", absorbed_damage)
+
+			for armor, amt in pairs(absorbers) do
+				armor:TakeDamage(absorbed_damage * amt / total_absorption + armor:GetBonusDamage(attacker, weapon))
 			end
 		end
-		--check general armor
-		for k,v in pairs(self.equipslots) do
-			if v.components.armor then
-				damage = v.components.armor:TakeDamage(damage, attacker, weapon)
-				if damage <= 0 then
-					return 0
-				end
-			end
-		end
+
 		-- custom damage reduction
 		if self.inst.prefab == "yakumoyukari" then
-			if Chara.components.upgrader:IsHatValid() then
+			if self.inst.components.inventory ~= nil and self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat" then
 				local hatabsorb = 0
 				for i = 2, 5, 1 do
 					if Chara.components.upgrader.hatskill[i] then
 						hatabsorb = hatabsorb + 0.2
 					end
 				end
-				damage = damage * (1 - hatabsorb)
+				leftover_damage = leftover_damage * (1 - hatabsorb)
 			end
 			
 			if Chara.components.upgrader.IsDamage then
-				damage = damage * 0.7
+				leftover_damage = leftover_damage * 0.7
 			end
 			
 			if Chara:HasTag("IsDamage") then
-				damage = damage * 0.5
+				leftover_damage = leftover_damage * 0.5
 			end
 		end
 		
-		return damage
+		return leftover_damage
 	end
 	self.ApplyDamage = NewTakeDamage
 end
@@ -311,7 +325,7 @@ local function ToolEfficientFn(self)
 		assert(GLOBAL.TOOLACTIONS[action.id], "invalid tool action")
 		if ThePlayer and IsYukari then
 			if ThePlayer.components.upgrader and ThePlayer.components.upgrader.IsEfficient then
-				if action == GLOBAL.ACTIONS.HAMMER then else
+				if action ~= GLOBAL.ACTIONS.HAMMER then -- Hammering efficiency should not be inceased.
 					effectiveness = effectiveness + 0.5
 				end
 			end
@@ -439,9 +453,8 @@ modimport "scripts/tunings_yukari.lua"
 modimport "scripts/strings_yukari.lua"
 modimport "scripts/actions_yukari.lua"
 modimport "scripts/recipes_yukari.lua"
---AddComponentPostInit("inventory", InventoryDamage)
---AddComponentPostInit("tool", ToolEfficientFn)
---AddPrefabPostInit("forest", AddSchemeManager) -- Override function AddSchemeManager to prefab "forest"
+AddComponentPostInit("inventory", OnTakeDamage)
+AddComponentPostInit("tool", ToolEfficientFn)
 AddPrefabPostInit("cave", AddSchemeManager)
 AddPrefabPostInit("world", AddSchemeManager)
 --AddPrefabPostInit("bunnyman", BunnymanNormalRetargetFn)

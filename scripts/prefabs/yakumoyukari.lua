@@ -90,20 +90,16 @@ local function onpreload(inst, data)
 			inst.components.upgrader.sanity_level = data.sanity_level or 0 
 			inst.components.upgrader.power_level = data.power_level or 0	
 			inst.components.upgrader.hatlevel = data.hatlevel or 1
+			inst.components.upgrader.ability = data.skilltree
+			inst.components.upgrader.hatskill = data.hatskill
+			inst.components.upgrader:AbilityManager(inst)
 			inst.components.upgrader:DoUpgrade(inst)
 
-			if data.skilltree then
-				inst.components.upgrader.ability = data.skilltree
-			end
-			if data.hatskill then
-				inst.components.upgrader.hatskill = data.hatskill
-			end
 			--re-set these from the save data, because of load-order clipping issues
 			if data.health and data.health.health then inst.components.health.currenthealth = data.health.health end
 			if data.hunger and data.hunger.hunger then inst.components.hunger.current = data.hunger.hunger end
 			if data.sanity and data.sanity.current then inst.components.sanity.current = data.sanity.current end
 			if data.power and data.power.current then inst.components.power.current = data.power.current end
-			
 			inst.components.health:DoDelta(0)
 			inst.components.hunger:DoDelta(0)
 			inst.components.sanity:DoDelta(0)
@@ -307,7 +303,7 @@ local function OnGrazed(inst)
 end
 
 local function EquippingEvent(inst)
-	print("hatequip")
+	
 	if inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) then
 		inst.hatequipped = inst.components.inventory ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat"
 	else
@@ -500,6 +496,8 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:ListenForEvent( "grazed", OnGrazed )
 	
 	inst.OnLoad = function(inst)
+		inst.valid = true
+		inst.components.upgrader:DoUpgrade(inst)
 		inst:PushEvent("yukariloaded")
 	end
 
@@ -508,8 +506,6 @@ local master_postinit = function(inst) -- after SetPristine()
     elseif TheNet:GetServerGameMode() == "quagmire" then
         event_server_data("quagmire", "prefabs/yakumoyukari").master_postinit(inst)
     end
-
-	print("Yukari masterinit loaded")
 end
 
 return MakePlayerCharacter("yakumoyukari", prefabs, assets, common_init, master_postinit)

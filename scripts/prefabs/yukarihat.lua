@@ -7,7 +7,7 @@ local assets =
 
 local function Ability(inst, owner)
 
-	if owner.components.upgrader:IsHatValid() then
+	if owner.components.upgrader:IsHatValid(owner) then
 		if owner.components.upgrader.hatlevel >= 3 then
 			inst.components.waterproofer:SetEffectiveness(1)
 		end

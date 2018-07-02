@@ -131,7 +131,7 @@ local function GetStatus(inst)
 end
 
 local function SetState(inst)
-	if inst.components.inventoryitem:IsHeld() then -- temp
+	if inst.components.inventoryitem:IsHeld() and inst.components.inventoryitem.owner.prefab == "yakumoyukari" then -- temp
 		local owner = inst.components.inventoryitem.owner
 		local CurrentLevel = owner.components.upgrader.hatlevel
 		local condition = GetCondition(inst)

@@ -171,10 +171,12 @@ local function SetDesc(inst, index)
 end
 
 local function SetState(inst)
-	local index = GetIndex(inst)
-	local condition = GetCondition(inst, index)
-	inst.components.spellcard:SetCondition( condition )
-	SetDesc(inst, index)
+	if inst.components.inventoryitem:IsHeld() and inst.components.inventoryitem.owner.prefab == "yakumoyukari"  then -- temp
+		local index = GetIndex(inst)
+		local condition = GetCondition(inst, index)
+		inst.components.spellcard:SetCondition( condition )
+		SetDesc(inst, index)
+	end
 end
 
 local function DoUpgrade(inst)

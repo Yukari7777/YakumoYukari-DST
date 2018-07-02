@@ -1,4 +1,4 @@
-function MakeUltimate(name, value)
+function MakeUltimate(name, index)
 
 	local fname = name.."ult"
 	
@@ -59,40 +59,34 @@ function MakeUltimate(name, value)
 	local function fn()  
 		
 		local inst = CreateEntity()    
-		inst.entity:AddNetwork()
-		local trans = inst.entity:AddTransform()    
-		local anim = inst.entity:AddAnimState()   
+	
+		inst.entity:AddTransform()    
+		inst.entity:AddAnimState()    
+		inst.entity:AddSoundEmitter()  
+		inst.entity:AddNetwork()	
 		
 		MakeInventoryPhysics(inst)   
 		
-		anim:SetBank("spell")    
-		anim:SetBuild("spell")    
-		anim:PlayAnimation("idle")    
+		inst.AnimState:SetBank("spell")    
+		inst.AnimState:SetBuild("spell")    
+		inst.AnimState:PlayAnimation("idle")    
 		
+		if not TheWorld.ismastersim then
+			return inst
+		end
+
+		inst.entity:SetPristine()
+
 		inst:AddComponent("inspectable")        
 		
 		inst:AddComponent("inventoryitem") 
 		inst.components.inventoryitem.imagename = fname    
 		inst.components.inventoryitem.atlasname = "images/inventoryimages/"..fname..".xml"    
-		local owner = inst.components.inventoryitem.owner
-		
-		local function IsHanded()
-			local hands = owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
-			if hands then return false else return true end
-		end
-		
-		local function CallFn()
-			inst.components.spellcard:SetCondition( IsHanded() )
-		end
 
 		inst:AddComponent("spellcard")
-		inst.components.spellcard.index = value
+		inst.components.spellcard.index = index
 		inst.components.spellcard.name = fname
 		inst.components.spellcard:SetSpellFn( DoUpgrade )
-		inst.components.spellcard:SetCondition( IsHanded() )
-		
-		owner:ListenForEvent("equip", CallFn )
-		owner:ListenForEvent("unequip", CallFn )
 		
 		return inst
 	end

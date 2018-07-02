@@ -57,8 +57,8 @@ local Upgrader = Class(function(self, inst)
 	
 end)
 
-function Upgrader:IsHatValid()
-	return false-- self.inst.components.inventory ~= nil and self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat"
+function Upgrader:IsHatValid(inst)
+	return inst ~= nil and inst.components.inventory ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat" or false
 end
 
 function Upgrader:AbilityManager(inst)
@@ -249,7 +249,7 @@ end
 
 function Upgrader:HatSkillManager(inst)
 
-	local IsValid = self.IsHatValid()
+	local IsValid = inst.valid and self:IsHatValid(inst)
 
 	if IsValid then
 		local skill = self.hatskill
