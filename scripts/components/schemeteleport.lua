@@ -1,38 +1,10 @@
 local schemeteleport = Class(function(self, inst)
     self.inst = inst
 	self.target = nil
+	self.islinked = false
 end)
 
-function schemeteleport:CollectSceneActions(doer, actions) 
-	if self.target ~= nil and self.target.components.schemeteleport then
-		table.insert(actions, ACTIONS.JUMPIN)
-	elseif #actions > 0 then
-		table.remove(actions)
-	end
-end
-
-function schemeteleport:OnActivate(doer)
-	if doer:HasTag("player") then
-		doer.SoundEmitter:KillSound("wormhole_travel")
-		doer.SoundEmitter:PlaySound("tunnel/common/travel")
-		doer.components.health:SetInvincible(true)
-		doer.components.playercontroller:Enable(false)
-
-		doer.HUD:Hide()
-		TheFrontEnd:SetFadeLevel(1)
-		doer:DoTaskInTime(1, function() 
-			TheFrontEnd:Fade(true,2)
-			doer.HUD:Show()
-		end)
-		doer:DoTaskInTime(2, function()
-			doer:PushEvent("tunneltravel")
-			doer.components.health:SetInvincible(false)
-			doer.components.playercontroller:Enable(true)
-		end)
-	end
-end
-
-function schemeteleport:OnActivateOther(other, doer) 
+function schemeteleport:OnActivate(other, doer) 
 	other.sg:GoToState("open")
 end
 
@@ -41,8 +13,11 @@ function schemeteleport:Activate(doer)
 		return
 	end
 	
-	self:OnActivate(doer)
-	self:OnActivateOther(self.target, doer)
+	if doer:HasTag("player") then
+		doer.SoundEmitter:KillSound("wormhole_travel")
+		doer.SoundEmitter:PlaySound("tunnel/common/travel")
+	end
+	self:OnActivate(self.target, doer)
 	
 	self:Teleport(doer)
 
@@ -119,6 +94,7 @@ end
 
 function schemeteleport:Target(otherschemeteleport)
 	self.target = otherschemeteleport
+	self.islinked = true
 end
 
 return schemeteleport

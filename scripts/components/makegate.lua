@@ -66,9 +66,9 @@ function MakeGate:Teleport(pt, caster)
 end
 
 function MakeGate:RCreate(pt, caster)
-	if not self:CanSpell(caster, TUNING.YDEFAULT.TELEPORT_POWER_COST, pt) then
-		return false
-	end
+	--if not self:CanSpell(caster, TUNING.YDEFAULT.TELEPORT_POWER_COST, pt) then
+		--return false
+	--end
 
 	caster.SoundEmitter:PlaySound("dontstarve/common/staff_blink")
 	if caster.components.health then

@@ -1,6 +1,6 @@
 local assets =
 {
-	Asset("ANIM", 			"anim/tunnel.zip" ),
+	Asset("ANIM", "anim/tunnel.zip" ),
 }
 
 local function onpreload(inst, data)
@@ -39,42 +39,53 @@ end
 
 local function fn(Sim)
 
-	local inst = CreateEntity()
-	inst.entity:AddNetwork()
-	local trans = inst.entity:AddTransform()
-	local anim = inst.entity:AddAnimState()
-    inst.entity:AddSoundEmitter()
-	inst:AddTag("tunnel") 
-    
+	local inst = CreateEntity()    
+	
+	inst.entity:AddTransform()    
+	inst.entity:AddAnimState()    
+	inst.entity:AddSoundEmitter()  
 	inst.entity:AddMiniMapEntity()
+	inst.entity:AddNetwork()	
+    
     inst.MiniMapEntity:SetIcon("minimap_tunnel.tex")
    
-    anim:SetBank("tunnel")
-    anim:SetBuild("tunnel")
-	anim:SetLayer( LAYER_BACKGROUND )
-	anim:SetSortOrder( 3 )
-	anim:SetRayTestOnBB(true)
+    inst.AnimState:SetBank("tunnel")
+    inst.AnimState:SetBuild("tunnel")
+	inst.AnimState:SetLayer( LAYER_BACKGROUND )
+	inst.AnimState:SetSortOrder( 3 )
+	inst.AnimState:SetRayTestOnBB(true)
+
+	inst:AddTag("tunnel") 
+	inst:AddTag("teleporter")
 	
+	if not TheWorld.ismastersim then
+		return inst
+    end
+
+	inst.entity:SetPristine()
+
+
 	inst:SetStateGraph("SGtunnel")
     inst:AddComponent("inspectable")
+
+	inst:AddComponent("schemeteleport")
+	inst:AddComponent("scheme_manager")
 
 	inst:AddComponent("playerprox")
 	inst.components.playerprox:SetDist(5,5)
 	inst.components.playerprox.onnear = function()
 		if inst.components.schemeteleport.target then
-			_G.DisableWormholeJumpNoise()
+			--_G.DisableWormholeJumpNoise()
 			inst.sg:GoToState("opening")
 		end
 	end
 	
 	inst.components.playerprox.onfar = function()
 		if inst.sg.currentstate.name == "open" then
-			_G.EnableWormholeJumpNoise()
+			--_G.EnableWormholeJumpNoise()
 			inst.sg:GoToState("closing")
 		end
 	end
-	
-	inst:AddComponent("schemeteleport")
 	
 	inst.OnSave = onsave
 	inst.OnPreLoad = onpreload

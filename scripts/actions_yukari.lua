@@ -87,14 +87,14 @@ AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.UTELE, "utelec
 
 
 
-local SPAWNG = AddAction("SPAWNG", "Spawn", function(act)
+local SPAWNG = AddAction("SPAWNG", "Spawn Scheme Tunnel", function(act)
 	if act.invobject and act.invobject.components.makegate then
         return act.invobject.components.makegate:RCreate(act.pos, act.doer)
     end
 end)
 
-SPAWNG.priority = 30
-SPAWNG.distance = 10
+SPAWNG.priority = 7
+SPAWNG.distance = 6
 SPAWNG.rmb = true
 SPAWNG.mount_valid = false
 
@@ -113,7 +113,7 @@ local spawng = State({
 
     timeline = 
     {
-        TimeEvent(33*FRAMES, function(inst) inst:PerformBufferedAction() end),
+        TimeEvent(15*FRAMES, function(inst) inst:PerformBufferedAction() end),
     },
 
     events = {
@@ -413,6 +413,32 @@ AddStategraphState("wilson", casttohoh)
 AddStategraphState("wilson_client", casttohohc)
 AddStategraphActionHandler("wilson", ActionHandler(ACTIONS.CASTTOHOH, "casttohoh"))
 AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.CASTTOHOH, "casttohohc"))
+
+ACTIONS.JUMPIN.fn = function(act)
+	if act.doer ~= nil and
+        act.doer.sg ~= nil and
+        act.doer.sg.currentstate.name == "jumpin_pre" then
+        if act.target ~= nil and act.target.components.teleporter ~= nil and act.target.components.teleporter:IsActive() then
+            act.doer.sg:GoToState("jumpin", { teleporter = act.target })
+            return true
+		elseif act.target ~= nil and act.target.components.schemeteleport ~= nil and act.target.components.schemeteleport.islinked then
+			act.doer.sg:GoToState("jumpin", { teleporter = act.target })
+			act.doer:DoTaskInTime(0.8, function()
+				act.target.components.schemeteleport:Activate(act.doer)
+			end)
+			return true
+        end
+        act.doer.sg:GoToState("idle")
+    end
+
+end
+
+local function tunnelfn(inst, doer, actions, right)
+	if inst:HasTag("teleporter") and inst.components.schemeteleport.islinked then
+		table.insert(actions, ACTIONS.JUMPIN)
+    end
+end
+AddComponentAction("SCENE", "schemeteleport", tunnelfn)
 
 if Language == "chinese" then
 UTELEPORT.str = "´« ËÍ"

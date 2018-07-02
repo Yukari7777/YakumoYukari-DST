@@ -87,41 +87,6 @@ function AddSchemeManager(inst)
 	inst:AddComponent("scheme_manager")
 end
 
--------------------------------- Scheme gate
-
--- GLOBAL.jumpintimeline = {}
-
--- GLOBAL.ACTIONS.JUMPIN.fn = function(act)
-    -- if act.target.components.teleporter then
-	    -- act.target.components.teleporter:Activate(act.doer)
-	    -- return true
-	-- elseif act.target.components.schemeteleport then 
-		-- act.target.components.schemeteleport:Activate(act.doer)
-		-- return true
-	-- end
--- end
-
--- function SimPostInit(player)
-	-- local state = player.sg.sg.states["jumpin"]
-	-- GLOBAL.jumpintimeline = state.timeline
--- end
-
--- GLOBAL.DisableWormholeJumpNoise = function()
-	-- local player = GLOBAL.ThePlayer
-	-- local state = player.sg.sg.states["jumpin"]
-	-- state.timeline = nil
--- end
-
--- GLOBAL.EnableWormholeJumpNoise = function()
-	-- local player = GLOBAL.ThePlayer
-	-- local state = player.sg.sg.states["jumpin"]
-	-- state.timeline = GLOBAL.jumpintimeline
--- end
-
--- AddSimPostInit(SimPostInit)
-
----------------------------------------------
-
 function GodTelePort()
 	if ThePlayer and IsYukari then
 		if ThePlayer.components.upgrader.GodTelepoirt and ThePlayer.istelevalid then
@@ -477,8 +442,8 @@ modimport "scripts/recipes_yukari.lua"
 --AddComponentPostInit("inventory", InventoryDamage)
 --AddComponentPostInit("tool", ToolEfficientFn)
 --AddPrefabPostInit("forest", AddSchemeManager) -- Override function AddSchemeManager to prefab "forest"
---AddPrefabPostInit("cave", AddSchemeManager)
---AddPrefabPostInit("world", AddSchemeManager)
+AddPrefabPostInit("cave", AddSchemeManager)
+AddPrefabPostInit("world", AddSchemeManager)
 --AddPrefabPostInit("bunnyman", BunnymanNormalRetargetFn)
 --AddPrefabPostInit("pigman", PigmanNormalRetargetFn)
 --AddPrefabPostInit("bat", BatRetargetFn)

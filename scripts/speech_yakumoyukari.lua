@@ -527,7 +527,7 @@ return {
 		},
 		DIVININGRODBASE =
 		{
-			GENERIC = "It linked to the other world.",
+			GENERIC = "It linked it to the other world.",
 			READY = "I need to insert my divining rod.",
 			UNLOCKED = "I can see what's beyond the world..",
 		},
