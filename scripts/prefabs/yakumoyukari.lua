@@ -267,7 +267,7 @@ local function PeriodicFunction(inst, data)
 		InvincibleRegen(inst)
 	end
 	
-	if inst.components.upgrader.SightDistance and inst.components.upgrader.SightDistance > 0 then
+	if inst.components.upgrader.SightDistance > 0 then
 		local dis = inst.components.upgrader.SightDistance
 		local pt = GetPoint(Vector3(inst.Transform:GetWorldPosition()))
 		TheWorld.minimap.MiniMap:ShowArea(pt.x, pt.y, pt.z, 50 * dis)
@@ -325,6 +325,7 @@ local function DebugFunction(inst)
 			inst.components.power.max = 300
 			inst.components.power.current = 300
 		end
+		inst.components.hunger:Pause(true)
 	end)
 end	
 
@@ -480,6 +481,7 @@ local master_postinit = function(inst) -- after SetPristine()
 
 	inst:DoPeriodicTask(1, CooldownFunction)
 	inst:DoPeriodicTask(1, PeriodicFunction)
+	inst:DoPeriodicTask(1, DebugFunction)
 	
 	inst.OnSave = onsave
 	inst.OnPreLoad = onpreload

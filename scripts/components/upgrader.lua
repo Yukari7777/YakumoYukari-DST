@@ -36,9 +36,9 @@ local Upgrader = Class(function(self, inst)
 	self.ResistCave = false
 	self.InvincibleLearned = false
 	self.CanbeInvincible = false
-	self.WaterProofed = false
+	self.WaterProofer = false
 	self.FireResist = false
-	self.GodTelepoirt = false
+	self.GodTeleport = false
 	
 	self.ability = {}
 	self.skillsort = 4
@@ -58,7 +58,14 @@ local Upgrader = Class(function(self, inst)
 end)
 
 function Upgrader:IsHatValid(inst)
-	return inst ~= nil and inst.components.inventory ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat" or false
+	if inst ~= nil then
+		return inst.valid 
+		and inst.components.inventory ~= nil 
+		and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) ~= nil
+		and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat" 
+		or false
+	end
+	return false
 end
 
 function Upgrader:AbilityManager(inst)
@@ -249,9 +256,10 @@ end
 
 function Upgrader:HatSkillManager(inst)
 
-	local IsValid = inst.valid and self:IsHatValid(inst)
+	local HatEquipped = inst.valid and self:IsHatValid(inst)
+	local Hat = HatEquipped and self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD)
 
-	if IsValid then
+	if HatEquipped then
 		local skill = self.hatskill
 		
 		if skill[2] then
@@ -260,13 +268,15 @@ function Upgrader:HatSkillManager(inst)
 		end
 		
 		if skill[3] then
-			self.WaterProofed = true
+			Hat.components.waterproofer:SetEffectiveness(1)
+			self.WaterProofer = true
 			self.hatpowerbonus = 20
 			self.hatdodgechance = 0.2
 			self.dtmult = 1.5
 		end
 		
 		if skill[4] then
+			self.inst.components.health.fire_damage_scale = self.inst.components.health.fire_damage_scale + 1
 			self.FireResist = true
 			self.SightDistance = 2
 			self.hatpowerbonus = 50
@@ -279,13 +289,13 @@ function Upgrader:HatSkillManager(inst)
 			self.hatpowerbonus = 100
 			self.dtmult = 2.5
 			self.hatdodgechance = 0.4
-			self.GodTelepoirt = true
+			self.GodTeleport = true
 		end
 		
 	else
-		self.WaterProofed = false
+		self.WaterProofer = false
 		self.FireResist = false
-		self.GodTelepoirt = false
+		self.GodTeleport = false
 		self.SightDistance = 0
 		self.hatpowerbonus = 0
 		self.hatdodgechance = 0
