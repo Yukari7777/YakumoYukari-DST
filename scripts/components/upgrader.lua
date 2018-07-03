@@ -254,6 +254,15 @@ function Upgrader:SkillManager(inst)
 	
 end
 
+function Upgrader:SetFireDamageScale(inst)
+	local fireimmunedbody = inst.valid
+		  and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY)
+		  and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == ("armordragonfly" or "armorobsidian") or false
+	if self.inst.components.health then
+		self.inst.components.health.fire_damage_scale = (fireimmunedbody or self.FireResist) and 0 or 1
+	end
+end
+
 function Upgrader:HatSkillManager(inst)
 
 	local HatEquipped = inst.valid and self:IsHatValid(inst)
@@ -276,7 +285,6 @@ function Upgrader:HatSkillManager(inst)
 		end
 		
 		if skill[4] then
-			self.inst.components.health.fire_damage_scale = self.inst.components.health.fire_damage_scale + 1
 			self.FireResist = true
 			self.SightDistance = 2
 			self.hatpowerbonus = 50
@@ -301,14 +309,16 @@ function Upgrader:HatSkillManager(inst)
 		self.hatdodgechance = 0
 		self.dtmult = 1.2
 	end
+	self:SetFireDamageScale(inst)
 end
 
-function Upgrader:DoUpgrade(inst, stat) 
+function Upgrader:DoUpgrade(inst, stat) -- it contains stat initializing
 	local hunger_percent = inst.components.hunger:GetPercent()
 	local health_percent = inst.components.health:GetPercent()
 	local sanity_percent = inst.components.sanity:GetPercent()
 	local power_percent = inst.components.power:GetPercent()
-	
+	self:AbilityManager(inst)
+
 	local difficulty = GetModConfigData("difficulty", "YakumoYukari")
 	local STATUS = TUNING.STATUS_DEFAULT
 	if difficulty == "easy" then
@@ -317,7 +327,7 @@ function Upgrader:DoUpgrade(inst, stat)
 		STATUS = TUNING.STATUS_HARD
 	end
 	
-	if stat then
+	if stat ~= nil then
 		if stat == 1 then
 			self.health_level = self.health_level + 1
 			inst.HUD.controls.status.heart:PulseGreen()
@@ -347,7 +357,7 @@ function Upgrader:DoUpgrade(inst, stat)
 			inst.components.locomotor.runspeed = 6 + self.bonusspeed + self.hatbonusspeed
 			inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_UPGRADE_POWER"))	
 		end	
-	else 
+	else -- for init or update
 		inst.components.health.maxhealth = STATUS.DEFAULT_HP + self.health_level * STATUS.HP_RATE + self.healthbonus + math.max(0, (self.health_level - 30) * 7.5)
 		inst.components.hunger.hungerrate = math.max( 0, (STATUS.DEFAULT_HR - self.hunger_level * STATUS.HR_RATE - math.max(0, (self.hunger_level - 30) * 0.025 )) ) * TUNING.WILSON_HUNGER_RATE 
 		inst.components.hunger.max = STATUS.DEFAULT_HU + self.hungerbonus
@@ -364,7 +374,6 @@ function Upgrader:DoUpgrade(inst, stat)
 	inst.components.hunger:SetPercent(hunger_percent)
 	inst.components.sanity:SetPercent(sanity_percent)
 	inst.components.power:SetPercent(power_percent)
-	self:AbilityManager(inst)
 
 end
 

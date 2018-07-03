@@ -5,36 +5,6 @@ local assets =
 	Asset("ATLAS", "images/inventoryimages/yukarihat.xml"),    
 }
 
-local function Ability(inst)
-	if inst.components.inventoryitem:IsHeld() and inst.components.inventoryitem.owner.prefab == "yakumoyukari" then -- temp
-		local owner = inst.components.inventoryitem.owner
-
-		if owner.components.upgrader:IsHatValid(owner) then
-			if owner.components.upgrader.hatlevel >= 3 then
-				print("hatlevel >= 3")
-				inst:AddTag("waterproofer")
-				--inst.components.waterproofer:SetEffectiveness(TUNING.WATERPROOFNESS_ABSOLUTE)
-			end
-		
-			if owner.components.upgrader.hatlevel >= 4 then
-				inst.components.equippable.poisonblocker = true
-				inst.components.equippable.poisongasblocker = true
-				if not owner.fireimmuned and owner.components.health then
-					owner.components.health.fire_damage_scale = 0
-				end
-			end
-		else
-			--inst.components.waterproofer:SetEffectiveness(0)
-			inst:RemoveTag("waterproofer")
-			inst.components.equippable.poisonblocker = false
-			inst.components.equippable.poisongasblocker = false
-			if not owner.fireimmuned == false and owner.components.health then
-				owner.components.health.fire_damage_scale = 1
-			end
-		end
-	end
-end
-
 local function fn()  
 	
 	local function onequiphat(inst, owner)
@@ -43,7 +13,6 @@ local function fn()
         owner.AnimState:Show("HAT_HAIR")
         owner.AnimState:Hide("HAIR_NOHAT")
         owner.AnimState:Hide("HAIR") 
-		Ability(inst) 
 		owner:PushEvent("hatequip")
     end
 
@@ -52,7 +21,6 @@ local function fn()
         owner.AnimState:Hide("HAT_HAIR")
         owner.AnimState:Show("HAIR_NOHAT")
         owner.AnimState:Show("HAIR") 
-		Ability(inst) 
 		owner:PushEvent("hatunequip")
     end
 
@@ -93,10 +61,6 @@ local function fn()
 	inst.components.equippable.equipslot = EQUIPSLOTS.HEAD
 	inst.components.equippable:SetOnEquip( onequiphat )
     inst.components.equippable:SetOnUnequip( onunequiphat )
-
-	inst.OnLoad = function(inst)
-		Ability(inst)
-	end
 	
 	return inst
 end

@@ -209,10 +209,10 @@ local function BunnymanNormalRetargetFn(inst)
 		return FindEntity(inst, TUNING.PIG_TARGET_DIST,
 			function(guy)
 				return inst.components.combat:CanTarget(guy)
-					and (guy:HasTag("monster") or guy:HasTag("youkai"))
+					and (guy:HasTag("monster") or guy:HasTag("youkai")
 					or (guy.components.inventory ~= nil and
 						guy:IsNear(inst, TUNING.BUNNYMAN_SEE_MEAT_DIST) and
-						guy.components.inventory:FindItem(is_meat) ~= nil)
+						guy.components.inventory:FindItem(is_meat) ~= nil))
 			end,
 			{ "_combat", "_health" }, -- see entityreplica.lua
 			{ "realyoukai" }, -- not even be targetted with meat
@@ -224,17 +224,16 @@ end
 local function PigmanNormalRetargetFn(inst)
 	local function NormalRetargetFn(inst)
 		return FindEntity(inst, TUNING.PIG_TARGET_DIST,
-
 			function(guy)
 				return (guy.LightWatcher == nil or guy.LightWatcher:IsInLight())
-					and inst.components.combat:CanTarget(guy)
+					and inst.components.combat:CanTarget(guy) and (guy:HasTag("monster") or guy:HasTag("youkai"))
 			end,
-			{ "monster", "_combat" }, -- see entityreplica.lua
+			{ "_combat" }, -- see entityreplica.lua
 			inst.components.follower.leader ~= nil and
 			{ "playerghost", "INLIMBO", "abigail" } or
 			{ "playerghost", "INLIMBO", "realyoukai" })
 	end
-	inst.components.combat:SetRetargetFunction(1, NormalRetargetFn)
+	inst.components.combat:SetRetargetFunction(3, NormalRetargetFn)
 end
 -- Bat Retarget Function
 local function BatRetargetFn(inst)
@@ -266,21 +265,7 @@ local function BatRetargetFn(inst)
 	
 	inst.components.combat:SetRetargetFunction(3, Retarget)
 end
--- Spring Bee Retarget Function
-local function BeeRetargetFn(inst)
-	local function SpringBeeRetarget(inst)
-		return GLOBAL.TheWorld.state.isspring and
-        FindEntity(inst, 4,
-            function(guy)
-                return inst.components.combat:CanTarget(guy)
-            end,
-            { "_combat", "_health" },
-            { "insect", "INLIMBO" },
-            { "character", "animal", "monster" })
-        or nil
-	end
-	inst.components.combat:SetRetargetFunction(2, SpringBeeRetarget)
-end
+-- Bee Retarget Function
 local function KillerbeeRetargetFn(inst)
 	local function KillerRetarget(inst)
 		return FindEntity(inst, SpringCombatMod(8),
@@ -290,6 +275,20 @@ local function KillerbeeRetargetFn(inst)
 			{ "_combat", "_health" },
 			{ "insect", "INLIMBO", "realyoukai" },
 			{ "character", "animal", "monster" })
+	end
+	inst.components.combat:SetRetargetFunction(2, KillerRetarget)
+end
+local function BeeRetargetFn(inst)
+	local function SpringBeeRetarget(inst)
+		return GLOBAL.TheWorld.state.isspring and
+        FindEntity(inst, 4,
+            function(guy)
+                return inst.components.combat:CanTarget(guy)
+            end,
+            { "_combat", "_health" },
+            { "insect", "INLIMBO", "realyoukai" },
+            { "character", "animal", "monster" })
+        or nil
 	end
 	inst.components.combat:SetRetargetFunction(2, SpringBeeRetarget)
 end
@@ -309,6 +308,34 @@ local function FrogRetargetFn(inst)
 	end
 	inst.components.combat:SetRetargetFunction(3, retargetfn)
 end
+-- spider(warrior) retargetfn
+local function FindTarget(inst, radius)
+    return FindEntity(
+        inst,
+        SpringCombatMod(radius),
+        function(guy)
+            return inst.components.combat:CanTarget(guy)
+                and not (inst.components.follower ~= nil and inst.components.follower.leader == guy)
+        end,
+        { "_combat", "character" },
+        { "monster", "INLIMBO", "realyoukai" }
+    )
+end
+
+local function SpiderRetargetFn(inst)
+	local function NormalRetarget(inst)
+		return FindTarget(inst, inst.components.knownlocations:GetLocation("investigate") ~= nil and TUNING.SPIDER_INVESTIGATETARGET_DIST or TUNING.SPIDER_TARGET_DIST)
+	end
+	inst.components.combat:SetRetargetFunction(1, NormalRetarget)
+end
+
+local function WarriorRetargetFn(inst)
+	local function WarriorRetarget(inst)
+		return FindTarget(inst, TUNING.SPIDER_WARRIOR_TARGET_DIST)
+	end
+	inst.components.combat:SetRetargetFunction(2, WarriorRetarget)
+end
+
 
 local function SetInspectable(inst)
 	if Inspect then
@@ -416,7 +443,7 @@ function DebugCooltime()
 	end
 end
 
-function DoDebug_1()
+function Status_1()
 	if ThePlayer and ThePlayer:HasTag("yakumoyukari") then 
 		if not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
 		and TheInput:IsKeyDown(GLOBAL.KEY_SHIFT) then 
@@ -425,7 +452,7 @@ function DoDebug_1()
 	end
 end
 
-function DoDebug_2()
+function Status_2()
 	if ThePlayer and ThePlayer:HasTag("yakumoyukari") then 
 		if not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
 		and TheInput:IsKeyDown(GLOBAL.KEY_SHIFT) then 
@@ -434,7 +461,7 @@ function DoDebug_2()
 	end
 end
 
-function DoDebug_3()
+function Status_3()
 	if ThePlayer and ThePlayer:HasTag("yakumoyukari") then 
 		if not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
 		and TheInput:IsKeyDown(GLOBAL.KEY_SHIFT) then 
@@ -443,32 +470,34 @@ function DoDebug_3()
 	end
 end
 
-TheInput:AddKeyDownHandler(98, DoDebug_1)
-TheInput:AddKeyDownHandler(118, DoDebug_2)
-TheInput:AddKeyDownHandler(110, DoDebug_3)
+TheInput:AddKeyDownHandler(98, Status_1)
+TheInput:AddKeyDownHandler(118, Status_2)
+TheInput:AddKeyDownHandler(110, Status_3)
 
 -------------------------------
-modimport "scripts/power_init.lua" -- load "scripts/power_init.lua"
+modimport "scripts/power_init.lua"
 modimport "scripts/tunings_yukari.lua"
 modimport "scripts/strings_yukari.lua"
 modimport "scripts/actions_yukari.lua"
 modimport "scripts/recipes_yukari.lua"
-AddComponentPostInit("inventory", OnTakeDamage)
-AddComponentPostInit("tool", ToolEfficientFn)
 AddPrefabPostInit("cave", AddSchemeManager)
 AddPrefabPostInit("world", AddSchemeManager)
---AddPrefabPostInit("bunnyman", BunnymanNormalRetargetFn)
---AddPrefabPostInit("pigman", PigmanNormalRetargetFn)
---AddPrefabPostInit("bat", BatRetargetFn)
---AddPrefabPostInit("bee", BeeRetargetFn)
---AddPrefabPostInit("killerbee", KillerbeeRetargetFn)
---AddPrefabPostInit("frog", FrogRetargetFn)
---AddPrefabPostInit("shadowwatcher", SetInspectable)
---AddPrefabPostInit("shadowskittish", SetInspectable)
---AddPrefabPostInit("shadowskittish_water", SetInspectable)
---AddPrefabPostInit("creepyeyes", SetInspectable)
---AddPrefabPostInit("crawlinghorror", SetInspectable)
---AddPrefabPostInit("terrorbeak", SetInspectable)
---AddPrefabPostInit("swimminghorror", SetInspectable)
---AddPrefabPostInit("crawlingnightmare", SetInspectable)
---AddPrefabPostInit("nightmarebeak", SetInspectable)
+AddPrefabPostInit("bunnyman", BunnymanNormalRetargetFn)
+AddPrefabPostInit("pigman", PigmanNormalRetargetFn)
+AddPrefabPostInit("bat", BatRetargetFn)
+AddPrefabPostInit("bee", BeeRetargetFn)
+AddPrefabPostInit("killerbee", KillerbeeRetargetFn)
+AddPrefabPostInit("frog", FrogRetargetFn)
+AddPrefabPostInit("spider", SpiderRetargetFn)
+AddPrefabPostInit("spider_warrior", WarriorRetargetFn)
+AddPrefabPostInit("shadowwatcher", SetInspectable)
+AddPrefabPostInit("shadowskittish", SetInspectable)
+AddPrefabPostInit("shadowskittish_water", SetInspectable)
+AddPrefabPostInit("creepyeyes", SetInspectable)
+AddPrefabPostInit("crawlinghorror", SetInspectable)
+AddPrefabPostInit("terrorbeak", SetInspectable)
+AddPrefabPostInit("swimminghorror", SetInspectable)
+AddPrefabPostInit("crawlingnightmare", SetInspectable)
+AddPrefabPostInit("nightmarebeak", SetInspectable)
+AddComponentPostInit("inventory", OnTakeDamage)
+AddComponentPostInit("tool", ToolEfficientFn)

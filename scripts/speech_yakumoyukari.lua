@@ -109,7 +109,7 @@ return {
 	BATTLECRY =
 	{
 		GENERIC = "I'll let you a death!",
-		PIG = "Ha! Now I kick a piggy!",
+		PIG = "I'm butcher now!",
 		PREY = "I will erase you!",
 		SPIDER = "I'll let your guts out!",
 		SPIDER_WARRIOR = "Hey! You wanna go?",
@@ -887,7 +887,7 @@ return {
 		POMEGRANATE_COOKED = "Well, It's now not for our skin.",
 		POMEGRANATE_SEEDS = "Seed of Punica granatum",
 		POND = "It's not clean water.",
-		POOP = "It's just item..  It's merely item..",
+		POOP = "It's just item..  It's nothing but a item..",
 		FERTILIZER = "Still just F...",
 		PUMPKIN = "Cucurbita spp",
 		PUMPKINCOOKIE = "Best snacks in this game!!",
