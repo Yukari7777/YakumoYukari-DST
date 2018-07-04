@@ -7,18 +7,6 @@ local assets =
 	Asset("IMAGE", "images/inventoryimages/yukariumbre.tex"),
 }
 
-local function UpdateSound(inst)
-	-- inst:WatchWorldState("israining", boolean)
-    local soundShouldPlay = (TheWorld.state.israining and inst.components.equippable:IsEquipped() and inst.isunfolded)
-    if soundShouldPlay ~= inst.SoundEmitter:PlayingSound("umbrellarainsound") then
-        if soundShouldPlay then
-		    inst.SoundEmitter:PlaySound("dontstarve/rain/rain_on_umbrella", "umbrellarainsound") 
-        else
-		    inst.SoundEmitter:KillSound("umbrellarainsound")
-		end
-    end
-end 
-
 local function onuse(staff, pos, caster)
 
     if caster.components.power then
@@ -45,7 +33,7 @@ local function OnUnequipYukari(inst, owner)
 	owner.DynamicShadow:SetSize(1.3, 0.6)	
 	
 	inst.isunfolded = false
-	inst.components.weapon:SetDamage(6)
+	inst.components.weapon:SetDamage(TUNING.YDEFAULT.YUKARI_UMBRE_DAMAGE)
 	inst.components.waterproofer:SetEffectiveness(0)
 end    
 
@@ -58,7 +46,7 @@ local function unfoldit(inst)
 		owner.AnimState:OverrideSymbol("swap_object", "swap_yukariumbre", "swap")
 		owner.SoundEmitter:PlaySound("dontstarve/wilson/use_umbrella_down")
 		owner.DynamicShadow:SetSize(1.3, 0.6)
-		inst.components.weapon:SetDamage(6)
+		inst.components.weapon:SetDamage(TUNING.YDEFAULT.YUKARI_UMBRE_DAMAGE)
 		inst.components.waterproofer:SetEffectiveness(0)
 		
 		inst.isunfolded = false
@@ -68,7 +56,7 @@ local function unfoldit(inst)
 		owner.AnimState:OverrideSymbol("swap_object", "swap_yukariumbre2", "swap")
 		owner.SoundEmitter:PlaySound("dontstarve/wilson/use_umbrella_up") 
 		owner.DynamicShadow:SetSize(2.2, 1.4)
-		inst.components.weapon:SetDamage(1)
+		inst.components.weapon:SetDamage(TUNING.YDEFAULT.YUKARI_UMBRE_DAMAGE_SMALL)
 		inst.components.waterproofer:SetEffectiveness(1)
 		
 		inst.isunfolded = true
@@ -84,7 +72,7 @@ local function fn()
 	
 	inst.entity:AddTransform()    
 	inst.entity:AddAnimState()    
-	inst.entity:AddSoundEmitter()  
+	inst.entity:AddSoundEmitter()
 	inst.entity:AddMiniMapEntity()
 	inst.entity:AddNetwork()
 	
@@ -99,14 +87,13 @@ local function fn()
 	inst:AddTag("nopunch")
 	inst:AddTag("umbrella")
 	
+	inst.isunfolded = false
+
 	if not TheWorld.ismastersim then
 		return inst
     end
 
 	inst.entity:SetPristine()
-	
-	
-	inst.isunfolded = false
 	
 	inst:AddComponent("waterproofer")
 	inst.components.waterproofer:SetEffectiveness(0)
@@ -130,7 +117,7 @@ local function fn()
 	inst.components.inventoryitem.atlasname = "images/inventoryimages/yukariumbre.xml"  
 	
 	inst:AddComponent("weapon")
-    inst.components.weapon:SetDamage(6)
+    inst.components.weapon:SetDamage(TUNING.YDEFAULT.YUKARI_UMBRE_DAMAGE)
 	
 	inst:AddComponent("equippable")  
 	inst.components.equippable:SetOnEquip( OnEquipYukari )    

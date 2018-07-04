@@ -1,3 +1,15 @@
+local function onmax(self, max)
+    self.inst.replica.power:SetMaxPower(max)
+end
+
+local function oncurrent(self, current)
+    self.inst.replica.power:SetCurrent(current)
+end
+
+local function onratescale(self, ratescale)
+    self.inst.replica.power:SetRateScale(ratescale)
+end
+
 local Power = Class(function(self, inst)
     self.inst = inst
     self.max = 75
@@ -10,33 +22,18 @@ local Power = Class(function(self, inst)
 	self.task = self.inst:DoPeriodicTask(self.period, function() self:DoDec(self.period) end)
 	self.inst:ListenForEvent("respawn", function(inst) self:OnRespawn() end)
 	
-	self.IsLoaded = false
-	
-end)
-
-function Power:IsHatEquipped()
-	local valid = false
-	if self.inst.components.inventory and self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) then
-		valid = self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat"
-	end
-	return valid
-	
-end
+end, nil, {
+	max = onmax,
+    current = oncurrent,
+    --ratescale = onratescale,
+})
 
 function Power:OnRespawn()
-	self.current = 100
-end
-
-function Power:Pause()
-end
-
-function Power:Resume()
+	self.current = 75
 end
 
 function Power:OnSave()
-	if self.current ~= self.max then
-		return {power = self.current}
-	end
+	return {power = self.current}
 end
 
 function Power:OnLoad(data)
@@ -93,9 +90,9 @@ end
 function Power:DoDec(dt, ignore_damage)
 
 	if self.inst.hatequipped and self.inst.components.upgrader then	
-		self.inst.components.power:DoDelta(self.regenrate * dt * self.inst.components.upgrader.dtmult , false ,"power")	
+		self.inst.components.power:DoDelta(self.regenrate * dt * self.inst.components.upgrader.dtmult , false, "power")	
 	else
-		self.inst.components.power:DoDelta(self.regenrate * dt, false ,"power")
+		self.inst.components.power:DoDelta(self.regenrate * dt, false, "power")
 	end
 	
     -- print ("%2.2f / %2.2f", self.current, self.max)

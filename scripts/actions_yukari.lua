@@ -163,12 +163,18 @@ AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.SPAWNG, "spawn
 
 local function action_umbre(inst, doer, pos, actions, right)
 	if right then
-		local equip = doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
+		if TheWorld and TheWorld.ismastersim then
+			local equip = doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) 
+		else	
+			local equip = doer.replica.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
+		end 
 
-		if equip.isunfolded and inst.components.makegate:CanSpell(doer, 75, pos) then
-			table.insert(actions, ACTIONS.SPAWNG)
-		elseif equip.isunfolded == false and inst.components.makegate:CanSpell(doer, 33, pos) then
-			table.insert(actions, ACTIONS.UTELE)
+		if equip ~= nil then
+			if equip.isunfolded and inst.components.makegate:CanSpell(doer, 75, pos) then
+				table.insert(actions, ACTIONS.SPAWNG)
+			elseif equip.isunfolded == false and inst.components.makegate:CanSpell(doer, 33, pos) then
+				table.insert(actions, ACTIONS.UTELE)
+			end
 		end
 	end
 end

@@ -109,10 +109,6 @@ local function onpreload(inst, data)
 	
 end
 
-local function onload(inst, data)
-	inst.istelevalid = true
-end
-
 local function OnhitEvent(inst, data)
 
 	local target = data.target
@@ -339,6 +335,9 @@ local function common_init(inst) -- things before SetPristine()
 	inst.invin_cool = 0
 	inst.grazecnt = 0
 
+	inst.maxpower = net_ushortint(inst.GUID, "maxpower", "maxpower_dirty")
+	inst.currentpower = net_ushortint(inst.GUID, "currentpower", "currentpower_dirty")
+
 	inst.fireimmuned = false
 	inst.hatequipped = false
 
@@ -485,7 +484,11 @@ local master_postinit = function(inst) -- after SetPristine()
 	
 	inst.OnSave = onsave
 	inst.OnPreLoad = onpreload
-	inst.OnLoad = onload
+	inst.OnLoad = function(inst)
+		inst.valid = true
+		inst.components.upgrader:DoUpgrade(inst)
+		inst:PushEvent("yukariloaded")
+	end
 	
 	inst:ListenForEvent( "debugmode", DebugFunction, inst)
 	inst:ListenForEvent( "hungerdelta", DoHungerUp )
@@ -496,12 +499,6 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:ListenForEvent( "hatequip", EquippingEvent )
 	inst:ListenForEvent( "hatunequip", EquippingEvent )
 	inst:ListenForEvent( "grazed", OnGrazed )
-	
-	inst.OnLoad = function(inst)
-		inst.valid = true
-		inst.components.upgrader:DoUpgrade(inst)
-		inst:PushEvent("yukariloaded")
-	end
 
 	if TheNet:GetServerGameMode() == "lavaarena" then
         event_server_data("lavaarena", "prefabs/yakumoyukari").master_postinit(inst)

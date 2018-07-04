@@ -1,6 +1,8 @@
 local UIAnim = require "widgets/uianim"
+local Badge = require "widgets/badge"
 local Widget = require "widgets/widget"
 local Text = require "widgets/text"
+local PlayerBadge = require "widgets/playerbadge"
 
 local function IsModEnabled(modname)
 	for k, v in ipairs(KnownModIndex:GetModsToLoad()) do
@@ -11,41 +13,34 @@ local function IsModEnabled(modname)
 	return false
 end
 
-local yokaibadge = Class(Widget, function(self, owner)
+local yokaibadge = Class(Widget, function(self, anim, owner)
+	--Badge._ctor(self, background_build, owner)
 	Widget._ctor(self, "yokaibadge")
+
 	self.owner = owner
 	
 	self.percent = 0
-    self:SetPosition(0,0,0)
+	self:SetScale(1, 1, 1)
+    self:SetPosition(0,-105,0)
 
-    self.active = false
 	self.combinedmod = IsModEnabled("Combined Status")
-
-    self.anim = self:AddChild(UIAnim())
-	   
-	self.anim:GetAnimState():SetBank("health")
-	self.anim:GetAnimState():SetBuild("sprint")
-	
-	self.anim:SetClickable(true)
 
 	self.pulse = self:AddChild(UIAnim())
     self.pulse:GetAnimState():SetBank("pulse")
     self.pulse:GetAnimState():SetBuild("hunger_health_pulse")
+
+    self.anim = self:AddChild(UIAnim())
+	self.anim:GetAnimState():SetBank("health")
+	self.anim:GetAnimState():SetBuild("sprint")
+	self.anim:GetAnimState():PlayAnimation("anim")
+	self.anim:SetClickable(true)
 	
-	self.arrow = self.anim:AddChild(UIAnim())
-	self.arrow:GetAnimState():SetBank("sanity_arrow")
-	self.arrow:GetAnimState():SetBuild("sanity_arrow")
-	self.arrow:GetAnimState():PlayAnimation("neutral")
-	self.arrow:SetClickable(false)
-	
-    self.underNumber = self:AddChild(Widget("undernumber"))
+	self.underNumber = self:AddChild(Widget("undernumber"))
 
     self.num = self:AddChild(Text(BODYTEXTFONT, 33))
     self.num:SetHAlign(ANCHOR_MIDDLE)
     self.num:SetPosition(5, 0, 0)
-	
 	self.num:SetClickable(false)
-	
     self.num:Hide()
 	
 	if self.combinedmod then
@@ -78,9 +73,9 @@ end
 function yokaibadge:SetPercent(val, max)	
     val = val or self.percent
 	
-	self.power = self.owner.components.power.current
-	self.power_m = self.owner.components.power.max
-    self.anim:GetAnimState():SetPercent("anim", 1 - self.power/self.power_m)
+	self.current = self.owner.components.power and self.owner.components.power.current or self.owner.replica.power:GetCurrent()
+	self.maxpower = max or self.owner.components.power.max or self.owner.replica.power:Max()
+    self.anim:GetAnimState():SetPercent("anim", 1 - self.current/self.maxpower)
             
     self.percent = val
 end
@@ -106,10 +101,12 @@ end
 
 
 function yokaibadge:OnUpdate(dt)
-	
-	self.num:SetString(tostring(math.floor(self.owner.components.power.current)))
-	if self.combinedmod then
-		self.maxnum:SetString(tostring(math.floor(self.owner.components.power.max)))
+	if self.owner and self.owner.replica.power ~= nil then
+		self.num:SetString(tostring(math.floor( self.owner.replica.power:GetCurrent() )))
+		if self.combinedmod then
+			self.maxnum:SetString(tostring(math.floor( self.owner.replica.power:Max() )))
+		end
+		self:SetPercent(self.owner.replica.power:GetCurrent(), self.owner.replica.power:Max())
 	end
 	
 end
