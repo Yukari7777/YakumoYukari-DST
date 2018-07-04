@@ -17,24 +17,26 @@ end
 
 local function StatusDisplaysInit(class)
 
-	local YokaiBadge = require "widgets/yokaibadge"
+	if class.owner.prefab == "yakumoyukari" then
+		local YokaiBadge = require "widgets/yokaibadge"
 
-	class.power = class:AddChild(YokaiBadge(nil, class.owner))
-	if IsModEnabled("Combined Status") then
-		class.brain:SetPosition(0, 35, 0)
-		class.stomach:SetPosition(-62, 35, 0)
-		class.heart:SetPosition(62, 35, 0)
-		class.power:SetScale(.9,.9,.9)
-		class.power:SetPosition(-62, -50, 0)
-	else
-		class.power:SetPosition(-40, -50,0)
-		class.brain:SetPosition(40, -50, 0)
-		class.stomach:SetPosition(-40,17,0)
-	end
+		class.power = class:AddChild(YokaiBadge(nil, class.owner))
+		if IsModEnabled("Combined Status") then
+			class.brain:SetPosition(0, 35, 0)
+			class.stomach:SetPosition(-62, 35, 0)
+			class.heart:SetPosition(62, 35, 0)
+			class.power:SetScale(.9,.9,.9)
+			class.power:SetPosition(-62, -50, 0)
+		else
+			class.power:SetPosition(-40, -50,0)
+			class.brain:SetPosition(40, -50, 0)
+			class.stomach:SetPosition(-40,17,0)
+		end
 			
-	class.inst:ListenForEvent("powerdelta", function(inst, data) 
-		class.power:SetPercent(data.newpercent, class.owner.replica.power:Max())
-	end, class.owner)
+		class.inst:ListenForEvent("powerdelta", function(inst, data) 
+			class.power:SetPercent(data.newpercent, class.owner.replica.power:Max())
+		end, class.owner)
+	end
 
 			
 	
