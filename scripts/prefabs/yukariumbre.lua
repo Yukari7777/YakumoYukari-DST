@@ -11,9 +11,9 @@ local function onuse(staff, pos, caster)
 
     if caster.components.power then
 		if staff.isunfolded then
-			caster.components.power:DoDelta(-75, false)
+			caster.components.power:DoDelta(-TUNING.YDEFAULT.TELEPORT_POWER_COST, false)
 		else
-			caster.components.power:DoDelta(-33, false)
+			caster.components.power:DoDelta(-TUNING.YDEFAULT.SPAWNG_POWER_COST, false)
 		end
     end
 
@@ -32,7 +32,7 @@ local function OnUnequipYukari(inst, owner)
 	owner.AnimState:Show("ARM_normal")
 	owner.DynamicShadow:SetSize(1.3, 0.6)	
 	
-	inst.isunfolded = false
+	inst.isunfolded:set(false)
 	inst.components.weapon:SetDamage(TUNING.YDEFAULT.YUKARI_UMBRE_DAMAGE)
 	inst.components.waterproofer:SetEffectiveness(0)
 end    
@@ -40,7 +40,7 @@ end
 local function unfoldit(inst)
 	local owner = inst.components.inventoryitem.owner
 	
-	if inst.isunfolded then
+	if inst.isunfolded:value() then
 		owner:PushEvent("unequip", {item=inst, eslot=EQUIPSLOTS.HANDS})
 		owner:PushEvent("equip", {item=inst, eslot=EQUIPSLOTS.HANDS})
 		owner.AnimState:OverrideSymbol("swap_object", "swap_yukariumbre", "swap")
@@ -49,7 +49,7 @@ local function unfoldit(inst)
 		inst.components.weapon:SetDamage(TUNING.YDEFAULT.YUKARI_UMBRE_DAMAGE)
 		inst.components.waterproofer:SetEffectiveness(0)
 		
-		inst.isunfolded = false
+		inst.isunfolded:set(false)
 	else
 		owner:PushEvent("unequip", {item=inst, eslot=EQUIPSLOTS.HANDS})
 		owner:PushEvent("equip", {item=inst, eslot=EQUIPSLOTS.HANDS})
@@ -59,7 +59,7 @@ local function unfoldit(inst)
 		inst.components.weapon:SetDamage(TUNING.YDEFAULT.YUKARI_UMBRE_DAMAGE_SMALL)
 		inst.components.waterproofer:SetEffectiveness(1)
 		
-		inst.isunfolded = true
+		inst.isunfolded:set(true)
 	end
 	
 	inst.components.useableitem.inuse = false
@@ -87,7 +87,7 @@ local function fn()
 	inst:AddTag("nopunch")
 	inst:AddTag("umbrella")
 	
-	inst.isunfolded = false
+	inst.isunfolded = net_bool(inst.GUID, "isunfolded")
 
 	if not TheWorld.ismastersim then
 		return inst

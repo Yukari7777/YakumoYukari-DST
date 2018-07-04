@@ -52,7 +52,7 @@ local utele = State({ -- server
 })
 
 local utelec = State({ -- client
-	name = "uteles",
+	name = "utelec",
     tags = { "doing", "busy", "canrotate" },
 
     onenter = function(inst)
@@ -131,8 +131,8 @@ local spawngc = State({
 
     onenter = function(inst)
         inst.components.locomotor:Stop()
-        inst.AnimState:PlayAnimation("atk_pre")
-        inst.AnimState:PushAnimation("atk_lag", false)
+        inst.AnimState:PlayAnimation("staff_pre")
+        inst.AnimState:PushAnimation("staff_lag", false)
 
         inst:PerformPreviewBufferedAction()
         inst.sg:SetTimeout(TIMEOUT)
@@ -159,20 +159,12 @@ AddStategraphState("wilson_client", spawngc)
 AddStategraphActionHandler("wilson", ActionHandler(ACTIONS.SPAWNG, "spawng"))
 AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.SPAWNG, "spawngc"))
 
-
-
 local function action_umbre(inst, doer, pos, actions, right)
 	if right then
-		if TheWorld and TheWorld.ismastersim then
-			local equip = doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) 
-		else	
-			local equip = doer.replica.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
-		end 
-
-		if equip ~= nil then
-			if equip.isunfolded and inst.components.makegate:CanSpell(doer, 75, pos) then
+		if doer:HasTag("yakumoyukari") and doer.replica.power then
+			if inst.isunfolded:value() and doer.replica.power:GetCurrent() >= TUNING.YDEFAULT.SPAWNG_POWER_COST then
 				table.insert(actions, ACTIONS.SPAWNG)
-			elseif equip.isunfolded == false and inst.components.makegate:CanSpell(doer, 33, pos) then
+			elseif not inst.isunfolded:value() and doer.replica.power:GetCurrent() >= TUNING.YDEFAULT.TELEPORT_POWER_COST then
 				table.insert(actions, ACTIONS.UTELE)
 			end
 		end
@@ -195,7 +187,7 @@ CASTTOHO.priority = -1
 CASTTOHO.rmb = true
 CASTTOHO.mount_valid = false
 
-local casttoho = State({ -- todo : use "read" motion
+local casttoho = State({
     name = "casttoho",
     tags = {"doing", "busy", "canrotate"},
 
@@ -203,22 +195,22 @@ local casttoho = State({ -- todo : use "read" motion
         if inst.components.playercontroller ~= nil then
             inst.components.playercontroller:Enable(false)
         end
-        inst.AnimState:PlayAnimation("staff_pre")
-        inst.AnimState:PushAnimation("staff", false)
-        inst.components.locomotor:Stop()
+       inst.AnimState:PlayAnimation("staff_pre")
+       inst.AnimState:PushAnimation("staff", false)
+	   inst.components.locomotor:Stop()
 
 		--Spawn an effect on the player's location
         local staff = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
         local colour = staff ~= nil and staff.fxcolour or {95/255,0,1}
 
-        inst.sg.statemem.stafffx = SpawnPrefab("staffcastfx")
-        inst.sg.statemem.stafffx.entity:SetParent(inst.entity)
-        inst.sg.statemem.stafffx.Transform:SetRotation(inst.Transform:GetRotation())
-        inst.sg.statemem.stafffx:SetUp(colour)
+        inst.sg.statemem.spellfx = SpawnPrefab("staffcastfx")
+        inst.sg.statemem.spellfx.entity:SetParent(inst.entity)
+        inst.sg.statemem.spellfx.Transform:SetRotation(inst.Transform:GetRotation())
+        inst.sg.statemem.spellfx:SetUp(colour)
 
-        inst.sg.statemem.stafflight = SpawnPrefab("staff_castinglight")
-        inst.sg.statemem.stafflight.Transform:SetPosition(inst.Transform:GetWorldPosition())
-        inst.sg.statemem.stafflight:SetUp(colour, 1.9, .33)
+        inst.sg.statemem.spelllight = SpawnPrefab("staff_castinglight")
+        inst.sg.statemem.spelllight.Transform:SetPosition(inst.Transform:GetWorldPosition())
+        inst.sg.statemem.spelllight:SetUp(colour, 1.9, .33)
 
 		inst.sg.statemem.castsound = staff ~= nil and staff.castsound or "soundpack/spell/spelldt"
     end,
@@ -229,8 +221,8 @@ local casttoho = State({ -- todo : use "read" motion
             inst.SoundEmitter:PlaySound("soundpack/spell/spelldt")
         end),
         TimeEvent(53 * FRAMES, function(inst)
-            inst.sg.statemem.stafffx = nil --Can't be cancelled anymore
-            inst.sg.statemem.stafflight = nil --Can't be cancelled anymore
+            inst.sg.statemem.spellfx = nil --Can't be cancelled anymore
+            inst.sg.statemem.spelllight = nil --Can't be cancelled anymore
             --V2C: NOTE! if we're teleporting ourself, we may be forced to exit state here!
             inst:PerformBufferedAction()
         end),
@@ -293,22 +285,23 @@ AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.CASTTOHO, "cas
 
 
 local function spell_inv(inst, doer, actions, right)
-        if doer:HasTag("yakumoyukari") 
-		and inst.components.spellcard ~= nil
-		and inst.components.spellcard:CanCast(doer) then
-            table.insert(actions, ACTIONS.CASTTOHO)
-        end
+    if doer:HasTag("yakumoyukari") then
+		if doer.replica.power and inst.costpower and doer.replica.power:GetCurrent() >= inst.costpower:value()
+		or inst.canspell and inst.canspell:value() 
+		or inst:HasTag("ultpanel")then
+			table.insert(actions, ACTIONS.CASTTOHO)
+		end
+    end
 end
 AddComponentAction("INVENTORY", "spellcard", spell_inv)
 
 
 local CASTTOHOH = AddAction("CASTTOHOH", "castspell", function(act) -- necro fantasia, ultupgrade
-	local item = act.invobject or act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
-
-	if item and item.components.spellcard and item.components.spellcard:CanCast(act.doer, act.target, act.pos) then
-		item.components.spellcard:CastSpell(act.target, act.pos)
-		return true
-	end
+	if doer:HasTag("yakumoyukari") 
+	and inst.components.spellcard ~= nil
+	and inst.components.spellcard:CanCast(doer) then
+        table.insert(actions, ACTIONS.CASTTOHOH)
+    end
 end)
 
 CASTTOHOH.priority = -1
@@ -440,7 +433,7 @@ ACTIONS.JUMPIN.fn = function(act)
 end
 
 local function tunnelfn(inst, doer, actions, right)
-	if inst:HasTag("teleporter") and inst.components.schemeteleport.islinked then
+	if inst:HasTag("teleporter") and inst.islinked:value() then
 		table.insert(actions, ACTIONS.JUMPIN)
     end
 end

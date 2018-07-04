@@ -50,7 +50,7 @@ function MakeUltimate(name, index)
 				if difficulty == "chinese" then
 					caster.components.talker:Say("我 必 须 要 把 "..name.." 升 级 到 "..ultreq.."之 上")
 				else
-					caster.components.talker:Say("I must do "..name.." upgrade over "..ultreq)
+					caster.components.talker:Say("I must reach "..name.." level "..ultreq)
 				end
 			end
 		end
@@ -69,7 +69,9 @@ function MakeUltimate(name, index)
 		
 		inst.AnimState:SetBank("spell")    
 		inst.AnimState:SetBuild("spell")    
-		inst.AnimState:PlayAnimation("idle")    
+		inst.AnimState:PlayAnimation("idle")   
+
+		inst:AddTag("ultpanel")
 		
 		if not TheWorld.ismastersim then
 			return inst

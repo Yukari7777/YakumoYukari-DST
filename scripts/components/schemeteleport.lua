@@ -95,6 +95,7 @@ end
 function schemeteleport:Target(otherschemeteleport)
 	self.target = otherschemeteleport
 	self.islinked = true
+	self.inst.islinked:set(true)
 end
 
 return schemeteleport

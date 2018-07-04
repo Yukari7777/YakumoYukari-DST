@@ -57,11 +57,12 @@ local GetString = GLOBAL.GetString
 local TheInput = GLOBAL.TheInput
 local IsPaused = GLOBAL.IsPaused
 local EQUIPSLOTS = GLOBAL.EQUIPSLOTS
+--local TheWorld = GLOBAL.TheWorld
 local Inspect = GetModConfigData("inspect")
 local Language = GetModConfigData("language")
 local FindEntity = GLOBAL.FindEntity
+--local IsMaster = GLOBAL.TheWorld and GLOBAL.TheWorld.ismastersim
 local SpringCombatMod = GLOBAL.SpringCombatMod
-local IsMaster = TheWorld and TheWorld.ismastersim
 local IsYukari = ThePlayer and ThePlayer.prefab == "yakumoyukari"
 
 ----- Basic settings for Yukari -----
@@ -122,209 +123,213 @@ TheInput:AddKeyDownHandler(116, GodTelePort)
 ---------------- OVERRIDE -----------------
 
 local function OnTakeDamage(self)
-	if IsMaster then
-		local function NewTakeDamage(self, damage, attacker, weapon, ...)
-			-- GRAZE MECHANISM
-			local Chara = self.inst
-			if self.inst.prefab == "yakumoyukari" then
-				local totaldodge = Chara.components.upgrader.dodgechance + Chara.components.upgrader.hatdodgechance
-				if math.random() < totaldodge then
-					local pt = GLOBAL.Vector3(Chara.Transform:GetWorldPosition())
-					for i = 1, math.random(3,5), 1 do
-						local fx = SpawnPrefab("graze_fx")
-						fx.Transform:SetPosition(pt.x + math.random() / 2, pt.y + 0.7 + math.random() / 2 , pt.z + math.random() / 2 )
-					end
-					Chara:PushEvent("grazed")
+	local function NewTakeDamage(self, damage, attacker, weapon, ...)
+		-- GRAZE MECHANISM
+		local Chara = self.inst
+		if self.inst.prefab == "yakumoyukari" then
+			local totaldodge = Chara.components.upgrader.dodgechance + Chara.components.upgrader.hatdodgechance
+			if math.random() < totaldodge then
+				local pt = GLOBAL.Vector3(Chara.Transform:GetWorldPosition())
+				for i = 1, math.random(3,5), 1 do
+					local fx = SpawnPrefab("graze_fx")
+					fx.Transform:SetPosition(pt.x + math.random() / 2, pt.y + 0.7 + math.random() / 2 , pt.z + math.random() / 2 )
+				end
+				Chara:PushEvent("grazed")
 				
-					return 0
-				end
+				return 0
 			end
-
-			local absorbers = {}
-
-			for k, v in pairs(self.equipslots) do
-				if v.components.resistance ~= nil and
-					v.components.resistance:HasResistance(attacker, weapon) and
-					v.components.resistance:ShouldResistDamage() then
-					v.components.resistance:ResistDamage(damage)
-					return 0
-				elseif v.components.armor ~= nil then
-					absorbers[v.components.armor] = v.components.armor:GetAbsorption(attacker, weapon)
-				end
-			end
-
-			-- print("Incoming damage", damage)
-
-			local absorbed_percent = 0
-			local total_absorption = 0
-			for armor, amt in pairs(absorbers) do
-				-- print("\t", armor.inst, "absorbs", amt)
-				absorbed_percent = math.max(amt, absorbed_percent)
-				total_absorption = total_absorption + amt
-			end
-
-			local absorbed_damage = damage * absorbed_percent
-			local leftover_damage = damage - absorbed_damage
-
-			-- print("\tabsorbed%", absorbed_percent, "total_absorption", total_absorption, "absorbed_damage", absorbed_damage, "leftover_damage", leftover_damage)
-
-			if total_absorption > 0 then
-				ProfileStatsAdd("armor_absorb", absorbed_damage)
-
-				for armor, amt in pairs(absorbers) do
-					armor:TakeDamage(absorbed_damage * amt / total_absorption + armor:GetBonusDamage(attacker, weapon))
-				end
-			end
-
-			-- custom damage reduction
-			if self.inst.prefab == "yakumoyukari" then
-				if self.inst.components.inventory ~= nil and self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat" then
-					local hatabsorb = 0
-					for i = 2, 5, 1 do
-						if Chara.components.upgrader.hatskill[i] then
-							hatabsorb = hatabsorb + 0.2
-						end
-					end
-					leftover_damage = leftover_damage * (1 - hatabsorb)
-				end
-			
-				if Chara.components.upgrader.IsDamage then
-					leftover_damage = leftover_damage * 0.7
-				end
-			
-				if Chara:HasTag("IsDamage") then
-					leftover_damage = leftover_damage * 0.5
-				end
-			end
-		
-			return leftover_damage
 		end
-		self.ApplyDamage = NewTakeDamage
+
+		local absorbers = {}
+
+		for k, v in pairs(self.equipslots) do
+			if v.components.resistance ~= nil and
+				v.components.resistance:HasResistance(attacker, weapon) and
+				v.components.resistance:ShouldResistDamage() then
+				v.components.resistance:ResistDamage(damage)
+				return 0
+			elseif v.components.armor ~= nil then
+				absorbers[v.components.armor] = v.components.armor:GetAbsorption(attacker, weapon)
+			end
+		end
+
+		-- print("Incoming damage", damage)
+
+		local absorbed_percent = 0
+		local total_absorption = 0
+		for armor, amt in pairs(absorbers) do
+			-- print("\t", armor.inst, "absorbs", amt)
+			absorbed_percent = math.max(amt, absorbed_percent)
+			total_absorption = total_absorption + amt
+		end
+
+		local absorbed_damage = damage * absorbed_percent
+		local leftover_damage = damage - absorbed_damage
+
+		-- print("\tabsorbed%", absorbed_percent, "total_absorption", total_absorption, "absorbed_damage", absorbed_damage, "leftover_damage", leftover_damage)
+
+		if total_absorption > 0 then
+			ProfileStatsAdd("armor_absorb", absorbed_damage)
+
+			for armor, amt in pairs(absorbers) do
+				armor:TakeDamage(absorbed_damage * amt / total_absorption + armor:GetBonusDamage(attacker, weapon))
+			end
+		end
+
+		-- custom damage reduction
+		if self.inst.prefab == "yakumoyukari" then
+			if self.inst.components.inventory ~= nil and self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat" then
+				local hatabsorb = 0
+				for i = 2, 5, 1 do
+					if Chara.components.upgrader.hatskill[i] then
+						hatabsorb = hatabsorb + 0.2
+					end
+				end
+				leftover_damage = leftover_damage * (1 - hatabsorb)
+			end
+			
+			if Chara.components.upgrader.IsDamage then
+				leftover_damage = leftover_damage * 0.7
+			end
+			
+			if Chara:HasTag("IsDamage") then
+				leftover_damage = leftover_damage * 0.5
+			end
+		end
+		
+		return leftover_damage
 	end
+	self.ApplyDamage = NewTakeDamage
 end
 -- Bunnyman Retarget Function
 local function BunnymanNormalRetargetFn(inst)
-	if IsMaster then
-		local function is_meat(item)
-			return item.components.edible and item.components.edible.foodtype == GLOBAL.FOODTYPE.MEAT
-		end
-	
-		local function NormalRetargetFn(inst)
-			return FindEntity(inst, TUNING.PIG_TARGET_DIST,
-				function(guy)
-					return inst.components.combat:CanTarget(guy)
-						and (guy:HasTag("monster") or guy:HasTag("youkai")
-						or (guy.components.inventory ~= nil and
-							guy:IsNear(inst, TUNING.BUNNYMAN_SEE_MEAT_DIST) and
-							guy.components.inventory:FindItem(is_meat) ~= nil))
-				end,
-				{ "_combat", "_health" }, -- see entityreplica.lua
-				{ "realyoukai" }, -- not even be targetted with meat
-				{ "monster", "player" })
-		end
-		inst.components.combat:SetRetargetFunction(1, NormalRetargetFn)
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	local function is_meat(item)
+		return item.components.edible and item.components.edible.foodtype == GLOBAL.FOODTYPE.MEAT
 	end
+	
+	local function NormalRetargetFn(inst)
+		return FindEntity(inst, TUNING.PIG_TARGET_DIST,
+			function(guy)
+				return inst.components.combat:CanTarget(guy)
+					and (guy:HasTag("monster") or guy:HasTag("youkai")
+					or (guy.components.inventory ~= nil and
+						guy:IsNear(inst, TUNING.BUNNYMAN_SEE_MEAT_DIST) and
+						guy.components.inventory:FindItem(is_meat) ~= nil))
+			end,
+			{ "_combat", "_health" }, -- see entityreplica.lua
+			{ "realyoukai" }, -- not even be targetted with meat
+			{ "monster", "player" })
+	end
+	inst.components.combat:SetRetargetFunction(1, NormalRetargetFn)
 end
 -- Pigman Retarget Function
 local function PigmanNormalRetargetFn(inst)
-	if IsMaster then
-		local function NormalRetargetFn(inst)
-			return FindEntity(inst, TUNING.PIG_TARGET_DIST,
-				function(guy)
-					return (guy.LightWatcher == nil or guy.LightWatcher:IsInLight())
-						and inst.components.combat:CanTarget(guy) and (guy:HasTag("monster") or guy:HasTag("youkai"))
-				end,
-				{ "_combat" }, -- see entityreplica.lua
-				inst.components.follower.leader ~= nil and
-				{ "playerghost", "INLIMBO", "abigail" } or
-				{ "playerghost", "INLIMBO", "realyoukai" })
-		end
-		inst.components.combat:SetRetargetFunction(3, NormalRetargetFn)
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	local function NormalRetargetFn(inst)
+		return FindEntity(inst, TUNING.PIG_TARGET_DIST,
+			function(guy)
+				return (guy.LightWatcher == nil or guy.LightWatcher:IsInLight())
+					and inst.components.combat:CanTarget(guy) and (guy:HasTag("monster") or guy:HasTag("youkai"))
+			end,
+			{ "_combat" }, -- see entityreplica.lua
+			inst.components.follower.leader ~= nil and
+			{ "playerghost", "INLIMBO", "abigail" } or
+			{ "playerghost", "INLIMBO", "realyoukai" })
 	end
+	inst.components.combat:SetRetargetFunction(3, NormalRetargetFn)
 end
 -- Bat Retarget Function
 local function BatRetargetFn(inst)
-	if IsMaster then
-		local function MakeTeam(inst, attacker, ...) 
-			local leader = SpawnPrefab("teamleader")
-			leader.components.teamleader:SetUp(attacker, inst)
-			leader.components.teamleader:BroadcastDistress(inst)
-		end
-	
-		local function Retarget(inst)
-			local ta = inst.components.teamattacker
-			local newtarget = FindEntity(inst, TUNING.BAT_TARGET_DIST, function(guy)
-					return inst.components.combat:CanTarget(guy)
-				end,
-				nil,
-				{"bat", "realyoukai"},
-				{"character", "monster"}
-			)
-
-			if newtarget and not ta.inteam and not ta:SearchForTeam() then
-				MakeTeam(inst, newtarget)
-			end
-
-			if ta.inteam and not ta.teamleader:CanAttack() then
-				return newtarget
-			end
-		end
-	
-		inst.components.combat:SetRetargetFunction(3, Retarget)
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	local function MakeTeam(inst, attacker, ...) 
+		local leader = SpawnPrefab("teamleader")
+		leader.components.teamleader:SetUp(attacker, inst)
+		leader.components.teamleader:BroadcastDistress(inst)
 	end
+	
+	local function Retarget(inst)
+		local ta = inst.components.teamattacker
+		local newtarget = FindEntity(inst, TUNING.BAT_TARGET_DIST, function(guy)
+				return inst.components.combat:CanTarget(guy)
+			end,
+			nil,
+			{"bat", "realyoukai"},
+			{"character", "monster"}
+		)
+
+		if newtarget and not ta.inteam and not ta:SearchForTeam() then
+			MakeTeam(inst, newtarget)
+		end
+
+		if ta.inteam and not ta.teamleader:CanAttack() then
+			return newtarget
+		end
+	end
+	
+	inst.components.combat:SetRetargetFunction(3, Retarget)
 end
 -- Bee Retarget Function
 local function KillerbeeRetargetFn(inst)
-	if IsMaster then
-		local function KillerRetarget(inst)
-			return FindEntity(inst, SpringCombatMod(8),
-				function(guy)
-					return inst.components.combat:CanTarget(guy)
-				end,
-				{ "_combat", "_health" },
-				{ "insect", "INLIMBO", "realyoukai" },
-				{ "character", "animal", "monster" })
-		end
-		inst.components.combat:SetRetargetFunction(2, KillerRetarget)
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	local function KillerRetarget(inst)
+		return FindEntity(inst, SpringCombatMod(8),
+			function(guy)
+				return inst.components.combat:CanTarget(guy)
+			end,
+			{ "_combat", "_health" },
+			{ "insect", "INLIMBO", "realyoukai" },
+			{ "character", "animal", "monster" })
 	end
+	inst.components.combat:SetRetargetFunction(2, KillerRetarget)
 end
 local function BeeRetargetFn(inst)
-	if IsMaster then
-		local function SpringBeeRetarget(inst)
-			return GLOBAL.TheWorld.state.isspring and
-			FindEntity(inst, 4,
-				function(guy)
-					return inst.components.combat:CanTarget(guy)
-				end,
-				{ "_combat", "_health" },
-				{ "insect", "INLIMBO", "realyoukai" },
-				{ "character", "animal", "monster" })
-			or nil
-		end
-		inst.components.combat:SetRetargetFunction(2, SpringBeeRetarget)
-	end	
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	local function SpringBeeRetarget(inst)
+		return GLOBAL.TheWorld.state.isspring and
+		FindEntity(inst, 4,
+			function(guy)
+				return inst.components.combat:CanTarget(guy)
+			end,
+			{ "_combat", "_health" },
+			{ "insect", "INLIMBO", "realyoukai" },
+			{ "character", "animal", "monster" })
+		or nil
+	end
+	inst.components.combat:SetRetargetFunction(2, SpringBeeRetarget)
 end
 -- frog Retarget Function
 local function FrogRetargetFn(inst)
-	if IsMaster then
-		local function retargetfn(inst)
-			if not inst.components.health:IsDead() and not inst.components.sleeper:IsAsleep() then
-			return FindEntity(inst, TUNING.FROG_TARGET_DIST, function(guy) 
-				if not guy.components.health:IsDead() then
-					return guy.components.inventory ~= nil
-				end
-			end,
-			{"_combat","_health"},
-			{"realyoukai"}
-			)
-		end
-		end
-		if inst.components.combat ~= nil then
-			inst.components.combat:SetRetargetFunction(3, retargetfn)
-		end
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	local function retargetfn(inst)
+		if not inst.components.health:IsDead() and not inst.components.sleeper:IsAsleep() then
+		return FindEntity(inst, TUNING.FROG_TARGET_DIST, function(guy) 
+			if not guy.components.health:IsDead() then
+				return guy.components.inventory ~= nil
+			end
+		end,
+		{"_combat","_health"},
+		{"realyoukai"}
+		)
+	end
+	end
+	if inst.components.combat ~= nil then
+		inst.components.combat:SetRetargetFunction(3, retargetfn)
 	end
 end
--- spider(warrior) retargetfn
+-- spiders retargetfn
 local function FindTarget(inst, radius)
     return FindEntity(
         inst,
@@ -339,21 +344,23 @@ local function FindTarget(inst, radius)
 end
 
 local function SpiderRetargetFn(inst)
-	if IsMaster then
-		local function NormalRetarget(inst)
-			return FindTarget(inst, inst.components.knownlocations:GetLocation("investigate") ~= nil and TUNING.SPIDER_INVESTIGATETARGET_DIST or TUNING.SPIDER_TARGET_DIST)
-		end
-		inst.components.combat:SetRetargetFunction(1, NormalRetarget)
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	local function NormalRetarget(inst)
+		return FindTarget(inst, inst.components.knownlocations:GetLocation("investigate") ~= nil and TUNING.SPIDER_INVESTIGATETARGET_DIST or TUNING.SPIDER_TARGET_DIST)
 	end
+	inst.components.combat:SetRetargetFunction(1, NormalRetarget)
 end
 
 local function WarriorRetargetFn(inst)
-	if IsMaster then
-		local function WarriorRetarget(inst)
-			return FindTarget(inst, TUNING.SPIDER_WARRIOR_TARGET_DIST)
-		end
-		inst.components.combat:SetRetargetFunction(2, WarriorRetarget)
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	local function WarriorRetarget(inst)
+		return FindTarget(inst, TUNING.SPIDER_WARRIOR_TARGET_DIST)
 	end
+	inst.components.combat:SetRetargetFunction(2, WarriorRetarget)
 end
 
 

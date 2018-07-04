@@ -175,6 +175,7 @@ local function SetState(inst)
 		local index = GetIndex(inst)
 		local condition = GetCondition(inst, index)
 		inst.components.spellcard:SetCondition( condition )
+		inst.canspell:set( condition )
 		SetDesc(inst, index)
 	end
 end
@@ -259,6 +260,7 @@ function MakePanel(iname)
 		inst.AnimState:PlayAnimation("idle")   
 
 		inst:AddTag("spellcard")
+		inst.canspell = net_bool(inst.GUID, "canspell")
 
 		if not TheWorld.ismastersim then
 			return inst

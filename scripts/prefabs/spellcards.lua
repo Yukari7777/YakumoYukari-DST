@@ -15,6 +15,7 @@ function MakeCard(name)
 		
 	local function test(inst)
 		inst.components.spellcard.costpower = 5
+		inst.costpower:set(5)
 		inst.components.finiteuses:SetMaxUses(3)
 		inst.components.finiteuses:SetUses(3)
 		inst.components.spellcard:SetSpellFn(function()
@@ -823,6 +824,8 @@ function MakeCard(name)
 		inst.AnimState:PlayAnimation("idle")    
 		
 		inst:AddTag("spellcard")
+		
+		inst.costpower = net_ushortint(inst.GUID, "costpower")
 
 		inst.entity:SetPristine()
 

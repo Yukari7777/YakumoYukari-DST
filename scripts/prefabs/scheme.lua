@@ -137,6 +137,7 @@ local function SetState(inst)
 		local condition = GetCondition(inst)
 		inst.components.inspectable:SetDescription( GetStatus(inst) )
 		inst.components.spellcard:SetCondition( condition )
+		inst.canspell:set(condition)
 	end
 end
 
@@ -220,6 +221,8 @@ local function fn()
 	inst.AnimState:PlayAnimation("idle")    
 
 	inst:AddTag("scheme")
+
+	inst.canspell = net_bool(inst.GUID, "canspell")
 
 	inst.entity:SetPristine()
 

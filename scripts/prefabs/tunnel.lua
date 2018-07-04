@@ -57,6 +57,7 @@ local function fn(Sim)
 
 	inst:AddTag("tunnel") 
 	inst:AddTag("teleporter")
+	inst.islinked = net_bool(inst.GUID, "islinked")
 	
 	if not TheWorld.ismastersim then
 		return inst
@@ -75,14 +76,12 @@ local function fn(Sim)
 	inst.components.playerprox:SetDist(5,5)
 	inst.components.playerprox.onnear = function()
 		if inst.components.schemeteleport.target then
-			--_G.DisableWormholeJumpNoise()
 			inst.sg:GoToState("opening")
 		end
 	end
 	
 	inst.components.playerprox.onfar = function()
 		if inst.sg.currentstate.name == "open" then
-			--_G.EnableWormholeJumpNoise()
 			inst.sg:GoToState("closing")
 		end
 	end

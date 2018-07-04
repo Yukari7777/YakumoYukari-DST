@@ -67,7 +67,7 @@ end
 
 function Spellcard:CanCast(doer)
 	
-	if doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil then -- todo : use "read" motion in order to delete this.
+	if doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil then
 		self:AddDesc(STRINGS.YUKARI_SHOULD_BRING_SOMETHING)
 		return false
 	end

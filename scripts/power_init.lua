@@ -33,7 +33,6 @@ local function StatusDisplaysInit(class)
 	end
 			
 	class.inst:ListenForEvent("powerdelta", function(inst, data) 
-		print("dodelta call")
 		class.power:SetPercent(data.newpercent, class.owner.replica.power:Max())
 	end, class.owner)
 

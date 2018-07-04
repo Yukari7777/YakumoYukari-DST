@@ -162,8 +162,8 @@ end
 
 local function DoPowerRestore(inst, amount)
 	inst.components.power:DoDelta(amount, false)
-	inst.HUD.controls.status.power:PulseGreen() 
-	inst.HUD.controls.status.power:ScaleTo(1.3,1,.7)
+	--inst.HUD.controls.status.power:PulseGreen() 
+	--inst.HUD.controls.status.power:ScaleTo(1.3,1,.7)
 end
 	
 function DoHungerUp(inst, data)
@@ -328,15 +328,13 @@ end
 local function common_init(inst) -- things before SetPristine()
 	inst.MiniMapEntity:SetIcon( "yakumoyukari.tex" )
 
-	inst:AddComponent("upgrader")
-
 	inst.regen_cool = 0
 	inst.poison_cool = 0
 	inst.invin_cool = 0
 	inst.grazecnt = 0
 
-	inst.maxpower = net_ushortint(inst.GUID, "maxpower", "maxpower_dirty")
-	inst.currentpower = net_ushortint(inst.GUID, "currentpower", "currentpower_dirty")
+	inst.maxpower = net_ushortint(inst.GUID, "maxpower")
+	inst.currentpower = net_ushortint(inst.GUID, "currentpower")
 
 	inst.fireimmuned = false
 	inst.hatequipped = false
@@ -358,6 +356,7 @@ end
 
 local master_postinit = function(inst) -- after SetPristine()
 	
+	inst:AddComponent("upgrader")
 	inst:AddComponent("power")
 	
 	inst.soundsname = "willow"
@@ -371,7 +370,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.components.combat.damagemultiplier = TUNING.YDEFAULT.DAMAGE_MULTIPLIER
 	inst.components.builder.science_bonus = 1
 	
-	RECIPETABS['TOUHOU'] = {str = "TOUHOU", sort= 10, icon = "touhoutab.tex", icon_atlas = "images/inventoryimages/touhoutab.xml"}
+	CUSTOM_RECIPETABS['TOUHOU'] = {str = "TOUHOU", sort= 787, icon = "touhoutab.tex", icon_atlas = "images/inventoryimages/touhoutab.xml"}
 	
 	inst.components.eater.EatMEAT = inst.components.eater.Eat
 	function inst.components.eater:Eat( food )

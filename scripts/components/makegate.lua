@@ -21,21 +21,14 @@ function MakeGate:GetBlinkPoint()
 	end
 end
 
-function MakeGate:CanMakeToPoint(pt)
-	return TheWorld.Map:IsAboveGroundAtPoint(pt:Get()) and not TheWorld.Map:IsGroundTargetBlocked(pt)
-end
-
 function MakeGate:SpawnEffect(inst)
 	local pt = inst:GetPosition()
 	local fx = SpawnPrefab("small_puff")
 	fx.Transform:SetPosition(pt.x, pt.y, pt.z)
 end
 
-function MakeGate:CanSpell(caster, cost, pt)
-	if self:CanMakeToPoint(pt) == false then
-		return false
-	end
-	if caster.components.power and caster.components.power.current >= cost then
+function MakeGate:CanSpell(caster)
+	if caster.components.power and caster.components.power:GetCurrent() >= cost then
 		if self.onusefn == nil then
 			return false
 		end
@@ -47,9 +40,9 @@ function MakeGate:CanSpell(caster, cost, pt)
 end
 
 function MakeGate:Teleport(pt, caster)
-	if not self:CanSpell(caster, TUNING.YDEFAULT.TELEPORT_POWER_COST, pt) then
-		return false
-	end
+	--if not self:CanSpell(caster) then
+	--	return false
+	--end
 	
 	self:SpawnEffect(caster)
 	caster.SoundEmitter:PlaySound("dontstarve/common/staff_blink")
@@ -66,7 +59,7 @@ function MakeGate:Teleport(pt, caster)
 end
 
 function MakeGate:RCreate(pt, caster)
-	--if not self:CanSpell(caster, TUNING.YDEFAULT.TELEPORT_POWER_COST, pt) then
+	--if not self:CanSpell(caster) then
 		--return false
 	--end
 
