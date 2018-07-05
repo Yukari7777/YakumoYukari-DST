@@ -118,16 +118,9 @@ function MakeCard(name)
 			local x,y,z = owner.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x, y, z, 40)
 			local Language = GetModConfigData("language", "YakumoYukari")
-			SetSharedLootTable('nodrop', nil)
-			
 			for k,v in pairs(ents) do
-				if v.components.health and not v:HasTag("player") then
-					if v.components.lootdropper and not v:HasTag("epic") then
-						v.components.lootdropper.loot = nil -- ISSUE : some prefabs still has loots.
-						v.components.lootdropper.chanceloot = nil
-						v.components.lootdropper.randomloot = nil
-						v.components.lootdropper.numrandomloot = nil
-					end
+
+				if v.components.health and not v:HasTag("player") and not v:HasTag("epic") then
 					v.components.health:DoDelta(-2147483647)
 				end
 				
@@ -477,6 +470,10 @@ function MakeCard(name)
 			local x,y,z = owner.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x, y, z, 60)
 			for k,v in pairs(ents) do
+				if v.components.timer then 
+					v.components.timer:SetTimeLeft("grow", 0) 
+				end
+
 				if v.components.witherable then
 					v.components.witherable.withered = false
 					v:RemoveTag("withered")

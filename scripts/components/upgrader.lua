@@ -147,6 +147,7 @@ function Upgrader:SkillManager(inst)
 	end
 	
 	if skill[2][2] then
+		inst.components.eater.strongstomach = true
 		self.hungerbonus = 50
 		self.powerupvalue = 2
 		inst.components.temperature.inherentinsulation = TUNING.INSULATION_SMALL
@@ -237,8 +238,9 @@ function Upgrader:SkillManager(inst)
 	end
 	
 	if skill[4][4] then
+		inst.components.locomotor:SetTriggersCreep(false)
 		inst:AddTag("realyoukai")
-		inst:AddTag("monster")
+		inst:AddTag("spiderwhisperer")
 		self.powerbonus = 175
 		self.bonusspeed = 3
 	end
