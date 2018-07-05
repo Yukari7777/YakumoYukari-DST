@@ -24,6 +24,7 @@ local Upgrader = Class(function(self, inst)
 	self.dtmult = 1.2
 	self.SightDistance = 0
 	self.dodgechance = TUNING.YDEFAULT.GRAZE_RATE
+	self.hatdodgechance = 0
 
 	self.emergency = nil
 	
