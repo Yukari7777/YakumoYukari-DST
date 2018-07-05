@@ -121,7 +121,7 @@ function MakeCard(name)
 			SetSharedLootTable('nodrop', nil)
 			
 			for k,v in pairs(ents) do
-				if v.components.health and v:HasTag("player") then
+				if v.components.health and not v:HasTag("player") then
 					if v.components.lootdropper and not v:HasTag("epic") then
 						v.components.lootdropper.loot = nil -- ISSUE : some prefabs still has loots.
 						v.components.lootdropper.chanceloot = nil
