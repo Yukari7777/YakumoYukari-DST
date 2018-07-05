@@ -1,6 +1,7 @@
 PrefabFiles = {
 	"tunnel",
 	"yakumoyukari",
+	"yakumoyukari_none",
 	"yukariumbre",
 	"yukarihat",
 	"upgradepanel",
