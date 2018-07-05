@@ -128,7 +128,7 @@ local function OnTakeDamage(self)
 		-- GRAZE MECHANISM
 		local Chara = self.inst
 		if self.inst.prefab == "yakumoyukari" then
-			local totaldodge = Chara.components.upgrader.dodgechance + Chara.components.upgrader.hatdodgechance
+			local totaldodge = Chara.components.upgrader and (Chara.components.upgrader.dodgechance + Chara.components.upgrader.hatdodgechance)
 			if math.random() < totaldodge then
 				local pt = GLOBAL.Vector3(Chara.Transform:GetWorldPosition())
 				for i = 1, math.random(3,5), 1 do
