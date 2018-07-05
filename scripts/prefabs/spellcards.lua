@@ -121,7 +121,7 @@ function MakeCard(name)
 			SetSharedLootTable('nodrop', nil)
 			
 			for k,v in pairs(ents) do
-				if v.components.health and not v:HasTag("yakumoga") then
+				if v.components.health and v:HasTag("player") then
 					if v.components.lootdropper and not v:HasTag("epic") then
 						v.components.lootdropper.loot = nil -- ISSUE : some prefabs still has loots.
 						v.components.lootdropper.chanceloot = nil
@@ -170,7 +170,9 @@ function MakeCard(name)
 				str[2] = "在 虚 空 中 永 眠 吧.."
 				str[3] = "你 什 么 都 不 是.."
 			end
-			owner.components.talker:Say(str[math.random(3)], 3, nil, nil, true)
+			if owner.components.talker then
+				owner.components.talker:Say(str[math.random(3)], 3, nil, nil, true)
+			end
 			inst:Remove()
 		end)
 	end
