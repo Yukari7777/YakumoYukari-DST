@@ -474,8 +474,8 @@ function MakeCard(name)
 	end
 	
 	local function addictive(inst)
-		inst.components.spellcard.costpower = 200
-		inst.costpower:set(200)
+		inst.components.spellcard.costpower = 300
+		inst.costpower:set(300)
 		inst:RemoveComponent("finiteuses")
 		inst.components.spellcard:SetSpellFn(function()
 			local owner = inst.components.inventoryitem.owner
@@ -514,7 +514,7 @@ function MakeCard(name)
 				end
 			end
 			if owner.components.power then
-				owner.components.power:DoDelta(-200, false)
+				owner.components.power:DoDelta(-300, false)
 			end
 			inst:Remove()
 		end)
