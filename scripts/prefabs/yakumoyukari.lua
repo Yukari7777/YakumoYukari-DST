@@ -261,6 +261,10 @@ local function PeriodicFunction(inst, data)
 	if inst.components.health and inst.IsInvincible then
 		InvincibleRegen(inst)
 	end
+
+	if inst.components.health and inst.nohealthpenalty then
+		inst.components.heath:SetPenalty(0)
+	end
 	
 	if inst.components.upgrader.SightDistance > 0 then
 		local dis = inst.components.upgrader.SightDistance

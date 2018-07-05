@@ -28,6 +28,7 @@ local Upgrader = Class(function(self, inst)
 
 	self.emergency = nil
 	
+	self.nohealthpenalty = false
 	self.IsDamage = false
 	self.IsVampire = false
 	self.IsAOE = false
@@ -122,6 +123,7 @@ function Upgrader:SkillManager(inst)
 	end
 	
 	if skill[1][4] then
+		self.nohealthpenalty = true
 		self.healthbonus = 95
 		self.regenamount = 2
 		self.regencool = 30
@@ -208,6 +210,7 @@ function Upgrader:SkillManager(inst)
 	end	
 	
 	if skill[4][1] then
+		inst.components.moisture.baseDryingRate = 0.7
 		self.bonusspeed = 1
 		self.powerbonus = 25
 		self.powergenbonus = 0.25
@@ -232,6 +235,7 @@ function Upgrader:SkillManager(inst)
 	end
 	
 	if skill[4][3] then
+		inst:AddTag("fastbuilder")
 		self.powerbonus = 75
 		self.bonusspeed = 2
 		self.powergenbonus = 1
@@ -253,7 +257,6 @@ function Upgrader:SkillManager(inst)
 	if skill[4][6] then
 		self.IsEfficient = true
 		self.bonusspeed = 4
-		inst.components.moisture.baseDryingRate = 0.5
 	end
 	
 end
