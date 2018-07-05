@@ -237,6 +237,7 @@ function Upgrader:SkillManager(inst)
 	
 	if skill[4][4] then
 		inst:AddTag("realyoukai")
+		inst:AddTag("monster")
 		self.powerbonus = 175
 		self.bonusspeed = 3
 	end
@@ -317,6 +318,8 @@ function Upgrader:DoUpgrade(inst, stat) -- it contains stat initializing
 	local health_percent = inst.components.health:GetPercent()
 	local sanity_percent = inst.components.sanity:GetPercent()
 	local power_percent = inst.components.power:GetPercent()
+	local ignoresanity = inst.components.sanity.ignore
+    inst.components.sanity.ignore = false
 	self:AbilityManager(inst)
 
 	local difficulty = GetModConfigData("difficulty", "YakumoYukari")
@@ -374,7 +377,7 @@ function Upgrader:DoUpgrade(inst, stat) -- it contains stat initializing
 	inst.components.hunger:SetPercent(hunger_percent)
 	inst.components.sanity:SetPercent(sanity_percent)
 	inst.components.power:SetPercent(power_percent)
-
+	inst.components.sanity.ignore = ignoresanity
 end
 
 return Upgrader

@@ -35,12 +35,13 @@ function MakeCard(name)
 	
 	local function mesh(inst)
 		inst.components.spellcard.costpower = 60
+		inst.costpower:set(60)
 		inst.components.finiteuses:SetMaxUses(3)
 		inst.components.finiteuses:SetUses(3)
 		inst.components.spellcard:SetSpellFn(function()
 			local owner = inst.components.inventoryitem.owner
 			if owner.components.sanity then
-				local amount = owner.components.sanity:GetMaxSanity() * owner.components.sanity:GetPercent()
+				local amount = owner.components.sanity:GetMaxWithPenalty() * owner.components.sanity:GetPercent()
 				owner.components.sanity:SetPercent(1)
 				owner.components.sanity:DoDelta(-amount)
 			end
@@ -54,6 +55,7 @@ function MakeCard(name)
 	
 	local function away(inst)
 		inst.components.spellcard.costpower = 50
+		inst.costpower:set(50)
 		inst.components.finiteuses:SetMaxUses(5)
 		inst.components.finiteuses:SetUses(5)
 		inst:AddComponent("stackable")
@@ -110,6 +112,7 @@ function MakeCard(name)
 		inst:RemoveComponent("finiteuses")
 		inst.components.spellcard.action = ACTIONS.CASTTOHOH
 		inst.components.spellcard.costpower = 300
+		inst.costpower:set(300)
 		inst.components.spellcard:SetSpellFn(function()
 			local owner = inst.components.inventoryitem.owner
 			local x,y,z = owner.Transform:GetWorldPosition()
@@ -174,6 +177,7 @@ function MakeCard(name)
 	
 	local function curse(inst)
 		inst.components.spellcard.costpower = 50
+		inst.costpower:set(50)
 		inst.components.finiteuses:SetMaxUses(3)
 		inst.components.finiteuses:SetUses(3)
 		inst.Duration = 0
@@ -218,7 +222,7 @@ function MakeCard(name)
 						end
 						if inst.Activated then
 							if owner.components.sanity then
-								owner.components.sanity:DoDelta(- owner.components.sanity:GetMaxSanity() * 0.025)
+								owner.components.sanity:DoDelta(- owner.components.sanity:GetMaxWithPenalty() * 0.025)
 							end
 							owner.components.combat.damagemultiplier = math.max(GetMultipulier(), old_dmg)
 							owner.components.locomotor.walkspeed = 6 + math.max(GetMultipulier(), old_speed)
@@ -238,6 +242,7 @@ function MakeCard(name)
 		
 	local function balance(inst)
 		inst.components.spellcard.costpower = 100
+		inst.costpower:set(100)
 		inst.components.finiteuses:SetMaxUses(5)
 		inst.components.finiteuses:SetUses(5)
 		inst.components.spellcard:SetSpellFn(function()
@@ -272,7 +277,7 @@ function MakeCard(name)
 	end
 	
 	local function laplace(inst)
-		inst.components.spellcard.costpower = 1
+		inst.components.spellcard.costpower = 5
 		table.insert(assets, Asset("IMAGE", "images/colour_cubes/purple_moon_cc.tex"))
 		table.insert(assets, Asset("IMAGE", "images/colour_cubes/mole_vision_on_cc.tex"))
         table.insert(assets, Asset("IMAGE", "images/colour_cubes/mole_vision_off_cc.tex"))
@@ -280,77 +285,76 @@ function MakeCard(name)
 		inst.components.finiteuses:SetUses(1500)
 		inst:AddComponent("stackable")
 		inst.components.stackable.maxsize = TUNING.STACK_SIZE_LARGEITEM
-		inst.Activated = nil
-		inst.components.spellcard:SetSpellFn(function()
-			local owner = inst.components.inventoryitem.owner
-			if owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) and owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "molehat" then
-				owner.components.talker:Say(GetString(owner.prefab, "ACTIONFAIL_GENERIC"))
-			else
-				if inst.Activated == nil then
-					owner:DoPeriodicTask(1, function()
-						if inst.Activated then
-							if GetClock() and TheWorld and TheWorld.components.colourcubemanager then
-								GetClock():SetNightVision(true)
-								TheWorld.components.colourcubemanager:SetOverrideColourCube("images/colour_cubes/purple_moon_cc.tex", .5)
-							end
-							if owner.components.power and owner.components.power.current >= 1 then
-								owner.components.power:DoDelta(-1, false)
-							else 
-								owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_LOWPOWER"))
-								if TheWorld and TheWorld.components.colourcubemanager then
-									TheWorld.components.colourcubemanager:SetOverrideColourCube(nil, .5)
-								end
-								GetClock():SetNightVision(false)
-								inst.Activated = false
-							end
-							if owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) and owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "molehat" then
-								owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_EYEHURT"))
-								if owner.components.combat then
-									owner.components.combat:GetAttacked(inst, 10)
-								end
-								inst.Activated = false
-								 if GetClock() and TheWorld and TheWorld.components.colourcubemanager then
-									if GetClock():IsDay() and not TheWorld:IsCave() then
-										TheWorld.components.colourcubemanager:SetOverrideColourCube("images/colour_cubes/mole_vision_off_cc.tex", .25)
-									else
-										TheWorld.components.colourcubemanager:SetOverrideColourCube("images/colour_cubes/mole_vision_on_cc.tex", .25)
-									end
-								end
-							end
+		local function deletetask(inst)
+			inst.sighttask:Cancel()
+			inst.sighttask = nil
+		end
+
+		inst.components.spellcard:SetSpellFn(function() -- todo : make own cccube
+			local NIGHTVISION_COLOURCUBES = {
+				day = "images/colour_cubes/beaver_vision_cc.tex",
+				dusk = "images/colour_cubes/beaver_vision_cc.tex",
+				night = "images/colour_cubes/beaver_vision_cc.tex",
+				full_moon = "images/colour_cubes/beaver_vision_cc.tex",
+			}
+			local owner = inst.components.inventoryitem and inst.components.inventoryitem.owner
+			local HasNightVision = owner.components.playervision and owner.components.playervision:HasNightVision()
+			local HasGoggleVision = owner.components.playervision and owner.components.playervision:HasGoggleVision()
+
+			if inst.sighttask then
+				deletetask(inst)
+				owner.components.playervision:SetCustomCCTable(nil)
+				owner.components.playervision:ForceNightVision(false)
+			end
+
+			if inst.sighttask == nil and HasNightVision then return false else
+				owner.components.power:DoDelta(4, false)
+				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NEWSIGHT"))
+				inst.sighttask = owner.DoPeriodicTask(owner, 1, function() -- Let's not use syntactic sugar
+					if inst.components.inventoryitem:IsHeld() then 
+						if owner.components.power and owner.components.power.current >= 1 then
+							owner.components.playervision:ForceNightVision(true)
+							owner.components.playervision:SetCustomCCTable(NIGHTVISION_COLOURCUBES)
 							inst.components.finiteuses:Use(1)
+							owner.components.power:DoDelta(-1, false)
+						else 
+							owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_LOWPOWER"))
+							owner.components.playervision:ForceNightVision(false)
+							owner.components.playervision:SetCustomCCTable(nil)
+							deletetask(inst)
 						end
-					end)
-					inst.Activated = true
-					owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NEWSIGHT"))
-				else
-					if inst.Activated then
-						inst.Activated = false
-						if TheWorld and TheWorld.components.colourcubemanager then
-							TheWorld.components.colourcubemanager:SetOverrideColourCube(nil, .5)
+						if HasGoggleVision then -- Player wears goggle in task
+							owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_EYEHURT"))
+							if owner.components.combat then
+								owner.components.combat:GetAttacked(inst, 10)
+							end
+							owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
+							deletetask(inst)
 						end
-						GetClock():SetNightVision(false)
-					else 
-						inst.Activated = true
-						owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NEWSIGHT"))
-					end
-				end
+					else -- so that you can still access owner(actually it's self) even inst.components.inventoryitem.owner is nil
+						owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
+						owner.components.playervision:ForceNightVision(false)
+						owner.components.playervision:SetCustomCCTable(nil)
+						deletetask(inst)
+					end 
+				end)
 			end
 			return true
 		end)
+
 		inst.components.finiteuses:SetOnFinished(function()
-			local owner = inst.components.inventoryitem.owner
-			if TheWorld and TheWorld.components.colourcubemanager then
-				TheWorld.components.colourcubemanager:SetOverrideColourCube(nil, .5)
-			end
-			inst.Activated = false
-			GetClock():SetNightVision(false)
+			local owner = inst.components.inventoryitem and inst.components.inventoryitem.owner
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
+			owner.components.playervision:ForceNightVision(false)
+			owner.components.playervision:SetCustomCCTable(nil)
+			deletetask(inst)
 			inst:Remove()
 		end)
 	end
 	
 	local function butter(inst)
 		inst.components.spellcard.costpower = 80
+		inst.costpower:set(80)
 		inst:RemoveComponent("finiteuses")
 		inst.components.spellcard:SetSpellFn(function()
 			local owner = inst.components.inventoryitem.owner
@@ -387,77 +391,89 @@ function MakeCard(name)
 	
 	local function bait(inst) -- name : Bewitching Bait
 		inst.components.spellcard.costpower = 1
+		inst.costpower:set(1)
 		inst.components.finiteuses:SetMaxUses(300)
 		inst.components.finiteuses:SetUses(300)
-		inst.Activated = nil
-		inst.components.spellcard:SetSpellFn(function()
-			local function barrier()
-				if inst.fx then 
-					return inst.fx
-				else
-					local fx = SpawnPrefab("barrierfieldfx")
-					local fx_hitanim = function()
-					fx.AnimState:PlayAnimation("hit")
-					fx.AnimState:PushAnimation("idle_loop")
-					end
-					fx.entity:SetParent(owner.entity)
-					fx.AnimState:SetScale(0.7,0.7,0.7)
-					fx.AnimState:SetMultColour(0.5,0,0.5,0.3)
-					fx.Transform:SetPosition(0, 0.2, 0)
-					inst.fx = fx
-					return fx
+		local function barrier(inst)
+			if inst.fx then 
+				return inst.fx
+			else
+				local fx = SpawnPrefab("barrierfieldfx")
+				local fx_hitanim = function()
+				fx.AnimState:PlayAnimation("hit")
+				fx.AnimState:PushAnimation("idle_loop")
 				end
+				fx.entity:SetParent(inst.components.inventoryitem.owner.entity)
+				fx.AnimState:SetScale(0.7,0.7,0.7)
+				fx.AnimState:SetMultColour(0.5,0,0.5,0.3)
+				fx.Transform:SetPosition(0, 0.2, 0)
+				inst.fx = fx
+				return fx
 			end
-			local fx = barrier()
+		end
+		inst.components.spellcard:SetSpellFn(function()
 			local owner = inst.components.inventoryitem.owner
-			if inst.Activated == nil then -- create barrier
-				inst.Activated = true
-				owner:DoPeriodicTask(1, function()
-					if inst.Activated then
-						if owner.components.power and owner.components.power.current >= 1 then
-							owner.components.power:DoDelta(-1, false)
+			
+
+			if inst.barriertask then
+				owner:RemoveTag("IsDamage")
+				inst.fx.kill_fx(inst.fx)
+				inst.fx = nil
+				inst.barriertask:Cancel()
+				inst.barriertask = nil
+			else
+				inst.fx = barrier(inst)
+				inst.barriertask = owner.DoPeriodicTask(owner, 1, function()
+					if owner.components.power and owner.components.power.current >= 1 then
+						owner.components.power:DoDelta(-1, false)
+						if not owner:HasTag("isDamage") then
 							owner:AddTag("IsDamage")
-							local x,y,z = owner.Transform:GetWorldPosition()
-							local ents = TheSim:FindEntities(x, y, z, 6)
-							for k,v in pairs(ents) do
-								if v.components.combat and v.components.combat.target ~= owner then
-									v.components.combat.target = owner
-								end
-							end
-							inst.components.finiteuses:Use(1)
-						else 
-							owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_LOWPOWER"))
-							inst.Activated = false
-							fx.kill_fx(fx)
-							inst.fx = nil
 						end
-					else
+						if owner.components.upgrader.ability[4][4] and owner:HasTag("realyoukai") then
+							owner:RemoveTag("realyoukai")
+						end
+						local x,y,z = owner.Transform:GetWorldPosition()
+						local ents = TheSim:FindEntities(x, y, z, 12)
+						for k,v in pairs(ents) do
+							if v.components.combat and v.components.combat.canattack and v.components.combat.target ~= owner and not v:HasTag("player") then
+								--v.components.combat.target = owner
+								v.components.combat:SetTarget(owner)
+							end
+						end
+						inst.components.finiteuses:Use(1)
+					else 
+						owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_LOWPOWER"))
 						owner:RemoveTag("IsDamage")
+						if owner.components.upgrader.ability[4][4] then
+							owner:AddTag("realyoukai")
+						end
+						inst.fx.kill_fx(inst.fx)
+						inst.fx = nil
+						inst.barriertask:Cancel()
+						inst.barriertask = nil
 					end
 				end)
-			else
-				if inst.Activated then
-					inst.Activated = false
-					fx.kill_fx(fx)
-					inst.fx = nil
-				else
-					inst.Activated = true -- enable barrier
-				end
 			end
 			return true
 		end)
 		inst.components.finiteuses:SetOnFinished(function()
-			local fx = inst.fx
-			inst.Activated = false
-			fx.kill_fx(fx)
-			inst.fx = nil
+			local owner = inst.components.inventoryitem.owner
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
+			owner:RemoveTag("IsDamage")
+			if owner.components.upgrader.ability[4][4] then
+				owner:AddTag("realyoukai")
+			end
+			inst.fx.kill_fx(inst.fx)
+			inst.fx = nil
+			inst.barriertask:Cancel()
+			inst.barriertask = nil
 			inst:Remove()
 		end)
 	end
 	
 	local function addictive(inst)
 		inst.components.spellcard.costpower = 200
+		inst.costpower:set(200)
 		inst:RemoveComponent("finiteuses")
 		inst.components.spellcard:SetSpellFn(function()
 			local owner = inst.components.inventoryitem.owner
@@ -470,6 +486,9 @@ function MakeCard(name)
 					v.components.pickable.witherable = false
 					v.components.pickable.inst:RemoveTag("witherable")
 					v.components.pickable.shouldwither = true
+					if v.rain then
+						v.rain = 0
+					end
 					v.components.pickable:Regen()
 				end
 				
@@ -500,6 +519,7 @@ function MakeCard(name)
 	local function lament(inst) -- Urashima's Box
 		inst:RemoveComponent("finiteuses")
 		inst.components.spellcard.costpower = 20
+		inst.costpower:set(20)
 		inst:AddComponent("stackable")
 		inst.components.stackable.maxsize = TUNING.STACK_SIZE_SMALLITEM
 		inst.Activated = false
@@ -570,18 +590,14 @@ function MakeCard(name)
 			{"nightmarebeak", 1, "bad"},
 			{"killerbee", math.random(4), "bad"},
 			{"krampus", math.random(3), "bad"},
-			{"deerclops", 1, "bad", function(prefab) prefab:DoTaskInTime(10, function() prefab:Remove(); prefab:PushEvent("ms_sendlightningstrike", TheInput:GetWorldPosition() ) end) end, "rog"},
+			{"deerclops", 1, "bad", function(prefab) prefab:DoTaskInTime(10, function() prefab:PushEvent("ms_sendlightningstrike", prefab.Transform:GetWorldPosition()); prefab:Remove()  end) end, "rog"},
 			{"mosquito", math.random(3), "bad", nil, "rog"},
 			{"tallbird", 1, "bad", nil, "rog"},
 			{"mosquito_poison", math.random(3), "bad", nil, "sw"},
 		}
 		inst.components.spellcard:SetSpellFn(function()
-				local owner = inst.components.inventoryitem.owner
 				local function spawn()
 				local owner = inst.components.inventoryitem.owner
-				if owner.components.kramped.threshold == nil then -- just in case
-					owner.components.kramped.threshold = 50
-				end
 				local function GetLoot(list)
 					local loot = {}
 					for i=1, #list, 1 do
@@ -613,8 +629,6 @@ function MakeCard(name)
 						return pt+result_offset
 					end
 				end
-				local threshold = owner.components.kramped.threshold
-				local actions = owner.components.kramped.actions
 				local naughtiness = actions / threshold
 				local key, amount, grade, pt, list, loot
 				if count > 1 then
@@ -710,9 +724,7 @@ function MakeCard(name)
 							owner.SoundEmitter:PlaySound("dontstarve/HUD/sanity_down")
 							prefab.Transform:SetPosition(pt.x, pt.y, pt.z)
 						end
-					 
-						owner.components.kramped:OnNaughtyAction( math.min(threshold - (actions + 1), math.random(10, 30)) )
-						-- So Naughty points can be gained until 'threshold - 1' so that prevent spawning Krampus.
+						local owner = inst.components.inventoryitem.owner
 						local x,y,z = owner.Transform:GetWorldPosition()
 						local ents = TheSim:FindEntities(x, y, z, 14)
 						for k,v in pairs(ents) do
@@ -734,7 +746,7 @@ function MakeCard(name)
 				return false--owner.components.talker:Say(GetString(owner.prefab, "ACTIONFAIL_GENERIC"))
 			else
 				inst.Activated = true
-				
+				local owner = inst.components.inventoryitem.owner
 				local x,y,z = owner.Transform:GetWorldPosition()
 				local ents = TheSim:FindEntities(x, y, z, 100)
 				owner.components.playercontroller:Enable(false)
@@ -758,6 +770,7 @@ function MakeCard(name)
 	
 	local function matter(inst) -- Universe of Matter and Antimatter
 		inst.components.spellcard.costpower = 150
+		inst.costpower:set(150)
 		inst.components.finiteuses:SetMaxUses(2)
 		inst.components.finiteuses:SetUses(2)
 		inst:AddComponent("stackable")
@@ -767,10 +780,10 @@ function MakeCard(name)
 			local Inventory = owner.components.inventory
 			
 			local function repair(v)
-				
+
 				if v.components.fueled 
-				and not v.components.fueled.fueltype == "MAGIC"	
-				and not v.components.fueled.fueltype == "NIGHTMARE" then
+				and v.components.fueled.fueltype ~= "MAGIC"	
+				and v.components.fueled.fueltype ~= "NIGHTMARE" then
 					  v.components.fueled:DoDelta(1)
 				end
 				
@@ -779,12 +792,13 @@ function MakeCard(name)
 				and not v:HasTag("firestaff")
 				and not v:HasTag("spellcard")
 				and not v:HasTag("shadow")
-				and not v.prefab == "greenamulet"
-				and not v.prefab == "yellowamulet"
-				and not v.prefab == "orangeamulet"
-				and not v.prefab == "amulet"
+				and v.prefab ~= "greenamulet"
+				and v.prefab ~= "yellowamulet"
+				and v.prefab ~= "orangeamulet"
+				and v.prefab ~= "amulet"
 				and not v.components.spellcaster
-				and not v.components.blinkstaff then
+				and not v.components.blinkstaff 
+				then
 					local maxuse = v.components.finiteuses.total
 					v.components.finiteuses:SetUses(maxuse)
 				end

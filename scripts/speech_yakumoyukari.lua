@@ -1646,7 +1646,7 @@ return {
 	DESCRIBE_NOREINFORCE = "I'm no longer reinforced!",
 	DESCRIBE_EYEHURT = "Ouch! My eyes!",
 	DESCRIBE_NEWSIGHT = "Let's see this.",
-	DESCRIBE_DONEEFFCT = "It's done.",
+	DESCRIBE_DONEEFFCT = "The effect is over.",
 	DESCRIBE_NOSPAWN = "I can't spawn.",
 	DESCRIBE_TOOMANYBUTTER = "I think It's enough..?",
 	DESCRIBE_ABILITY_ALREADY = "I already have this ability.",

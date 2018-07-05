@@ -317,7 +317,7 @@ end
 
 local function DebugFunction(inst)
 	inst:DoPeriodicTask(1, function()
-		if inst.components.power then
+		if inst.components.power and inst.infpower then
 			inst.components.power.max = 300
 			inst.components.power.current = 300
 		end
@@ -479,7 +479,6 @@ local master_postinit = function(inst) -- after SetPristine()
 
 	inst:DoPeriodicTask(1, CooldownFunction)
 	inst:DoPeriodicTask(1, PeriodicFunction)
-	inst:DoPeriodicTask(1, DebugFunction)
 	
 	inst.OnSave = onsave
 	inst.OnPreLoad = onpreload

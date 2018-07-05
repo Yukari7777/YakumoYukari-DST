@@ -509,7 +509,7 @@ modimport "scripts/strings_yukari.lua"
 modimport "scripts/actions_yukari.lua"
 modimport "scripts/recipes_yukari.lua"
 AddPrefabPostInit("cave", AddSchemeManager)
-AddPrefabPostInit("world", AddSchemeManager)
+AddPrefabPostInit("forest", AddSchemeManager)
 AddPrefabPostInit("bunnyman", BunnymanNormalRetargetFn)
 AddPrefabPostInit("pigman", PigmanNormalRetargetFn)
 AddPrefabPostInit("bat", BatRetargetFn)

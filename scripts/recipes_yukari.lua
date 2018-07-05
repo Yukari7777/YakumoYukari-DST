@@ -26,8 +26,8 @@ end
 	
 local spellcardbaitrecipe = AddRecipe( "spellcard_bait", {Ingredient("honey", 4), Ingredient("armorgrass", 1)}, RECIPETABS.TOUHOU, {SCIENCE = 1} )
 spellcardbaitrecipe.atlas = "images/inventoryimages/spellcard_bait.xml"
-local spelllamentrecipe = AddRecipe( "spellcard_lament", {Ingredient("boards", 3), Ingredient("nightmarefuel", 1)}, RECIPETABS.TOUHOU, {SCIENCE = 1} )
-spelllamentrecipe.atlas = "images/inventoryimages/spellcard_lament.xml"
+--local spelllamentrecipe = AddRecipe( "spellcard_lament", {Ingredient("boards", 3), Ingredient("nightmarefuel", 1)}, RECIPETABS.TOUHOU, {SCIENCE = 1} )
+--spelllamentrecipe.atlas = "images/inventoryimages/spellcard_lament.xml"
 local spellbutterrecipe = AddRecipe( "spellcard_butter", {Ingredient("butter", 1)}, RECIPETABS.TOUHOU, {SCIENCE = 1})
 spellbutterrecipe.atlas = "images/inventoryimages/spellcard_butter.xml"
 local spellawayrecipe = AddRecipe( "spellcard_away", {Ingredient("cutreeds", 10), Ingredient("goose_feather", 3)}, RECIPETABS.TOUHOU, {MAGIC = 1} )
