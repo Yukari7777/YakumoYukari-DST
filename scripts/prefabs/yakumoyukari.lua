@@ -235,7 +235,7 @@ local function PeriodicFunction(inst, data)
 	if inst.components.upgrader.ResistDark then
 		if inst.components.upgrader.ResistCave then
 			inst.components.sanity.night_drain_mult = 0
-		elseif not TheWorld:IsCave() then
+		elseif not TheWorld:HasTag("cave") then
 			inst.components.sanity.night_drain_mult = 0
 		end
 	else
@@ -246,7 +246,7 @@ local function PeriodicFunction(inst, data)
 	end
 	
 	if inst.components.upgrader.NightVision then
-		if TheWorld.state.phase == "night" or TheWorld:IsCave() then
+		if TheWorld.state.phase == "night" or TheWorld:HasTag("cave") then
 			if inst.components.sanity and inst.components.sanity:GetPercent() >= 0.8 and inst.components.sanity:GetPercent() < 0.98 then
 				inst.Light:SetRadius(1);inst.Light:SetFalloff(.9);inst.Light:SetIntensity(0.3);inst.Light:SetColour(128/255,0,217/255);inst.Light:Enable(true)
 			elseif inst.components.sanity and inst.components.sanity:GetPercent() >= 0.98 then
