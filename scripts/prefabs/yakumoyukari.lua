@@ -29,8 +29,6 @@ local assets = {
 		Asset( "SOUND", "sound/sfx.fsb" ),
         Asset( "SOUND", "sound/wilson.fsb" ),
 
-        --Asset( "ANIM", "anim/yakumoyukari.zip" ),
-		--Asset( "ANIM", "anim/ghost_yukari_build.zip"),
 		Asset( "ATLAS", "images/avatars/avatar_yakumoyukari.xml"),
 		Asset( "ATLAS", "images/avatars/avatar_ghost_yakumoyukari.xml"),
 }

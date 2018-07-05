@@ -243,31 +243,26 @@ function MakeCard(name)
 	end
 		
 	local function balance(inst)
-		inst.components.spellcard.costpower = 100
-		inst.costpower:set(100)
-		inst.components.finiteuses:SetMaxUses(5)
-		inst.components.finiteuses:SetUses(5)
+		inst.components.spellcard.costpower = 150
+		inst.costpower:set(150)
+		inst.components.finiteuses:SetMaxUses(2)
+		inst.components.finiteuses:SetUses(2)
 		inst.components.spellcard:SetSpellFn(function()
 			local owner = inst.components.inventoryitem.owner
-			local x,y,z = owner.Transform:GetWorldPosition()
-			local ents = TheSim:FindEntities(x, y, z, 50)
-			for k,v in pairs(ents) do
-				if v.components.pickable then
-					v.components.pickable:FinishGrowing()
+			local Inventory = owner.components.inventory
+
+			local function refresh(v)
+				if v.components.perishable then
+					local max = v.components.perishable.perishtime 
+					v.components.perishable:SetPerishTime(max)
 				end
-				
-				if v.components.hackable then
-					v.components.hackable:FinishGrowing()
-				end
-				
-				if v.components.crop then
-					v.components.crop:DoGrow(TUNING.TOTAL_DAY_TIME*5)
-				end
-				
-				if v:HasTag("tree") and v.components.growable and not v:HasTag("stump") then
-					v.components.growable:DoGrowth()
-					v.components.growable:SetStage(3) -- tallest
-				end
+			end
+			
+			for k,v in pairs(Inventory.itemslots) do
+				refresh(v)
+			end
+			for k,v in pairs(Inventory.equipslots) do
+				refresh(v)
 			end
 		
 			if owner.components.power then
@@ -503,6 +498,15 @@ function MakeCard(name)
 					v.components.hackable.witherable = false
 					v.components.hackable.inst:RemoveTag("witherable")
 					v.components.hackable:Regen()
+				end
+
+				if v.components.crop then
+					v.components.crop:DoGrow(TUNING.TOTAL_DAY_TIME*5)
+				end
+				
+				if v:HasTag("tree") and v.components.growable and not v:HasTag("stump") then
+					v.components.growable:DoGrowth()
+					v.components.growable:SetStage(3) -- tallest
 				end
 				
 				if v.components.grower then

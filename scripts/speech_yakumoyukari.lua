@@ -32,7 +32,7 @@ return {
 		GENERIC = "This world's foods are unique.",
 		PAINFUL = "That was a painful food...",
 		SPOILED = "It passed its expiration date.",
-		STALE = "That wass not actually food.",
+		STALE = "That was not actually food.",
 		INVALID = "I can eat humans but this is not!",
 	},
 	ANNOUNCE_ENTER_DARK = "It's BLACK!",
@@ -939,12 +939,12 @@ return {
         RUBBLE = "",
 		RESEARCHLAB = 
 		{	
-			GENERIC = "I have already known all about this.",
+			GENERIC = "A science station.",
 			BURNT = "Oh.. he's sad...",
 		},
 		RESEARCHLAB2 = 
 		{
-			GENERIC = "Better information  is stored into it.",
+			GENERIC = "Better information is stored into it.",
 			BURNT = "It burnt.",
 		},
 		RESEARCHLAB3 = 

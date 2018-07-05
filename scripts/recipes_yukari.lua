@@ -32,7 +32,7 @@ local spellbutterrecipe = AddRecipe( "spellcard_butter", {Ingredient("butter", 1
 spellbutterrecipe.atlas = "images/inventoryimages/spellcard_butter.xml"
 local spellawayrecipe = AddRecipe( "spellcard_away", {Ingredient("cutreeds", 10), Ingredient("goose_feather", 3)}, RECIPETABS.TOUHOU, {MAGIC = 1} )
 spellawayrecipe.atlas = "images/inventoryimages/spellcard_away.xml"
-local spellbalancerecipe = AddRecipe( "spellcard_balance", {Ingredient("seeds", 5), Ingredient("poop", 3)}, RECIPETABS.TOUHOU, {MAGIC = 1} )
+local spellbalancerecipe = AddRecipe( "spellcard_balance", {Ingredient("redgem", 3), Ingredient("bluegem", 5), Ingredient("seeds", 15), Ingredient("poop", 15)}, RECIPETABS.TOUHOU, {MAGIC = 2} )
 spellbalancerecipe.atlas = "images/inventoryimages/spellcard_balance.xml"
 local spelladdictiverecipe = AddRecipe( "spellcard_addictive", {Ingredient("poop", 10), Ingredient("ice", 10), Ingredient("nitre", 5), Ingredient("seeds", 5)}, RECIPETABS.TOUHOU, {MAGIC = 2} )
 spelladdictiverecipe.atlas = "images/inventoryimages/spellcard_addictive.xml"
