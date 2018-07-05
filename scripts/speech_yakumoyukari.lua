@@ -275,7 +275,7 @@ return {
 		MUSHTREE_SMALL ="Green magic mushtree.",
 		RABBITHOUSE=
 		{
-			GENERIC = "Are they really like carrots?",
+			GENERIC = "Are they really love carrots?",
 			BURNT = "Now it burnt.",
 		},
 		SLURTLE="He's looking for minerals.",

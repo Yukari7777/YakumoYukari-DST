@@ -178,7 +178,9 @@ local function OnTakeDamage(self)
 
 		-- custom damage reduction
 		if self.inst.prefab == "yakumoyukari" then
-			if self.inst.components.inventory ~= nil and self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat" then
+			if self and self.inst 
+			and self.inst.components.inventory ~= nil 
+			and self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat" then
 				local hatabsorb = 0
 				for i = 2, 5, 1 do
 					if Chara.components.upgrader.hatskill[i] then
