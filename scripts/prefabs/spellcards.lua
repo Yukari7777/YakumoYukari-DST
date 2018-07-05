@@ -482,12 +482,15 @@ function MakeCard(name)
 			local x,y,z = owner.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x, y, z, 60)
 			for k,v in pairs(ents) do
+				if v.components.witherable then
+					v.components.witherable.withered = false
+					v:RemoveTag("withered")
+					v:RemoveTag("witherable")
+				end
+
 				if v.components.pickable then
-					v.components.pickable.withered = false
-					v.components.pickable.inst:RemoveTag("withered")
-					v.components.pickable.witherable = false
-					v.components.pickable.inst:RemoveTag("witherable")
-					v.components.pickable.shouldwither = true
+					v.components.pickable.max_cycles = 100
+					v.components.pickable.cycles_left = 100
 					if v.rain then
 						v.rain = 0
 					end
@@ -499,7 +502,6 @@ function MakeCard(name)
 					v.components.hackable.inst:RemoveTag("withered")
 					v.components.hackable.witherable = false
 					v.components.hackable.inst:RemoveTag("witherable")
-					v.components.hackable.shouldwither = true
 					v.components.hackable:Regen()
 				end
 				
