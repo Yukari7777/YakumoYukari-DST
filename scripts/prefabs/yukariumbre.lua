@@ -19,6 +19,22 @@ local function onuse(staff, pos, caster)
 
 end
 
+local function blinkstaff_reticuletargetfn()
+    local player = ThePlayer
+    local rotation = player.Transform:GetRotation() * DEGREES
+    local pos = player:GetPosition()
+    for r = 13, 1, -1 do
+        local numtries = 2 * PI * r
+        local offset = FindWalkableOffset(pos, rotation, r, numtries, false, true, NoHoles)
+        if offset ~= nil then
+            pos.x = pos.x + offset.x
+            pos.y = 0
+            pos.z = pos.z + offset.z
+            return pos
+        end
+    end
+end
+
 local function OnEquipYukari(inst, owner)        
 	owner.AnimState:OverrideSymbol("swap_object", "swap_yukariumbre", "swap")
 	owner.AnimState:Show("ARM_carry")        
@@ -105,9 +121,7 @@ local function fn()
     inst.components.insulator:SetSummer()
 	
 	inst:AddComponent("reticule")
-    inst.components.reticule.targetfn = function() 
-        return inst.components.makegate:GetBlinkPoint()
-    end
+    inst.components.reticule.targetfn = blinkstaff_reticuletargetfn
     inst.components.reticule.ease = true
 	
 	inst:AddComponent("inspectable")     

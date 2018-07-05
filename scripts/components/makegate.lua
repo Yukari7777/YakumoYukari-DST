@@ -4,23 +4,6 @@ local MakeGate = Class(function(self, inst)
     self.distance_controller = 7 
 end)
 
-function MakeGate:GetBlinkPoint()
-	--For use with controller.
-	local owner = self.inst.components.inventoryitem.owner
-	if not owner then return end
-	local pt = nil
-	local rotation = owner.Transform:GetRotation()*DEGREES
-	local pos = owner:GetPosition()
-
-	for r = self.distance_controller, 1, -1 do
-        local numtries = 2*PI*r
-		pt = FindWalkableOffset(pos, rotation, r, numtries)
-		if pt then
-			return pt + pos
-		end
-	end
-end
-
 function MakeGate:SpawnEffect(inst)
 	local pt = inst:GetPosition()
 	local fx = SpawnPrefab("small_puff")
