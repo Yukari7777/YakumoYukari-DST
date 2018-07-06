@@ -13,6 +13,7 @@ slnx.sqlite
 *.vsp
 *.vspx
 *.sap
+dedicated_update.bat
 
 # Visual Studio cache files
 # files ending in .cache can be ignored
