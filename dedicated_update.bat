@@ -1,0 +1,1 @@
+robocopy "C:\Program Files (x86)\Steam\steamapps\common\Don't Starve Together\mods\YakumoYukari-DST" "C:\steamcmd\steamapps\common\Don't Starve Together Dedicated Server\mods\YakumoYukari-DST" /COPYALL /E

@@ -154,8 +154,6 @@ local function OnTakeDamage(self)
 			end
 		end
 
-		-- print("Incoming damage", damage)
-
 		local absorbed_percent = 0
 		local total_absorption = 0
 		for armor, amt in pairs(absorbers) do

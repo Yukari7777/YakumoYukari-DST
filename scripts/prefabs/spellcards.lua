@@ -243,12 +243,21 @@ function MakeCard(name)
 		inst.components.spellcard:SetSpellFn(function()
 			local owner = inst.components.inventoryitem.owner
 			local Inventory = owner.components.inventory
+			local rotcnt = 0
 
 			local function refresh(v)
 				if v.components.perishable then
 					local max = v.components.perishable.perishtime 
 					v.components.perishable:SetPerishTime(max)
 				end
+
+				if v.prefab == "spoiled_food" or v.prefab == "rottenegg" then
+					if v.components.stackable then
+						rotcnt = rotcnt + v.components.stackable:StackSize()
+						v:Remove()
+					end
+				end
+				
 			end
 			
 			for k,v in pairs(Inventory.itemslots) do
@@ -257,7 +266,11 @@ function MakeCard(name)
 			for k,v in pairs(Inventory.equipslots) do
 				refresh(v)
 			end
-		
+			
+			for i = 1, rotcnt, 1 do
+				owner.components.inventory:GiveItem(SpawnPrefab("wetgoop"))
+			end
+
 			if owner.components.power then
 				owner.components.power:DoDelta(-100, false)
 			end
@@ -426,7 +439,6 @@ function MakeCard(name)
 						local ents = TheSim:FindEntities(x, y, z, 12)
 						for k,v in pairs(ents) do
 							if v.components.combat and v.components.combat.canattack and v.components.combat.target ~= owner and not v:HasTag("player") then
-								--v.components.combat.target = owner
 								v.components.combat:SetTarget(owner)
 							end
 						end

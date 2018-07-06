@@ -149,9 +149,9 @@ function Upgrader:SkillManager(inst)
 	end
 	
 	if skill[2][2] then
-		inst.components.eater.strongstomach = true
 		self.hungerbonus = 50
 		self.powerupvalue = 2
+		inst.components.eater.strongstomach = true
 		inst.components.temperature.inherentinsulation = TUNING.INSULATION_SMALL
 		inst.components.temperature.inherentsummerinsulation = TUNING.INSULATION_SMALL
 	end

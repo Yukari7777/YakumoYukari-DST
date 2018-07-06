@@ -373,8 +373,6 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.components.combat.damagemultiplier = TUNING.YDEFAULT.DAMAGE_MULTIPLIER
 	inst.components.builder.science_bonus = 1
 	
-	CUSTOM_RECIPETABS['TOUHOU'] = {str = "TOUHOU", sort= 787, icon = "touhoutab.tex", icon_atlas = "images/inventoryimages/touhoutab.xml"}
-	
 	inst.components.eater.EatMEAT = inst.components.eater.Eat
 	function inst.components.eater:Eat( food )
 		if self:CanEat(food) then
