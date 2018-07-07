@@ -168,7 +168,7 @@ local function OnTakeDamage(self)
 		-- print("\tabsorbed%", absorbed_percent, "total_absorption", total_absorption, "absorbed_damage", absorbed_damage, "leftover_damage", leftover_damage)
 
 		if total_absorption > 0 then
-			ProfileStatsAdd("armor_absorb", absorbed_damage)
+			GLOBAL.ProfileStatsAdd("armor_absorb", absorbed_damage)
 
 			for armor, amt in pairs(absorbers) do
 				armor:TakeDamage(absorbed_damage * amt / total_absorption + armor:GetBonusDamage(attacker, weapon))
