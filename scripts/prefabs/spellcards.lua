@@ -489,12 +489,12 @@ function MakeCard(name)
 				if v.components.witherable then
 					v.components.witherable.withered = false
 					v:RemoveTag("withered")
-					v:RemoveTag("witherable")
+					--v:RemoveTag("witherable")
 				end
 
 				if v.components.pickable then
-					v.components.pickable.max_cycles = 100
-					v.components.pickable.cycles_left = 100
+					--v.components.pickable.max_cycles = 100
+					v.components.pickable.cycles_left = nil
 					if v.rain then
 						v.rain = 0
 					end

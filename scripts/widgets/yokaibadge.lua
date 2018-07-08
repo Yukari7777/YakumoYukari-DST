@@ -3,18 +3,26 @@ local Badge = require "widgets/badge"
 local Widget = require "widgets/widget"
 local Text = require "widgets/text"
 local PlayerBadge = require "widgets/playerbadge"
-
-local function IsModEnabled(modname)
-	for k, v in ipairs(KnownModIndex:GetModsToLoad()) do
-		if KnownModIndex:GetModInfo(v).name == modname  then
-			return true
+--local GetModConfigData(, )
+--
+local function GetModName(modname) -- modinfo's modname and internal modname is different.
+	for _, knownmodname in ipairs(KnownModIndex:GetModsToLoad()) do
+		if KnownModIndex:GetModInfo(knownmodname).name == modname  then
+			return knownmodname
 		end
 	end
-	return false
+end
+
+local function GetModOptionValue(knownmodname, known_option_name)
+	local modinfo = KnownModIndex:GetModInfo(knownmodname)
+	for _,option in pairs(modinfo.configuration_options) do
+		if option.name == known_option_name then
+			return option.saved
+		end
+	end
 end
 
 local yokaibadge = Class(Widget, function(self, anim, owner)
-	--Badge._ctor(self, background_build, owner)
 	Widget._ctor(self, "yokaibadge")
 
 	self.owner = owner
@@ -23,7 +31,7 @@ local yokaibadge = Class(Widget, function(self, anim, owner)
 	self:SetScale(1, 1, 1)
     self:SetPosition(0,-105,0)
 
-	self.combinedmod = IsModEnabled("Combined Status")
+	self.combinedmod = GetModName("Combined Status")
 
 	self.pulse = self:AddChild(UIAnim())
     self.pulse:GetAnimState():SetBank("pulse")
@@ -43,7 +51,9 @@ local yokaibadge = Class(Widget, function(self, anim, owner)
 	self.num:SetClickable(false)
     self.num:Hide()
 	
-	if self.combinedmod then
+	if self.combinedmod ~= nil then
+		self.showmaxonnumbers = GetModOptionValue(self.combinedmod, "SHOWMAXONNUMBERS")
+
 		self.bg = self:AddChild(Image("images/status_bgs.xml", "status_bgs.tex"))
 		self.bg:SetScale(.4,.43,0)
 		self.bg:SetPosition(-.5, -40, 0)
@@ -56,7 +66,7 @@ local yokaibadge = Class(Widget, function(self, anim, owner)
 		self.num:MoveToFront()
 		self.num:Show()
 
-		self.maxnum = self:AddChild(Text(NUMBERFONT, 33))
+		self.maxnum = self:AddChild(Text(NUMBERFONT, self.showmaxonnumbers and 25 or 33))
 		self.maxnum:SetPosition(6, 0, 0)
 		self.maxnum:MoveToFront()
 		self.maxnum:Hide()
@@ -81,7 +91,7 @@ function yokaibadge:SetPercent(val, max)
 end
 
 function yokaibadge:OnGainFocus()
-	if self.combinedmod then
+	if self.combinedmod ~= nil then
 		self.maxnum:Show()
 	else
 		yokaibadge._base:OnGainFocus(self)
@@ -90,7 +100,7 @@ function yokaibadge:OnGainFocus()
 end
 
 function yokaibadge:OnLoseFocus()
-	if self.combinedmod then
+	if self.combinedmod ~= nil then
 		self.maxnum:Hide()
 		self.num:Show()
 	else
@@ -103,12 +113,20 @@ end
 function yokaibadge:OnUpdate(dt)
 	if self.owner and self.owner.replica.power ~= nil then
 		self.num:SetString(tostring(math.floor( self.owner.replica.power:GetCurrent() )))
-		if self.combinedmod then
-			self.maxnum:SetString(tostring(math.floor( self.owner.replica.power:Max() )))
+		if self.combinedmod ~= nil then
+			local maxtxt = self.showmaxonnumbers and "Max:\n" or ""
+
+			self.maxnum:SetString(maxtxt..tostring(math.floor( self.owner.replica.power:Max() )))
 		end
 		self:SetPercent(self.owner.replica.power:GetCurrent(), self.owner.replica.power:Max())
 	end
 	
+	if self.owner:HasTag("playerghost") then
+		self:SetScale(0, 0, 0)
+	else
+		self:SetScale(1, 1, 1)
+	end
+
 end
 
 return yokaibadge

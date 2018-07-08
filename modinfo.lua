@@ -1,7 +1,7 @@
-name = "Yakumo Yukari"
+name = "Yakumo Yukari Test"
 description = "Yakumo Yukari comes from unknown world to manipulate Don't Starve Together world!"
 author = "Yakumo Yukari"
-version = "0.2.1"
+version = "0.3"
 forumthread = ""
 api_version = 6
 api_version_dst = 10

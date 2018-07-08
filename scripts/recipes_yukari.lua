@@ -13,8 +13,8 @@ if Difficulty == "easy" then
 	PowerIngredient = { Ingredient("purplegem", 1), Ingredient("livinglog", 2) }
 end
 
-AddRecipe("healthpanel", HealthIngredient, TOUHOU, TECH.SCIENCE_ONE, nil, nil, nil, nil, nil, "images/inventoryimages/healthpanel.xml", "healthpanel.tex" )
-AddRecipe("hungerpanel", HungerIngredient, TOUHOU, TECH.SCIENCE_TWO, nil, nil, nil, nil, nil, "images/inventoryimages/hungerpanel.xml", "hungerpanel.tex")
+AddRecipe("healthpanel", HealthIngredient, TOUHOU, TECH.SCIENCE_TWO, nil, nil, nil, nil, nil, "images/inventoryimages/healthpanel.xml", "healthpanel.tex" )
+AddRecipe("hungerpanel", HungerIngredient, TOUHOU, TECH.SCIENCE_ONE, nil, nil, nil, nil, nil, "images/inventoryimages/hungerpanel.xml", "hungerpanel.tex")
 AddRecipe("sanitypanel", SanityIngredient, TOUHOU, TECH.MAGIC_ONE, nil, nil, nil, nil, nil, "images/inventoryimages/sanitypanel.xml", "sanitypanel.tex")
 AddRecipe("powerpanel", PowerIngredient, TOUHOU, TECH.MAGIC_TWO, nil, nil, nil, nil, nil, "images/inventoryimages/powerpanel.xml", "powerpanel.tex")
 --AddRecipe("spellcard_lament", {Ingredient("boards", 3), Ingredient("nightmarefuel", 1)}, TOUHOU, TECH.SCIENCE_ONE, nil, nil, nil, nil, nil, "images/inventoryimages/spellcard_lament.xml", "spellcard_lament.tex")

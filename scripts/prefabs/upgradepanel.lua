@@ -1,6 +1,7 @@
+--local berries = GetModConfigData("berries", "YakumoYukari") == "juicy" and "berries_juicy" or "berries"
 local Ingredients = {
 	{"spidergland", "healingsalve", "bandage"},
-	{"berries", "meatballs", "bonestew"},
+	{ "berries_juicy" , "meatballs", "bonestew"},
 	{"petals", "nightmarefuel", "livinglog"},
 	{"goldnugget", "purplegem", "thulecite"}
 }

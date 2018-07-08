@@ -10,10 +10,10 @@ local assets =
 local function onuse(staff, pos, caster)
 
     if caster.components.power then
-		if staff.isunfolded then
-			caster.components.power:DoDelta(-TUNING.YDEFAULT.TELEPORT_POWER_COST, false)
-		else
+		if staff.isunfolded:value() then
 			caster.components.power:DoDelta(-TUNING.YDEFAULT.SPAWNG_POWER_COST, false)
+		else
+			caster.components.power:DoDelta(-TUNING.YDEFAULT.TELEPORT_POWER_COST, false)
 		end
     end
 
