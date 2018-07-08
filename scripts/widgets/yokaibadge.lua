@@ -3,8 +3,7 @@ local Badge = require "widgets/badge"
 local Widget = require "widgets/widget"
 local Text = require "widgets/text"
 local PlayerBadge = require "widgets/playerbadge"
---local GetModConfigData(, )
---
+
 local function GetModName(modname) -- modinfo's modname and internal modname is different.
 	for _, knownmodname in ipairs(KnownModIndex:GetModsToLoad()) do
 		if KnownModIndex:GetModInfo(knownmodname).name == modname  then
