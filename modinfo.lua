@@ -1,7 +1,7 @@
-name = "Yakumo Yukari Test"
+name = "Yakumo Yukari"
 description = "Yakumo Yukari comes from unknown world to manipulate Don't Starve Together world!"
 author = "Yakumo Yukari"
-version = "0.3"
+version = "0.4"
 forumthread = ""
 api_version = 6
 api_version_dst = 10
@@ -24,7 +24,7 @@ configuration_options = {
 		label = "Play Style",
 		options =
 		{
-			{ description = "PVP", data = "pvp" },
+			{ description = "PVP", data = "easy" },
 			{ description = "Standard", data = "default" },
 			{ description = "Farmer", data = "hard" },
 		},
@@ -40,6 +40,17 @@ configuration_options = {
 			{ description = "false", data = false },
 		},
 		default = true,
+	},
+	
+	{
+		name = "berries",
+		label = "Hunger Upgrade Ingredient",
+		options = 
+		{
+			{ description = "Juicy Berries", data = "juicy" },
+			{ description = "Berries", data = "normal" },
+		},
+		default = "juicy",
 	}
 
 }

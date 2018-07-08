@@ -210,17 +210,6 @@ function GoInvincible(inst)
 end
 
 local function PeriodicFunction(inst, data)
-
-	if not inst:IsOnValidGround() then -- To fix the bug that cause the player to go to ocean
-		local dest = FindNearbyLand(inst:GetPosition(), 8)
-		if dest ~= nil then
-			if inst.Physics ~= nil then
-				inst.Physics:Teleport(dest:Get())
-			elseif inst.Transform ~= nil then
-				inst.Transform:SetPosition(dest:Get())
-			end
-		end
-	end
 	
 	local function GetPoint(pt)
 		local theta = math.random() * 2 * PI

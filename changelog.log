@@ -1,3 +1,6 @@
 Alpha v4
 
 - I forgot to change mod name to Yakumo Yukari. not Test..
+- Added temp option to set first hunger upgrade ingredient. 
+- Fixed players can go to ocean by jumping into schemegate(tunnel).
+- power(youkai) hud no longer be seen on death.

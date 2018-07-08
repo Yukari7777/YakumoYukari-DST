@@ -1,5 +1,4 @@
 - yukariumbre doesn't support controller.
 - schemegate(tunnel) cannot be in the world more than a pair.
-- You can go to ocean(or void in cave) by jumping into schemegate(tunnel).
-- power(youkai) hud still be seen on death.
 - yukari ghost is not custom build(actually, We have no artist)
+- first hunger upgrade ingredient should be seleted automatically.

@@ -425,11 +425,22 @@ ACTIONS.JUMPIN.fn = function(act)
 			act.doer:DoTaskInTime(0.8, function()
 				act.target.components.schemeteleport:Activate(act.doer)
 			end)
+			act.doer:DoTaskInTime(1.5, function()
+				if not act.doer:IsOnValidGround() then
+					local dest = GLOBAL.FindNearbyLand(act.doer:GetPosition(), 8)
+					if dest ~= nil then
+						if act.doer.Physics ~= nil then
+							act.doer.Physics:Teleport(dest:Get())
+						elseif act.doer.Transform ~= nil then
+							act.doer.Transform:SetPosition(dest:Get())
+						end
+					end
+				end
+			end)
 			return true
         end
         act.doer.sg:GoToState("idle")
     end
-
 end
 
 local function tunnelfn(inst, doer, actions, right)

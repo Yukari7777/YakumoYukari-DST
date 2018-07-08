@@ -1,7 +1,9 @@
---local berries = GetModConfigData("berries", "YakumoYukari") == "juicy" and "berries_juicy" or "berries"
+local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
+local berries = GetModConfigData("berries", modname) == "juicy" and "berries_juicy" or "berries"
+
 local Ingredients = {
 	{"spidergland", "healingsalve", "bandage"},
-	{ "berries_juicy" , "meatballs", "bonestew"},
+	{berries, "meatballs", "bonestew"},
 	{"petals", "nightmarefuel", "livinglog"},
 	{"goldnugget", "purplegem", "thulecite"}
 }
@@ -35,7 +37,7 @@ local function GetStatLevel(inst, index)
 end
 
 local function GetIngreCount(inst, index)
-	local difficulty = GetModConfigData("difficulty", "YakumoYukari")
+	local difficulty = GetModConfigData("difficulty", modname)
 	local level = GetStatLevel(inst, index) + 1
 	
 	local a = math.ceil(level * 0.7) + math.min(1, math.floor(level/10)) * math.floor(1.155 ^ (level - 10) ) -- 25 / 267 - 18 / 159
@@ -100,7 +102,7 @@ local function CountInventoryItem(inst, prefab)
 end
 
 local function GetMaxLevel()
-	local difficulty = GetModConfigData("difficulty", "YakumoYukari")
+	local difficulty = GetModConfigData("difficulty", modname)
 
 	local maxlevel = TUNING.YDEFAULT.UPGRADE_MAX
 	if difficulty == "easy" then
@@ -154,7 +156,6 @@ end
 local function SetDesc(inst, index)
 	local currentLevel = GetStatLevel(inst, index)
 	local condition = GetCondition(inst, index)
-	local Language = GetModConfigData("language", "YakumoYukari")
 		
 	local function IsHanded()
 		local hands = inst.components.inventoryitem.owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
