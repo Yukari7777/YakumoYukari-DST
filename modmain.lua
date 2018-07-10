@@ -170,24 +170,17 @@ local function OnTakeDamage(self)
 		if total_absorption > 0 then
 			GLOBAL.ProfileStatsAdd("armor_absorb", absorbed_damage)
 
-			for armor, amt in pairs(absorbers) do
+			for armor, amt in pairs(absorbers) do -- it doesn't increases armor durability efficiency.
 				armor:TakeDamage(absorbed_damage * amt / total_absorption + armor:GetBonusDamage(attacker, weapon))
 			end
 		end
 
 		-- custom damage reduction
 		if self.inst.prefab == "yakumoyukari" then
-			if self and self.inst 
-			and self.inst.components.inventory ~= nil 
-			and self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) ~= nil
-			and self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat" then
-				local hatabsorb = 0
-				for i = 2, 5, 1 do
-					if Chara.components.upgrader.hatskill[i] then
-						hatabsorb = hatabsorb + 0.2
-					end
+			if self.inst.components.upgrader.hatequipped then
+				for i = 1, Chara.components.upgrader.hatlevel, 1 do
+					leftover_damage = leftover_damage * 0.6 -- 40%, 64%, 78.4%, 87%, 92.2%
 				end
-				leftover_damage = leftover_damage * (1 - hatabsorb)
 			end
 			
 			if Chara.components.upgrader.IsDamage then

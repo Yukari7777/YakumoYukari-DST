@@ -18,9 +18,7 @@ function MakeCard(name)
 		inst.costpower:set(5)
 		inst.components.finiteuses:SetMaxUses(3)
 		inst.components.finiteuses:SetUses(3)
-		inst.components.spellcard:SetSpellFn(function()
-			local owner = inst.components.inventoryitem.owner
-
+		inst.components.spellcard:SetSpellFn(function(inst, owner)
 			if owner.components.health then
 				owner.components.health:DoDelta(20)
 			end
@@ -38,8 +36,7 @@ function MakeCard(name)
 		inst.costpower:set(60)
 		inst.components.finiteuses:SetMaxUses(3)
 		inst.components.finiteuses:SetUses(3)
-		inst.components.spellcard:SetSpellFn(function()
-			local owner = inst.components.inventoryitem.owner
+		inst.components.spellcard:SetSpellFn(function(inst, owner)
 			if owner.components.sanity then
 				local amount = owner.components.sanity:GetMaxWithPenalty() * owner.components.sanity:GetPercent()
 				owner.components.sanity:SetPercent(1)
@@ -58,12 +55,9 @@ function MakeCard(name)
 		inst.costpower:set(50)
 		inst.components.finiteuses:SetMaxUses(5)
 		inst.components.finiteuses:SetUses(5)
-		inst:AddComponent("stackable")
-		inst.components.stackable.maxsize = TUNING.STACK_SIZE_LARGEITEM
 		inst.IsInvisible = nil
 		inst.Duration = 0
-		inst.components.spellcard:SetSpellFn(function()
-			local owner = inst.components.inventoryitem.owner
+		inst.components.spellcard:SetSpellFn(function(inst, owner)
 			if inst.IsInvisible == true then
 				inst.Duration = inst.Duration + 10
 				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_INVINCIBILITY_DURATION"))
@@ -113,15 +107,14 @@ function MakeCard(name)
 		inst.components.spellcard.action = ACTIONS.CASTTOHOH
 		inst.components.spellcard.costpower = 300
 		inst.costpower:set(300)
-		inst.components.spellcard:SetSpellFn(function()
-			local owner = inst.components.inventoryitem.owner
+		inst.components.spellcard:SetSpellFn(function(inst, owner)
 			local x,y,z = owner.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x, y, z, 40)
 			local Language = GetModConfigData("language", "YakumoYukari")
 			for k,v in pairs(ents) do
 
 				if v.components.health and not v:HasTag("player") and not v:HasTag("epic") then
-					v.components.health:DoDelta(-2147483647)
+					v.components.health:DoDelta(-1000)
 				end
 				
 				if v.components.pickable then
@@ -177,8 +170,7 @@ function MakeCard(name)
 		inst.components.finiteuses:SetUses(3)
 		inst.Duration = 0
 		inst.Activated = nil
-		inst.components.spellcard:SetSpellFn(function()
-			local owner = inst.components.inventoryitem.owner
+		inst.components.spellcard:SetSpellFn(function(inst, owner)
 			local old_dmg = owner.components.combat.damagemultiplier
 			local old_speed = owner.components.upgrader.bonusspeed
 			local isfast = 1
@@ -240,8 +232,7 @@ function MakeCard(name)
 		inst.costpower:set(150)
 		inst.components.finiteuses:SetMaxUses(2)
 		inst.components.finiteuses:SetUses(2)
-		inst.components.spellcard:SetSpellFn(function()
-			local owner = inst.components.inventoryitem.owner
+		inst.components.spellcard:SetSpellFn(function(inst, owner)
 			local Inventory = owner.components.inventory
 			local rotcnt = 0
 
@@ -263,8 +254,15 @@ function MakeCard(name)
 			for k,v in pairs(Inventory.itemslots) do
 				refresh(v)
 			end
+
 			for k,v in pairs(Inventory.equipslots) do
-				refresh(v)
+				if type(v) == "table" and v.components.container then
+					for k, v2 in pairs(v.components.container.slots) do
+						refresh(v2)
+					end
+				else
+					refresh(v)
+				end
 			end
 			
 			for i = 1, rotcnt, 1 do
@@ -272,7 +270,7 @@ function MakeCard(name)
 			end
 
 			if owner.components.power then
-				owner.components.power:DoDelta(-100, false)
+				owner.components.power:DoDelta(-150, false)
 			end
 			inst.components.finiteuses:Use(1)
 			return true
@@ -293,14 +291,13 @@ function MakeCard(name)
 			inst.sighttask = nil
 		end
 
-		inst.components.spellcard:SetSpellFn(function() -- todo : make own cccube
+		inst.components.spellcard:SetSpellFn(function(inst, owner)-- todo : make own cccube
 			local NIGHTVISION_COLOURCUBES = {
 				day = "images/colour_cubes/beaver_vision_cc.tex",
 				dusk = "images/colour_cubes/beaver_vision_cc.tex",
 				night = "images/colour_cubes/beaver_vision_cc.tex",
 				full_moon = "images/colour_cubes/beaver_vision_cc.tex",
 			}
-			local owner = inst.components.inventoryitem and inst.components.inventoryitem.owner
 			local HasNightVision = owner.components.playervision and owner.components.playervision:HasNightVision()
 			local HasGoggleVision = owner.components.playervision and owner.components.playervision:HasGoggleVision()
 
@@ -359,8 +356,8 @@ function MakeCard(name)
 		inst.components.spellcard.costpower = 80
 		inst.costpower:set(80)
 		inst:RemoveComponent("finiteuses")
-		inst.components.spellcard:SetSpellFn(function()
-			local owner = inst.components.inventoryitem.owner
+		inst.components.spellcard:SetSpellFn(function(inst, owner)
+			
 			if not (TheWorld.components.butterflyspawner and TheWorld.components.birdspawner) then
 				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NOSPAWN"))
 			else
@@ -414,10 +411,7 @@ function MakeCard(name)
 				return fx
 			end
 		end
-		inst.components.spellcard:SetSpellFn(function()
-			local owner = inst.components.inventoryitem.owner
-			
-
+		inst.components.spellcard:SetSpellFn(function(inst, owner)
 			if inst.barriertask then
 				owner:RemoveTag("IsDamage")
 				inst.fx.kill_fx(inst.fx)
@@ -459,7 +453,7 @@ function MakeCard(name)
 			return true
 		end)
 		inst.components.finiteuses:SetOnFinished(function()
-			local owner = inst.components.inventoryitem.owner
+			
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
 			owner:RemoveTag("IsDamage")
 			if owner.components.upgrader.ability[4][4] then
@@ -477,8 +471,7 @@ function MakeCard(name)
 		inst.components.spellcard.costpower = 300
 		inst.costpower:set(300)
 		inst:RemoveComponent("finiteuses")
-		inst.components.spellcard:SetSpellFn(function()
-			local owner = inst.components.inventoryitem.owner
+		inst.components.spellcard:SetSpellFn(function(inst, owner)
 			local x,y,z = owner.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x, y, z, 60)
 			for k,v in pairs(ents) do
@@ -612,9 +605,9 @@ function MakeCard(name)
 			{"tallbird", 1, "bad", nil, "rog"},
 			{"mosquito_poison", math.random(3), "bad", nil, "sw"},
 		}
-		inst.components.spellcard:SetSpellFn(function()
+		inst.components.spellcard:SetSpellFn(function(inst, owner)
 				local function spawn()
-				local owner = inst.components.inventoryitem.owner
+				
 				local function GetLoot(list)
 					local loot = {}
 					for i=1, #list, 1 do
@@ -741,7 +734,7 @@ function MakeCard(name)
 							owner.SoundEmitter:PlaySound("dontstarve/HUD/sanity_down")
 							prefab.Transform:SetPosition(pt.x, pt.y, pt.z)
 						end
-						local owner = inst.components.inventoryitem.owner
+						
 						local x,y,z = owner.Transform:GetWorldPosition()
 						local ents = TheSim:FindEntities(x, y, z, 14)
 						for k,v in pairs(ents) do
@@ -763,7 +756,7 @@ function MakeCard(name)
 				return false--owner.components.talker:Say(GetString(owner.prefab, "ACTIONFAIL_GENERIC"))
 			else
 				inst.Activated = true
-				local owner = inst.components.inventoryitem.owner
+				
 				local x,y,z = owner.Transform:GetWorldPosition()
 				local ents = TheSim:FindEntities(x, y, z, 100)
 				owner.components.playercontroller:Enable(false)
@@ -790,10 +783,7 @@ function MakeCard(name)
 		inst.costpower:set(150)
 		inst.components.finiteuses:SetMaxUses(2)
 		inst.components.finiteuses:SetUses(2)
-		inst:AddComponent("stackable")
-		inst.components.stackable.maxsize = TUNING.STACK_SIZE_LARGEITEM
-		inst.components.spellcard:SetSpellFn(function()
-			local owner = inst.components.inventoryitem.owner
+		inst.components.spellcard:SetSpellFn(function(inst, owner)
 			local Inventory = owner.components.inventory
 			
 			local function repair(v)
@@ -801,7 +791,7 @@ function MakeCard(name)
 				if v.components.fueled 
 				and v.components.fueled.fueltype ~= "MAGIC"	
 				and v.components.fueled.fueltype ~= "NIGHTMARE" then
-					  v.components.fueled:DoDelta(1)
+					  v.components.fueled:DoDelta(540)
 				end
 				
 				if v.components.finiteuses
@@ -814,8 +804,7 @@ function MakeCard(name)
 				and v.prefab ~= "orangeamulet"
 				and v.prefab ~= "amulet"
 				and not v.components.spellcaster
-				and not v.components.blinkstaff 
-				then
+				and not v.components.blinkstaff then
 					local maxuse = v.components.finiteuses.total
 					v.components.finiteuses:SetUses(maxuse)
 				end
@@ -829,10 +818,17 @@ function MakeCard(name)
 			for k,v in pairs(Inventory.itemslots) do
 				repair(v)
 			end
+
 			for k,v in pairs(Inventory.equipslots) do
-				repair(v)
+				if type(v) == "table" and v.components.container then
+					for k, v2 in pairs(v.components.container.slots) do
+						repair(v2)
+					end
+				else
+					repair(v)
+				end
 			end
-			
+
 			if owner.components.power then
 				owner.components.power:DoDelta(-150, false)
 			end

@@ -1,6 +1,11 @@
-Alpha v4
+Alpha v5
 
-- I forgot to change mod name to Yakumo Yukari. not Test..
-- Added temp option to set first hunger upgrade ingredient. 
-- Fixed players can go to ocean by jumping into schemegate(tunnel).
-- power(youkai) hud no longer be seen on death.
+The Nerf
+- Power now be gained only when you equip Yukarihat.
+- Power regenate modifier has been greatly nerfed(upgrade per : 1/25 -> 1/50, max : 2 -> 1).
+- Max Power has been nerfed. (400 -> 300).
+
+- Reworked Yukari hat stats.
+¤¤now has 40% damage absorption(doesn't effect other armor's durability.) and each upgrade increases its absorption by 40%.
+
+- Fixed crash when spelling spellables in backpack.

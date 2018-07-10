@@ -46,12 +46,12 @@ function Spellcard:GetLevel(inst, index)
 	end
 end
 
-function Spellcard:CastSpell(target)
+function Spellcard:CastSpell(doer, target)
 	if self.spell then
-		self.spell(self.inst, target)
+		self.spell(self.inst, doer, target)
 		
 		if self.onfinish then
-			self.onfinish(self.inst, target)
+			self.onfinish(self.inst, doer)
 		end
 	end
 end

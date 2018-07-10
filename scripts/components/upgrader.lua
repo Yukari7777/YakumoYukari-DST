@@ -11,7 +11,6 @@ local Upgrader = Class(function(self, inst)
 	self.hungerbonus = 0
 	self.sanitybonus = 0
 	self.powerbonus = 0
-	self.hatpowerbonus = 0
 	self.powergenbonus = 0
 	self.bonusspeed = 0
 	self.hatbonusspeed = 0
@@ -21,13 +20,13 @@ local Upgrader = Class(function(self, inst)
 	self.regenamount = 0
 	self.regencool = 1
 	self.curecool = 1
-	self.dtmult = 1.2
-	self.SightDistance = 0
-	self.dodgechance = TUNING.YDEFAULT.GRAZE_RATE
+	self.dodgechance = 0.2
 	self.hatdodgechance = 0
 
 	self.emergency = nil
 	
+	self.hatequipped = false
+	self.fireimmuned = false
 	self.nohealthpenalty = false
 	self.IsDamage = false
 	self.IsVampire = false
@@ -58,17 +57,6 @@ local Upgrader = Class(function(self, inst)
 	end
 	
 end)
-
-function Upgrader:IsHatValid(inst)
-	if inst ~= nil then
-		return inst.valid 
-		and inst.components.inventory ~= nil 
-		and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) ~= nil
-		and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat" 
-		or false
-	end
-	return false
-end
 
 function Upgrader:AbilityManager(inst)
 
@@ -211,15 +199,14 @@ function Upgrader:SkillManager(inst)
 	
 	if skill[4][1] then
 		inst.components.moisture.baseDryingRate = 0.7
-		self.bonusspeed = 1
-		self.powerbonus = 25
-		self.powergenbonus = 0.25
+		self.powergenbonus = 0.1
 	end
 	
 	if skill[4][2] then
 		inst:RemoveTag("youkai")
-		self.powerbonus = 50
-		self.powergenbonus = 0.5
+		self.powerbonus = 25
+		self.powergenbonus = 0.2
+		self.bonusspeed = 1
 		-- TUNING.NIGHTSWORD_USES = 140
 		-- TUNING.ARMOR_SANITY = 1000
 	    -- TUNING.ICESTAFF_USES = 25
@@ -236,17 +223,18 @@ function Upgrader:SkillManager(inst)
 	
 	if skill[4][3] then
 		inst:AddTag("fastbuilder")
-		self.powerbonus = 75
+		inst:AddTag("realyoukai")
+		self.powerbonus = 50
 		self.bonusspeed = 2
-		self.powergenbonus = 1
+		self.powergenbonus = 0.3
 	end
 	
 	if skill[4][4] then
 		inst.components.locomotor:SetTriggersCreep(false)
-		inst:AddTag("realyoukai")
 		inst:AddTag("spiderwhisperer")
-		self.powerbonus = 175
+		self.powerbonus = 75
 		self.bonusspeed = 3
+		self.powergenbonus = 0.5
 	end
 	
 	if skill[4][5] then
@@ -264,7 +252,7 @@ end
 function Upgrader:SetFireDamageScale(inst)
 	local fireimmunedbody = inst.valid
 		  and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY)
-		  and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == ("armordragonfly" or "armorobsidian") or false
+		  and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == ("armordragonfly" or "armorobsidian")
 	if self.inst.components.health then
 		self.inst.components.health.fire_damage_scale = (fireimmunedbody or self.FireResist) and 0 or 1
 	end
@@ -272,36 +260,28 @@ end
 
 function Upgrader:HatSkillManager(inst)
 
-	local HatEquipped = inst.valid and self:IsHatValid(inst)
-	local Hat = HatEquipped and self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD)
+	local YukariHat = self.hatEquipped
 
-	if HatEquipped then
+	if YukariHat then
 		local skill = self.hatskill
 		
 		if skill[2] then
-			self.SightDistance = 1
 			self.hatdodgechance = 0.1
 		end
 		
 		if skill[3] then
-			Hat.components.waterproofer:SetEffectiveness(1)
+			--YukariHat.components.waterproofer:SetEffectiveness(1)
 			self.WaterProofer = true
-			self.hatpowerbonus = 20
 			self.hatdodgechance = 0.2
-			self.dtmult = 1.5
 		end
 		
 		if skill[4] then
 			self.FireResist = true
-			self.SightDistance = 2
-			self.hatpowerbonus = 50
 			self.hatbonusspeed = 1
 			self.hatdodgechance = 0.3
-			self.dtmult = 1.7
 		end
 		
 		if skill[5] then
-			self.hatpowerbonus = 100
 			self.dtmult = 2.5
 			self.hatdodgechance = 0.4
 			self.GodTeleport = true
@@ -311,15 +291,12 @@ function Upgrader:HatSkillManager(inst)
 		self.WaterProofer = false
 		self.FireResist = false
 		self.GodTeleport = false
-		self.SightDistance = 0
-		self.hatpowerbonus = 0
 		self.hatdodgechance = 0
-		self.dtmult = 1.2
 	end
 	self:SetFireDamageScale(inst)
 end
 
-function Upgrader:DoUpgrade(inst, stat) -- it contains stat initializing
+function Upgrader:DoUpgrade(inst, stat) -- without stat it updates stats.
 	local hunger_percent = inst.components.hunger:GetPercent()
 	local health_percent = inst.components.health:GetPercent()
 	local sanity_percent = inst.components.sanity:GetPercent()
@@ -328,7 +305,8 @@ function Upgrader:DoUpgrade(inst, stat) -- it contains stat initializing
     inst.components.sanity.ignore = false
 	self:AbilityManager(inst)
 
-	local difficulty = GetModConfigData("difficulty", "YakumoYukari")
+	local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
+	local difficulty = GetModConfigData("difficulty", modname)
 	local STATUS = TUNING.STATUS_DEFAULT
 	if difficulty == "easy" then
 		STATUS = TUNING.STATUS_EASY
@@ -360,7 +338,7 @@ function Upgrader:DoUpgrade(inst, stat) -- it contains stat initializing
 			self.power_level = self.power_level + 1
 			--inst.HUD.controls.status.power:PulseGreen()
 			--inst.HUD.controls.status.power:ScaleTo(1.3,1,.7)
-			inst.components.power.max = STATUS.DEFAULT_PW + self.power_level * STATUS.PO_RATE + self.powerbonus + self.hatpowerbonus + math.max(0, (self.power_level - 30) * 5)
+			inst.components.power.max = STATUS.DEFAULT_PW + self.power_level * STATUS.PO_RATE + self.powerbonus + math.max(0, (self.power_level - 30) * 5)
 			inst.components.power.regenrate = STATUS.DEFAULT_PR + self.power_level * STATUS.PR_RATE + self.powergenbonus
 			inst.components.locomotor.walkspeed = 4 + self.bonusspeed + self.hatbonusspeed
 			inst.components.locomotor.runspeed = 6 + self.bonusspeed + self.hatbonusspeed
@@ -372,7 +350,7 @@ function Upgrader:DoUpgrade(inst, stat) -- it contains stat initializing
 		inst.components.hunger.max = STATUS.DEFAULT_HU + self.hungerbonus
 		inst.components.sanity.max = STATUS.DEFAULT_SN + self.sanity_level * STATUS.SN_RATE + self.sanitybonus + math.max(0, (self.sanity_level - 30) * 5)
 		if inst.components.power then
-			inst.components.power.max = STATUS.DEFAULT_PW + self.power_level * STATUS.PO_RATE + self.powerbonus + self.hatpowerbonus + math.max(0, (self.power_level - 30) * 5)
+			inst.components.power.max = STATUS.DEFAULT_PW + self.power_level * STATUS.PO_RATE + self.powerbonus + math.max(0, (self.power_level - 30) * 5)
 			inst.components.power.regenrate = STATUS.DEFAULT_PR + self.power_level * STATUS.PR_RATE + self.powergenbonus
 		end
 		inst.components.locomotor.walkspeed = 4 + self.bonusspeed + self.hatbonusspeed

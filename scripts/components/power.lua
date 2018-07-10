@@ -15,7 +15,7 @@ local Power = Class(function(self, inst)
     self.max = 75
     self.current = 50
 
-    self.regenrate = 0.1
+    self.regenrate = 1/10
 	
     self.period = 1
 	
@@ -86,13 +86,10 @@ function Power:SetPercent(p)
 
 end
 
-
 function Power:DoDec(dt, ignore_damage)
 
-	if self.inst.hatequipped and self.inst.components.upgrader then	
-		self.inst.components.power:DoDelta(self.regenrate * dt * self.inst.components.upgrader.dtmult , false, "power")	
-	else
-		self.inst.components.power:DoDelta(self.regenrate * dt, false, "power")
+	if  self.inst.components.upgrader.hatequipped then	
+		self.inst.components.power:DoDelta(self.regenrate * dt, false)
 	end
 	
     -- print ("%2.2f / %2.2f", self.current, self.max)

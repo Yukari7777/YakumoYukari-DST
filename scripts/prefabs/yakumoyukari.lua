@@ -72,7 +72,6 @@ local function onsave(inst, data)
 	data.sanity_level = inst.components.upgrader.sanity_level
 	data.power_level = inst.components.upgrader.power_level
 	data.skilltree = inst.components.upgrader.ability
-	data.hatskill = inst.components.upgrader.hatskill
 	data.hatlevel = inst.components.upgrader.hatlevel
 end
 
@@ -90,7 +89,6 @@ local function onpreload(inst, data)
 			inst.components.upgrader.power_level = data.power_level or 0	
 			inst.components.upgrader.hatlevel = data.hatlevel or 1
 			inst.components.upgrader.ability = data.skilltree
-			inst.components.upgrader.hatskill = data.hatskill
 			inst.components.upgrader:AbilityManager(inst)
 			inst.components.upgrader:DoUpgrade(inst)
 
@@ -238,7 +236,7 @@ local function PeriodicFunction(inst, data)
 			inst.components.sanity.night_drain_mult = 0
 		end
 	else
-		if inst.hatequipped then
+		if inst.components.upgrader and inst.components.upgrader.hatequipped then
 			inst.components.sanity.night_drain_mult = 0.5
 		end
 		inst.components.sanity.night_drain_mult = 1
@@ -264,13 +262,6 @@ local function PeriodicFunction(inst, data)
 
 	if inst.components.health and inst.nohealthpenalty then
 		inst.components.heath:SetPenalty(0)
-	end
-	
-	if inst.components.upgrader.SightDistance > 0 then
-		local dis = inst.components.upgrader.SightDistance
-		local pt = GetPoint(Vector3(inst.Transform:GetWorldPosition()))
-		TheWorld.minimap.MiniMap:ShowArea(pt.x, pt.y, pt.z, 50 * dis)
-		TheWorld.Map:VisitTile(TheWorld.Map:GetTileCoordsAtPoint(pt.x, pt.y, pt.z))
 	end
 end
 
@@ -301,20 +292,10 @@ local function OnGrazed(inst)
 	inst.components.power:DoDelta(math.random(0, 2), false)
 end
 
-local function EquippingEvent(inst)
-	
-	if inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) then
-		inst.hatequipped = inst.components.inventory ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat"
-	else
-		inst.hatequipped = false
-	end
-		
-	if inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) then
-		inst.fireimmuned = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == ("armordragonfly" or "armorobsidian")
-	else
-		inst.fireimmuned = false
-	end
-
+local function EquippingEvent(inst, data)
+	print("hatequip called")
+	inst.components.upgrader.hatequipped = data.isequipped and data.inst
+	inst.components.upgrader.fireimmuned = inst.components.inventory ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == ("armordragonfly" or "armorobsidian")
 	inst.components.upgrader:DoUpgrade(inst)
 end
 
@@ -325,6 +306,7 @@ local function DebugFunction(inst)
 			inst.components.power.current = 300
 		end
 		inst.components.hunger:Pause(true)
+		--inst.components.health:SetInvincible(true)
 	end)
 end	
 
@@ -338,9 +320,6 @@ local function common_init(inst) -- things before SetPristine()
 
 	inst.maxpower = net_ushortint(inst.GUID, "maxpower")
 	inst.currentpower = net_ushortint(inst.GUID, "currentpower")
-
-	inst.fireimmuned = false
-	inst.hatequipped = false
 
 	inst:AddTag("youkai")
 	inst:AddTag("yakumoga")
@@ -495,8 +474,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:ListenForEvent( "onhitother", OnhitEvent )
 	inst:ListenForEvent( "attacked", OnAttackedEvent, inst )
 	inst:ListenForEvent( "teleported", TelePortDelay, inst )
-	inst:ListenForEvent( "hatequip", EquippingEvent )
-	inst:ListenForEvent( "hatunequip", EquippingEvent )
+	inst:ListenForEvent( "hatequipped", EquippingEvent )
 	inst:ListenForEvent( "grazed", OnGrazed )
 
 	if TheNet:GetServerGameMode() == "lavaarena" then

@@ -13,7 +13,7 @@ local function fn()
         owner.AnimState:Show("HAT_HAIR")
         owner.AnimState:Hide("HAIR_NOHAT")
         owner.AnimState:Hide("HAIR") 
-		owner:PushEvent("hatequip")
+		owner:PushEvent("hatequipped", {isequipped = true, inst = inst})
     end
 
     local function onunequiphat(inst, owner)
@@ -21,7 +21,7 @@ local function fn()
         owner.AnimState:Hide("HAT_HAIR")
         owner.AnimState:Show("HAIR_NOHAT")
         owner.AnimState:Show("HAIR") 
-		owner:PushEvent("hatunequip")
+		owner:PushEvent("hatequipped", {isequipped = false, inst = inst})
     end
 
 	local inst = CreateEntity()    
