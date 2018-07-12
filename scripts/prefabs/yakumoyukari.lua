@@ -89,7 +89,6 @@ local function onpreload(inst, data)
 			inst.components.upgrader.power_level = data.power_level or 0	
 			inst.components.upgrader.hatlevel = data.hatlevel or 1
 			inst.components.upgrader.ability = data.skilltree
-			inst.components.upgrader:AbilityManager(inst)
 			inst.components.upgrader:DoUpgrade(inst)
 
 			--re-set these from the save data, because of load-order clipping issues
@@ -293,10 +292,30 @@ local function OnGrazed(inst)
 end
 
 local function EquippingEvent(inst, data)
-	print("hatequip called")
 	inst.components.upgrader.hatequipped = data.isequipped and data.inst
 	inst.components.upgrader.fireimmuned = inst.components.inventory ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == ("armordragonfly" or "armorobsidian")
 	inst.components.upgrader:DoUpgrade(inst)
+end
+
+local function OnItemUpdate(inst) -- Character PushEvent to item.
+	
+	local inventory = inst.components.inventory
+
+	for k,v in pairs(inventory.itemslots) do
+		if v:HasTag("recieveitemupdate") then
+			v:PushEvent("onitemupdate", {owner = inst})
+		end
+	end
+	
+	for k,v in pairs(inventory.equipslots) do
+		if type(v) == "table" and v.components.container then
+			for k, v2 in pairs(v.components.container.slots) do
+				if v2:HasTag("recieveitemupdate") then
+					v2:PushEvent("onitemupdate", {owner = inst})
+				end
+			end
+		end
+	end
 end
 
 local function DebugFunction(inst)
@@ -465,17 +484,23 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.OnLoad = function(inst)
 		inst.valid = true
 		inst.components.upgrader:DoUpgrade(inst)
+		OnItemUpdate(inst)
 		inst:PushEvent("yukariloaded")
 	end
 	
-	inst:ListenForEvent( "debugmode", DebugFunction, inst)
-	inst:ListenForEvent( "hungerdelta", DoHungerUp )
-	inst:ListenForEvent( "healthdelta", GoInvincible )
-	inst:ListenForEvent( "onhitother", OnhitEvent )
-	inst:ListenForEvent( "attacked", OnAttackedEvent, inst )
-	inst:ListenForEvent( "teleported", TelePortDelay, inst )
-	inst:ListenForEvent( "hatequipped", EquippingEvent )
-	inst:ListenForEvent( "grazed", OnGrazed )
+	inst:ListenForEvent("debugmode", DebugFunction, inst)
+	inst:ListenForEvent("hungerdelta", DoHungerUp )
+	inst:ListenForEvent("healthdelta", GoInvincible )
+	inst:ListenForEvent("onhitother", OnhitEvent )
+	inst:ListenForEvent("attacked", OnAttackedEvent, inst )
+	inst:ListenForEvent("teleported", TelePortDelay, inst )
+	inst:ListenForEvent("hatequipped", EquippingEvent )
+	inst:ListenForEvent("grazed", OnGrazed )
+	inst:ListenForEvent("itemget", OnItemUpdate)
+	inst:ListenForEvent("itemlose", OnItemUpdate)
+	inst:ListenForEvent("gotnewitem", OnItemUpdate)
+	inst:ListenForEvent("refreshinventory", OnItemUpdate)
+	inst:ListenForEvent("stacksizechange", OnItemUpdate)
 
 	if TheNet:GetServerGameMode() == "lavaarena" then
         event_server_data("lavaarena", "prefabs/yakumoyukari").master_postinit(inst)

@@ -18,30 +18,15 @@ local Ingredients_sw = {
 	{{"obsidian", 25}, {"spellcard_away", 10}, {"spellcard_matter", 5}, {"spellcard_laplace", 2}, {"spellcard_necro", 1}}
 }
 
+local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
+
 local function GetIngameName(prefab)
 	return STRINGS.NAMES[string.upper(prefab)]
 end
 
-local function GetBackpack(inst)
-	local backpack
-	local Chara = inst.components.inventoryitem.owner
-	
-	if EQUIPSLOTS.BACK and Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.BACK) then -- check if backpack slot mod is enabled.
-		backpack = Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.BACK)
-	elseif Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) 
-	and Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).components.container then
-		backpack = Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY)
-	end
-	
-	if backpack and backpack.components.container then 
-		return backpack.components.container 
-	end
-end
-
-local function GetTable(inst)
-	--local difficulty = GetModConfigData("difficulty", "YakumoYukari")
-	local owner = inst.components.inventoryitem.owner
-	local hatlevel = owner.components.upgrader and owner.components.upgrader.hatlevel
+local function GetTable(owner)
+	--local difficulty = GetModConfigData("difficulty", modname)
+	local hatlevel = owner.components.upgrader.hatlevel
 	local list = {}
 	
 	if hatlevel < 5 then
@@ -51,28 +36,30 @@ local function GetTable(inst)
 	return list
 end
 
-local function CountInventoryItem(inst, prefab)
-	local inventory = inst.components.inventoryitem.owner.components.inventory
-	local backpack = GetBackpack(inst)
+local function CountInventoryItem(owner, item)
+	local inventory = owner.components.inventory
 	local count = 0
+
+	local function countitem(item, count)
+		if item.components.stackable ~= nil then
+			count = count + item.components.stackable.stacksize
+		else 
+			count = count + 1
+		end
+		return count
+	end
 	
 	for k,v in pairs(inventory.itemslots) do
-		if v.prefab == prefab then
-			if v.components.stackable then
-				count = count + v.components.stackable.stacksize
-			else 
-				count = count + 1
-			end
+		if v.prefab == item then
+			count = countitem(v, count)
 		end
 	end
 	
-	if backpack then
-		for k,v in pairs(backpack.slots) do
-			if v.prefab == prefab then
-				if v.components.stackable then
-					count = count + v.components.stackable.stacksize
-				else 
-					count = count + 1
+	for k,v in pairs(inventory.equipslots) do
+		if type(v) == "table" and v.components.container then
+			for k, v2 in pairs(v.components.container.slots) do
+				if v2.prefab == item then
+					count = countitem(v2, count)
 				end
 			end
 		end
@@ -81,15 +68,13 @@ local function CountInventoryItem(inst, prefab)
 	return count
 end
 
-local function GetStr(inst)
-	local list = GetTable(inst)
-	local Language = GetModConfigData("language", "YakumoYukari")
-	local owner = inst.components.inventoryitem.owner
-	local hatlevel = owner.components.upgrader.hatlevel
+local function GetStr(owner)
+	local list = GetTable(owner)
 	local text = ""
-	if hatlevel < 5 then
+
+	if owner.components.upgrader.hatlevel < 5 then
 		for i = 1, #list, 1 do
-			text = text.."\n"..GetIngameName(list[i][1]).." - "..CountInventoryItem(inst, list[i][1]).." / "..list[i][2]
+			text = text.."\n"..GetIngameName(list[i][1]).." - "..CountInventoryItem(owner, list[i][1]).." / "..list[i][2]
 		end
 	else
 		text = "\n"..STRINGS.YUKARI_UPGRADE_FINISHED
@@ -98,15 +83,13 @@ local function GetStr(inst)
 	return text
 end
 
-local function GetCondition(inst)
-	local list = GetTable(inst)
+local function GetCanpell(owner)
+	local list = GetTable(owner)
 	local condition = true
-	local owner = inst.components.inventoryitem.owner
-	local hatlevel = owner.components.upgrader.hatlevel
 
-	if hatlevel < 5 then 
+	if owner.components.upgrader.hatlevel < 5 then 
 		for i = 1, #list, 1 do 
-			condition = condition and ( CountInventoryItem(inst, list[i][1]) >= list[i][2] )
+			condition = condition and ( CountInventoryItem(owner, list[i][1]) >= list[i][2] )
 		end
 	else
 		condition = false
@@ -115,92 +98,70 @@ local function GetCondition(inst)
 	return condition
 end
 
-local function GetStatus(inst)
-	local owner = inst.components.inventoryitem ~= nil and inst.components.inventoryitem.owner
-	local CurrentLevel = owner.components.upgrader.hatlevel
-	local condition = GetCondition(inst)
-
-	local function IsHanded()
-		return inst.components.inventoryitem.owner ~= nil and 
-		inst.components.inventoryitem.owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil and 
-		condition and 
-		"\n"..STRINGS.YUKARI_SHOULD_BRING_SOMETHING or ""
-	end
+local function DoUpgrade(inst, owner)
+	local inventory = owner.components.inventory
+	local list = GetTable(owner)
 	
-	return STRINGS.YUKARI_CURRENT_LEVEL.." - "..CurrentLevel..GetStr(inst)..IsHanded()
-end
-
-local function SetState(inst)
-	if inst.components.inventoryitem:IsHeld() and inst.components.inventoryitem.owner.prefab == "yakumoyukari" then -- temp
-		local owner = inst.components.inventoryitem.owner
-		local CurrentLevel = owner.components.upgrader.hatlevel
-		local condition = GetCondition(inst)
-		inst.components.inspectable:SetDescription( GetStatus(inst) )
-		inst.components.spellcard:SetCondition( condition )
-		inst.canspell:set(condition)
-	end
-end
-
-local function DoUpgrade(inst)
-
-	local Chara = inst.components.inventoryitem.owner
-	local list = GetTable(inst)
-	local backpack = GetBackpack(inst)
-	
-	for i = 1, #list, 1 do
-		local function consume(item, left_count, backpack)
-		
-			local Inventory = Chara.components.inventory
-			for k,v in pairs(Inventory.itemslots) do
-				if v.prefab == item then
-					if v.components.stackable then
-						if v.components.stackable.stacksize >= left_count then
-							v.components.stackable:Get(left_count):Remove()
-							left_count = 0
-						else 
-							v:Remove()
-							left_count = left_count - v.components.stackable.stacksize
-						end
-					else 
-						v:Remove()
-						left_count = left_count - 1
-					end
+	local function remove(item, left_count)
+		if left_count > 0 then
+			if item.components.stackable then
+				if item.components.stackable.stacksize >= left_count then
+					item.components.stackable:Get(left_count):Remove()
+					return 0
+				else 
+					left_count = left_count - item.components.stackable.stacksize
+					item:Remove()
 				end
+			else 
+				left_count = left_count - 1
+				item:Remove()
 			end
-			
-			if backpack then
-				for k,v in pairs(backpack.slots) do
-					if v.prefab == item then
-						if v.components.stackable then
-							if v.components.stackable.stacksize >= left_count then
-								v.components.stackable:Get(left_count):Remove()
-								left_count = 0
-							else 
-								v:Remove()
-								left_count = left_count - v.components.stackable.stacksize
-							end
-						else 
-							v:Remove()
-							left_count = left_count - 1
-						end
-					end
-				end
-			end
-			if left_count >= 1 then consume(item, left_count, backpack) end
-			
 		end
-		consume(list[i][1], list[i][2], backpack)
+		return left_count
 	end
+
+	for i = 1, #list, 1 do -- I won't use RemoveItem function in inventory components because it doesn't get items in custom backpack slot. 
+		local left_count = list[i][2]
+
+		while left_count > 0 do
+			for k,v in pairs(inventory.itemslots) do
+				if v.prefab == list[i][1] then
+					left_count = remove(v, left_count)
+				end
+			end
+			
+			for k,v in pairs(inventory.equipslots) do
+				if type(v) == "table" and v.components.container then
+					for k, v2 in pairs(v.components.container.slots) do
+						if v2.prefab == list[i][1] then
+							left_count = remove(v2, left_count)
+						end
+					end
+				end
+			end
+		end
+	end
+
 	
 end
 
 local function OnFinish(inst)
-	local Chara = inst.components.inventoryitem.owner
-	Chara.components.upgrader.hatlevel = Chara.components.upgrader.hatlevel + 1
-	Chara.components.upgrader:AbilityManager(Chara)
-	Chara.components.upgrader:DoUpgrade(Chara)
-	SetState(inst)
-	Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_HATUPGRADE"))
+	local owner = inst.components.inventoryitem.owner
+	owner.components.upgrader.hatlevel = owner.components.upgrader.hatlevel + 1
+	owner.components.upgrader:DoUpgrade(owner)
+	owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_HATUPGRADE"))
+end
+
+local function GetDesc(inst, viewer)
+	if viewer.prefab == "yakumoyukari" then
+		return string.format( STRINGS.YUKARI_CURRENT_LEVEL.." - "..viewer.components.upgrader.hatlevel..GetStr(viewer) )
+	end
+end
+
+local function SetState(inst, data)
+	local condition = GetCanpell(data.owner)
+	inst.components.spellcard:SetCondition(condition)
+	inst.canspell:set(condition)
 end
 
 local function fn()  
@@ -221,6 +182,7 @@ local function fn()
 	inst.AnimState:PlayAnimation("idle")    
 
 	inst:AddTag("scheme")
+	inst:AddTag("recieveitemupdate")
 
 	inst.canspell = net_bool(inst.GUID, "canspell")
 
@@ -231,6 +193,7 @@ local function fn()
     end
 
 	inst:AddComponent("inspectable")    
+	inst.components.inspectable.getspecialdescription = GetDesc
 	
 	inst:AddComponent("inventoryitem")   
 	inst.components.inventoryitem.atlasname = "images/inventoryimages/scheme.xml" 
@@ -241,7 +204,7 @@ local function fn()
 	inst.components.spellcard:SetOnFinish( OnFinish )
 	inst.components.spellcard:SetCondition( false )
 	
-	inst:DoPeriodicTask(1, SetState) -- temp
+	inst:ListenForEvent("onitemupdate", SetState)
 	
 	return inst
 end

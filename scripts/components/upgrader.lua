@@ -296,14 +296,13 @@ function Upgrader:HatSkillManager(inst)
 	self:SetFireDamageScale(inst)
 end
 
-function Upgrader:DoUpgrade(inst, stat) -- without stat it updates stats.
+function Upgrader:DoUpgrade(inst, stat)
 	local hunger_percent = inst.components.hunger:GetPercent()
 	local health_percent = inst.components.health:GetPercent()
 	local sanity_percent = inst.components.sanity:GetPercent()
 	local power_percent = inst.components.power:GetPercent()
 	local ignoresanity = inst.components.sanity.ignore
     inst.components.sanity.ignore = false
-	self:AbilityManager(inst)
 
 	local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
 	local difficulty = GetModConfigData("difficulty", modname)
@@ -319,44 +318,36 @@ function Upgrader:DoUpgrade(inst, stat) -- without stat it updates stats.
 			self.health_level = self.health_level + 1
 			--inst.HUD.controls.status.heart:PulseGreen()
 			--inst.HUD.controls.status.heart:ScaleTo(1.3,1,.7)
-			inst.components.health.maxhealth = STATUS.DEFAULT_HP + self.health_level * STATUS.HP_RATE + self.healthbonus + math.max(0, (self.health_level - 30) * 7.5)
 			inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_UPGRADE_HEALTH"))
 		elseif stat == 2 then
 			self.hunger_level = self.hunger_level + 1
 			--inst.HUD.controls.status.stomach:PulseGreen()
 			--inst.HUD.controls.status.stomach:ScaleTo(1.3,1,.7)
-			inst.components.hunger.hungerrate = math.max( 0, (STATUS.DEFAULT_HR - self.hunger_level * STATUS.HR_RATE - math.max(0, (self.hunger_level - 30) * 0.025 )) * TUNING.WILSON_HUNGER_RATE )
-			inst.components.hunger.max = STATUS.DEFAULT_HU + self.hungerbonus
 			inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_UPGRADE_HUNGER"))
 		elseif stat == 3 then
 			self.sanity_level = self.sanity_level + 1
 			--inst.HUD.controls.status.brain:PulseGreen()
 			--inst.HUD.controls.status.brain:ScaleTo(1.3,1,.7)
-			inst.components.sanity.max = STATUS.DEFAULT_SN + self.sanity_level * STATUS.SN_RATE + self.sanitybonus + math.max(0, (self.sanity_level - 30) * 5)
 			inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_UPGRADE_SANITY"))
 		elseif stat == 4 then
 			self.power_level = self.power_level + 1
 			--inst.HUD.controls.status.power:PulseGreen()
 			--inst.HUD.controls.status.power:ScaleTo(1.3,1,.7)
-			inst.components.power.max = STATUS.DEFAULT_PW + self.power_level * STATUS.PO_RATE + self.powerbonus + math.max(0, (self.power_level - 30) * 5)
-			inst.components.power.regenrate = STATUS.DEFAULT_PR + self.power_level * STATUS.PR_RATE + self.powergenbonus
-			inst.components.locomotor.walkspeed = 4 + self.bonusspeed + self.hatbonusspeed
-			inst.components.locomotor.runspeed = 6 + self.bonusspeed + self.hatbonusspeed
 			inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_UPGRADE_POWER"))	
 		end	
-	else -- for init or update
-		inst.components.health.maxhealth = STATUS.DEFAULT_HP + self.health_level * STATUS.HP_RATE + self.healthbonus + math.max(0, (self.health_level - 30) * 7.5)
-		inst.components.hunger.hungerrate = math.max( 0, (STATUS.DEFAULT_HR - self.hunger_level * STATUS.HR_RATE - math.max(0, (self.hunger_level - 30) * 0.025 )) ) * TUNING.WILSON_HUNGER_RATE 
-		inst.components.hunger.max = STATUS.DEFAULT_HU + self.hungerbonus
-		inst.components.sanity.max = STATUS.DEFAULT_SN + self.sanity_level * STATUS.SN_RATE + self.sanitybonus + math.max(0, (self.sanity_level - 30) * 5)
-		if inst.components.power then
-			inst.components.power.max = STATUS.DEFAULT_PW + self.power_level * STATUS.PO_RATE + self.powerbonus + math.max(0, (self.power_level - 30) * 5)
-			inst.components.power.regenrate = STATUS.DEFAULT_PR + self.power_level * STATUS.PR_RATE + self.powergenbonus
-		end
-		inst.components.locomotor.walkspeed = 4 + self.bonusspeed + self.hatbonusspeed
-		inst.components.locomotor.runspeed = 6 + self.bonusspeed + self.hatbonusspeed
 	end
+
+	inst.components.health.maxhealth = STATUS.DEFAULT_HP + self.health_level * STATUS.HP_RATE + self.healthbonus + math.max(0, (self.health_level - 30) * 7.5)
+	inst.components.hunger.hungerrate = math.max( 0, (STATUS.DEFAULT_HR - self.hunger_level * STATUS.HR_RATE - math.max(0, (self.hunger_level - 30) * 0.025 )) ) * TUNING.WILSON_HUNGER_RATE 
+	inst.components.hunger.max = STATUS.DEFAULT_HU + self.hungerbonus
+	inst.components.sanity.max = STATUS.DEFAULT_SN + self.sanity_level * STATUS.SN_RATE + self.sanitybonus + math.max(0, (self.sanity_level - 30) * 5)
+	inst.components.power.max = STATUS.DEFAULT_PW + self.power_level * STATUS.PO_RATE + self.powerbonus + math.max(0, (self.power_level - 30) * 5)
+	inst.components.power.regenrate = STATUS.DEFAULT_PR + self.power_level * STATUS.PR_RATE + self.powergenbonus
+	inst.components.locomotor.walkspeed = 4 + self.bonusspeed + self.hatbonusspeed
+	inst.components.locomotor.runspeed = 6 + self.bonusspeed + self.hatbonusspeed
 	
+	
+	self:AbilityManager(inst)
 	inst.components.health:SetPercent(health_percent)
 	inst.components.hunger:SetPercent(hunger_percent)
 	inst.components.sanity:SetPercent(sanity_percent)

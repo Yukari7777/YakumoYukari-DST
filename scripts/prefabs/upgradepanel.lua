@@ -28,17 +28,17 @@ local function GetIndex(inst) -- enum..
 	end
 end
 
-local function GetStatLevel(inst, index)
-	if index == 1 then return inst.components.inventoryitem.owner.components.upgrader.health_level
-	elseif index == 2 then return inst.components.inventoryitem.owner.components.upgrader.hunger_level
-	elseif index == 3 then return inst.components.inventoryitem.owner.components.upgrader.sanity_level
-	elseif index == 4 then return inst.components.inventoryitem.owner.components.upgrader.power_level
+local function GetStatLevel(owner, index)
+	if index == 1 then return owner.components.upgrader.health_level
+	elseif index == 2 then return owner.components.upgrader.hunger_level
+	elseif index == 3 then return owner.components.upgrader.sanity_level
+	elseif index == 4 then return owner.components.upgrader.power_level
 	end
 end
 
-local function GetIngreCount(inst, index)
+local function GetIngreCount(owner, index)
 	local difficulty = GetModConfigData("difficulty", modname)
-	local level = GetStatLevel(inst, index) + 1
+	local level = GetStatLevel(owner, index) + 1
 	
 	local a = math.ceil(level * 0.7) + math.min(1, math.floor(level/10)) * math.floor(1.155 ^ (level - 10) ) -- 25 / 267 - 18 / 159
 	local b = math.min(1, math.floor(level/10)) * math.floor(1.1336 ^ (level - 10) + 0.2 * (level - 10) ) -- 9 / 64 - 5 / 28 
@@ -54,53 +54,6 @@ local function GetIngreCount(inst, index)
 	
 end
 
-local function GetBackpack(inst)
-	local backpack
-	local Chara = inst.components.inventoryitem.owner
-	
-	if EQUIPSLOTS.BACK and Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.BACK) then -- check if backpack slot mod is enabled.
-		backpack = Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.BACK)
-	elseif Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) 
-	and Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).components.container then
-		backpack = Chara.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY)
-	end
-	
-	if backpack and backpack.components.container then 
-		return backpack.components.container 
-	end
-end
-
-local function CountInventoryItem(inst, prefab)
-	local owner = inst.components.inventoryitem.owner
-	local inventory = owner.components.inventory
-	local backpack = GetBackpack(inst)
-	local count = 0
-	
-	for k,v in pairs(inventory.itemslots) do
-		if v.prefab == prefab then
-			if v.components.stackable then
-				count = count + v.components.stackable.stacksize
-			else 
-				count = count + 1
-			end
-		end
-	end
-	
-	if backpack then
-		for k,v in pairs(backpack.slots) do
-			if v.prefab == prefab then
-				if v.components.stackable then
-					count = count + v.components.stackable.stacksize
-				else 
-					count = count + 1
-				end
-			end
-		end
-	end
-	
-	return count
-end
-
 local function GetMaxLevel()
 	local difficulty = GetModConfigData("difficulty", modname)
 
@@ -114,17 +67,49 @@ local function GetMaxLevel()
 	return maxlevel
 end
 
-local function GetItemCount(inst, index)
+local function CountInventoryItem(owner, item)
+	local inventory = owner.components.inventory
+	local count = 0
+
+	local function countitem(item, count)
+		if item.components.stackable ~= nil then
+			count = count + item.components.stackable.stacksize
+		else 
+			count = count + 1
+		end
+		return count
+	end
+	
+	for k,v in pairs(inventory.itemslots) do
+		if v.prefab == item then
+			count = countitem(v, count)
+		end
+	end
+	
+	for k,v in pairs(inventory.equipslots) do
+		if type(v) == "table" and v.components.container then
+			for k, v2 in pairs(v.components.container.slots) do
+				if v2.prefab == item then
+					count = countitem(v2, count)
+				end
+			end
+		end
+	end
+	
+	return count
+end
+
+local function GetStr(owner, index)
 	local items = Ingredients[index]
-	local count = GetIngreCount(inst, index)
-	local currentLevel = GetStatLevel(inst, index)
+	local count = GetIngreCount(owner, index)
+	local currentLevel = GetStatLevel(owner, index)
 	local maxlevel = GetMaxLevel()
 	
 	local text = ""
 	if currentLevel < maxlevel then
 		for i = 1, 3, 1 do
 			if count[i] > 0 then
-				text = text.."\n"..GetIngameName(items[i]).." - "..CountInventoryItem(inst, items[i]).." / "..count[i]
+				text = text.."\n"..GetIngameName(items[i]).." - "..CountInventoryItem(owner, items[i]).." / "..count[i]
 			end
 		end
 	else
@@ -134,17 +119,17 @@ local function GetItemCount(inst, index)
 	return text
 end
 
-local function GetCondition(inst, index)
-
+local function GetCanpell(inst, owner)
+	local index = GetIndex(inst)
 	local items = Ingredients[index]
-	local count = GetIngreCount(inst, index)
-	local currentLevel = GetStatLevel(inst, index)
+	local count = GetIngreCount(owner, index)
+	local currentLevel = GetStatLevel(owner, index)
 	local maxlevel = GetMaxLevel()
 
 	local condition = true
 	if currentLevel < maxlevel then 
 		for i = 1, 3, 1 do 
-			condition = condition and ( CountInventoryItem(inst, items[i]) >= count[i] )
+			condition = condition and ( CountInventoryItem(owner, items[i]) >= count[i] )
 		end	
 	else
 		condition = false 
@@ -153,89 +138,77 @@ local function GetCondition(inst, index)
 	return condition
 end
 
-local function SetDesc(inst, index)
-	local currentLevel = GetStatLevel(inst, index)
-	local condition = GetCondition(inst, index)
-		
-	local function IsHanded()
-		local hands = inst.components.inventoryitem.owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
-		if hands and condition then
-			return "\n"..STRINGS.YUKARI_SHOULD_BRING_SOMETHING
-		else
-			return ""
-		end
-	end
-	
-	local str = STRINGS.YUKARI_CURRENT_LEVEL.." - "..currentLevel..GetItemCount(inst, index)..IsHanded()
-	
-	inst.components.inspectable:SetDescription(str)
-	
+local function SetState(inst, data)
+	local condition = GetCanpell(inst, data.owner)
+	inst.components.spellcard:SetCondition(condition)
+	inst.canspell:set(condition)
 end
 
-local function SetState(inst)
-	if inst.components.inventoryitem:IsHeld() and inst.components.inventoryitem.owner.prefab == "yakumoyukari"  then -- temp
+local function GetDesc(inst, viewer)
+	if viewer.prefab == "yakumoyukari" then
 		local index = GetIndex(inst)
-		local condition = GetCondition(inst, index)
-		inst.components.spellcard:SetCondition( condition )
-		inst.canspell:set( condition )
-		SetDesc(inst, index)
+		local currentLevel = GetStatLevel(viewer, index)
+
+		return string.format( STRINGS.YUKARI_CURRENT_LEVEL.." - "..currentLevel..GetStr(viewer, index) )
 	end
 end
 
-local function DoUpgrade(inst)
-	local backpack = GetBackpack(inst)
-	local Chara = inst.components.inventoryitem.owner
+local function DoUpgrade(inst, owner)
 	local index = GetIndex(inst)
 	local items = Ingredients[index]
-	local count = GetIngreCount(inst, index)
-	local inventory = Chara.components.inventory
+	local count = GetIngreCount(owner, index)
+	local inventory = owner.components.inventory
 	
-	for i = 1, 3, 1 do
-		local function consume(name, left_count, backpack)
-			
-			for k,v in pairs(inventory.itemslots) do
-				if v.prefab == name[i] then
-					if v.components.stackable then
-						if v.components.stackable.stacksize >= left_count then
-							v.components.stackable:Get(left_count):Remove()
-							left_count = 0
-						else 
-							v:Remove()
-							left_count = left_count - v.components.stackable.stacksize
-						end
-					else 
-						v:Remove()
-						left_count = left_count - 1
-					end
+	local function remove(item, left_count)
+		if left_count > 0 then
+			if item.components.stackable ~= nil then
+				if item.components.stackable.stacksize >= left_count then
+					item.components.stackable:Get(left_count):Remove()
+					return 0
+				else 
+					left_count = left_count - item.components.stackable.stacksize
+					item:Remove()
 				end
+			else 
+				left_count = left_count - 1
+				item:Remove()
 			end
-			
-			if backpack then
-				for k,v in pairs(backpack.slots) do
-					if v.prefab == name[i] then
-						if v.components.stackable then
-							if v.components.stackable.stacksize >= left_count then
-								v.components.stackable:Get(left_count):Remove()
-								left_count = 0
-							else 
-								v:Remove()
-								left_count = left_count - v.components.stackable.stacksize
-							end
-						else 
-							v:Remove()
-							left_count = left_count - 1
-						end
-					end
-				end
-			end
-			if left_count >= 1 then consume(name, left_count, backpack) end
-			
 		end
-		consume(items, count[i], backpack)
+		return left_count
 	end
-	
-	Chara.components.upgrader:DoUpgrade(Chara, index)
+
+	for i = 1, 3, 1 do -- I won't use RemoveItem function in inventory components because it doesn't get items in custom backpack slot. 
+		local left_count = count[i]
+
+		while left_count > 0 do
+			for k,v in pairs(inventory.itemslots) do
+				if v.prefab == items[i] then
+					left_count = remove(v, left_count)
+				end
+			end
+
+			for k,v in pairs(inventory.equipslots) do
+				if type(v) == "table" and v.components.container then
+					for k, v2 in pairs(v.components.container.slots) do
+						if v2.prefab == items[i] then
+							left_count = remove(v2, left_count)
+						end
+					end
+				end
+			end
+		end
+	end
+
+	owner.components.upgrader:DoUpgrade(owner, index)
 end
+
+local function OnFinish(inst)
+	local owner = inst.components.inventoryitem.owner
+	local condition = GetCanpell(inst, owner)
+	inst.components.spellcard:SetCondition(condition)
+	inst.canspell:set(condition)
+end
+
 
 function MakePanel(iname)
 	local fname = iname.."panel"
@@ -262,6 +235,8 @@ function MakePanel(iname)
 		inst.AnimState:PlayAnimation("idle")   
 
 		inst:AddTag("spellcard")
+		inst:AddTag("recieveitemupdate")
+
 		inst.canspell = net_bool(inst.GUID, "canspell")
 
 		if not TheWorld.ismastersim then
@@ -272,7 +247,8 @@ function MakePanel(iname)
 
 
 		inst:AddComponent("inspectable")			
-		
+		inst.components.inspectable.getspecialdescription = GetDesc
+
 		inst:AddComponent("inventoryitem") 
 		inst.components.inventoryitem.imagename = fname    
 		inst.components.inventoryitem.atlasname = "images/inventoryimages/"..fname..".xml" 	
@@ -280,9 +256,10 @@ function MakePanel(iname)
 		inst:AddComponent("spellcard")
 		inst.components.spellcard.name = fname
 		inst.components.spellcard:SetSpellFn( DoUpgrade )
+		inst.components.spellcard:SetOnFinish( OnFinish )
 		inst.components.spellcard:SetCondition( false )
 		
-		inst:DoPeriodicTask(1, SetState) -- temp
+		inst:ListenForEvent("onitemupdate", SetState)
 		
 		return inst
 	end

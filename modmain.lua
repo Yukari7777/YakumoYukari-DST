@@ -56,7 +56,6 @@ local SpawnPrefab = GLOBAL.SpawnPrefab
 local ThePlayer = GLOBAL.ThePlayer
 local GetString = GLOBAL.GetString
 local TheInput = GLOBAL.TheInput
-local IsPaused = GLOBAL.IsPaused
 local EQUIPSLOTS = GLOBAL.EQUIPSLOTS
 --local TheWorld = GLOBAL.TheWorld
 local Inspect = GetModConfigData("inspect")
@@ -70,7 +69,7 @@ local IsYukari = ThePlayer and ThePlayer.prefab == "yakumoyukari"
 STRINGS.CHARACTER_TITLES.yakumoyukari = "Youkai of Boundaries"
 STRINGS.CHARACTER_NAMES.yakumoyukari = "Yakumo Yukari"
 STRINGS.CHARACTER_DESCRIPTIONS.yakumoyukari = "has own ability 'youkai power'.\nbecomes dreadful when she get 'power' from her world."
-STRINGS.CHARACTER_QUOTES.yakumoyukari = "\"I will control this world, too.\""
+STRINGS.CHARACTER_QUOTES.yakumoyukari = "\"I have taken the first napkin.\""
 STRINGS.CHARACTERS.YAKUMOYUKARI = require "speech_yakumoyukari"
 if Language == "chinese" then
 	STRINGS.CHARACTER_TITLES.yakumoyukari = "境界的妖怪"
@@ -389,18 +388,18 @@ end
 
 
 ---------- print current upgrade & ability
-function DebugUpgrade()
-	if ThePlayer and ThePlayer.components.upgrader then
-		local HP = ThePlayer.health_level
-		local HN = ThePlayer.hunger_level
-		local SA = ThePlayer.sanity_level
-		local PO = ThePlayer.power_level
+function DebugUpgrade(inst)
+	if inst and inst.components.upgrader then
+		local HP = inst.components.upgrader.health_level
+		local HN = inst.components.upgrader..hunger_level
+		local SA = inst.components.upgrader..sanity_level
+		local PO = inst.components.upgrader..power_level
 		
 		local str = "Health Upgrade - "..HP.."\nHunger Upgrade - "..HN.."\nSanity Upgrade - "..SA.."\nPower Upgrade - "..PO
 		if Language == "chinese" then
 			str = "生 命 升 级 - "..HP.."\n饥 饿 升 级 - "..HN.."\n心 智 升 级 - "..SA.."\n妖 力 升 级 - "..PO
 		end
-		ThePlayer.components.talker:Say(str)
+		inst.components.talker:Say(str)
 	end
 end
 
@@ -466,12 +465,10 @@ function DebugCooltime()
 	end
 end
 
-function Status_1()
-	if ThePlayer and ThePlayer:HasTag("yakumoyukari") then 
-		if not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
-		and TheInput:IsKeyDown(GLOBAL.KEY_SHIFT) then 
-			DebugUpgrade() 
-		end
+function Status_1(inst)
+	--if not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
+	--and TheInput:IsKeyDown(GLOBAL.KEY_SHIFT) then 
+		DebugUpgrade(inst) 
 	end
 end
 
@@ -492,10 +489,13 @@ function Status_3()
 		end
 	end
 end
-
-TheInput:AddKeyDownHandler(98, Status_1)
-TheInput:AddKeyDownHandler(118, Status_2)
-TheInput:AddKeyDownHandler(110, Status_3)
+--[[AddPlayerPostInit(function(inst)
+	if inst.prefab == "yakumoyukari" then
+		TheInput:AddKeyDownHandler(98, Status_1)
+		TheInput:AddKeyDownHandler(118, Status_2)
+		TheInput:AddKeyDownHandler(110, Status_3)
+	end
+end)]]--
 
 -------------------------------
 modimport "scripts/power_init.lua"
