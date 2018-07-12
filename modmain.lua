@@ -388,12 +388,12 @@ end
 
 
 ---------- print current upgrade & ability
-function DebugUpgrade(inst)
+--[[function DebugUpgrade(inst)
 	if inst and inst.components.upgrader then
 		local HP = inst.components.upgrader.health_level
-		local HN = inst.components.upgrader..hunger_level
-		local SA = inst.components.upgrader..sanity_level
-		local PO = inst.components.upgrader..power_level
+		local HN = inst.components.upgrader.hunger_level
+		local SA = inst.components.upgrader.sanity_level
+		local PO = inst.components.upgrader.power_level
 		
 		local str = "Health Upgrade - "..HP.."\nHunger Upgrade - "..HN.."\nSanity Upgrade - "..SA.."\nPower Upgrade - "..PO
 		if Language == "chinese" then
@@ -401,7 +401,7 @@ function DebugUpgrade(inst)
 		end
 		inst.components.talker:Say(str)
 	end
-end
+end]]--
 
 function DebugAbility()
 	local HP = 0
@@ -469,7 +469,7 @@ function Status_1(inst)
 	--if not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
 	--and TheInput:IsKeyDown(GLOBAL.KEY_SHIFT) then 
 		DebugUpgrade(inst) 
-	end
+	--end
 end
 
 function Status_2()
@@ -489,13 +489,15 @@ function Status_3()
 		end
 	end
 end
---[[AddPlayerPostInit(function(inst)
+--[[
+AddPlayerPostInit(function(inst)
 	if inst.prefab == "yakumoyukari" then
 		TheInput:AddKeyDownHandler(98, Status_1)
 		TheInput:AddKeyDownHandler(118, Status_2)
 		TheInput:AddKeyDownHandler(110, Status_3)
 	end
-end)]]--
+end)
+]]--
 
 -------------------------------
 modimport "scripts/power_init.lua"
