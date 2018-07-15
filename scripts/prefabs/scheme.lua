@@ -101,6 +101,13 @@ end
 local function DoUpgrade(inst, owner)
 	local inventory = owner.components.inventory
 	local list = GetTable(owner)
+
+	if not GetCanpell(owner) then
+		inst.components.spellcard:SetCondition(false)
+		inst.canspell:set(false)
+		owner.components.talker:Say(STRINGS.YUKARI_MORE_INGREDIENT)
+		return false
+	end
 	
 	local function remove(item, left_count)
 		if left_count > 0 then
