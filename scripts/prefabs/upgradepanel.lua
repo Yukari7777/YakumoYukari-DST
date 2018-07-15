@@ -2,7 +2,7 @@ local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
 local berries = GetModConfigData("berries", modname) == "juicy" and "berries_juicy" or "berries"
 
 local Ingredients = {
-	{"spidergland", "healingsalve", "bandage"},
+	{"honey", "healingsalve", "bandage"},
 	{berries, "meatballs", "bonestew"},
 	{"petals", "nightmarefuel", "livinglog"},
 	{"goldnugget", "purplegem", "thulecite"}
