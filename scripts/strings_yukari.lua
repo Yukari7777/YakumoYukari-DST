@@ -89,7 +89,6 @@ STRINGS.YUKARI_UPGRADE_FINISHED = "Upgrade Finished"
 STRINGS.YUKARI_SHOULD_BRING_SOMETHING = "I should bring something on my hands."
 STRINGS.YUKARI_CURRENT_LEVEL = "Current Level"
 STRINGS.YUKARI_NEED_POWER = "I don't have enough power."
-STRINGS.YUKARI_MORE_INGREDIENT = "I don't have enough Ingredients."
 
 if Language == "chinese" then
 

@@ -122,11 +122,11 @@ end
 local function GetCanpell(inst, owner)
 	local index = GetIndex(inst)
 	local items = Ingredients[index]
-	local condition = owner.components.inventory ~= nil and true
 	local count = GetIngreCount(owner, index)
 	local currentLevel = GetStatLevel(owner, index)
 	local maxlevel = GetMaxLevel()
 
+	local condition = true
 	if currentLevel < maxlevel then 
 		for i = 1, 3, 1 do 
 			condition = condition and ( CountInventoryItem(owner, items[i]) >= count[i] )
@@ -158,13 +158,6 @@ local function DoUpgrade(inst, owner)
 	local items = Ingredients[index]
 	local count = GetIngreCount(owner, index)
 	local inventory = owner.components.inventory
-
-	if not GetCanpell(inst, owner) then
-		inst.components.spellcard:SetCondition(false)
-		inst.canspell:set(false)
-		owner.components.talker:Say(STRINGS.YUKARI_MORE_INGREDIENT)
-		return false
-	end
 	
 	local function remove(item, left_count)
 		if left_count > 0 then
@@ -209,8 +202,8 @@ local function DoUpgrade(inst, owner)
 	owner.components.upgrader:DoUpgrade(owner, index)
 end
 
-local function OnFinish(inst, owner)
-	--local owner = inst.components.inventoryitem.owner
+local function OnFinish(inst)
+	local owner = inst.components.inventoryitem.owner
 	local condition = GetCanpell(inst, owner)
 	inst.components.spellcard:SetCondition(condition)
 	inst.canspell:set(condition)
