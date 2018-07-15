@@ -83,7 +83,7 @@ AddMinimapAtlas("images/map_icons/yukarihat.xml")
 AddMinimapAtlas("images/map_icons/yukariumbre.xml")
 AddMinimapAtlas("images/map_icons/minimap_tunnel.xml")
 AddMinimapAtlas("images/map_icons/scheme.xml")
-
+--------------------------------------some byte changes--------------------------------------------
 ------ Function ------
 
 function AddSchemeManager(inst)
