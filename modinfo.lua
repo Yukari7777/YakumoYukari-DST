@@ -2,10 +2,14 @@ name = "Yakumo Yukari"
 description = "Yakumo Yukari comes from unknown world to manipulate Don't Starve Together world!"
 author = "Yakumo Yukari"
 <<<<<<< HEAD
+<<<<<<< HEAD
 version = "0.6.6"
 =======
 version = "0.6.1"
 >>>>>>> parent of 677d4c7... 업튕
+=======
+version = "0.6.3"
+>>>>>>> parent of 10158b1... version
 forumthread = ""
 api_version = 6
 api_version_dst = 10
