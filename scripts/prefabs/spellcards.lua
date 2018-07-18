@@ -342,8 +342,7 @@ function MakeCard(name)
 			return true
 		end)
 
-		inst.components.finiteuses:SetOnFinished(function()
-			local owner = inst.components.inventoryitem and inst.components.inventoryitem.owner
+		inst.components.finiteuses:SetOnFinished(function(inst, owner)
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
 			owner.components.playervision:ForceNightVision(false)
 			owner.components.playervision:SetCustomCCTable(nil)
@@ -426,7 +425,7 @@ function MakeCard(name)
 						if not owner:HasTag("isDamage") then
 							owner:AddTag("IsDamage")
 						end
-						if owner.components.upgrader.ability[4][4] and owner:HasTag("realyoukai") then
+						if owner.components.upgrader.ability[4][3] and owner:HasTag("realyoukai") then
 							owner:RemoveTag("realyoukai")
 						end
 						local x,y,z = owner.Transform:GetWorldPosition()
@@ -440,7 +439,7 @@ function MakeCard(name)
 					else 
 						owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_LOWPOWER"))
 						owner:RemoveTag("IsDamage")
-						if owner.components.upgrader.ability[4][4] then
+						if owner.components.upgrader.ability[4][3] then
 							owner:AddTag("realyoukai")
 						end
 						inst.fx.kill_fx(inst.fx)
@@ -452,11 +451,10 @@ function MakeCard(name)
 			end
 			return true
 		end)
-		inst.components.finiteuses:SetOnFinished(function()
-			
+		inst.components.finiteuses:SetOnFinished(function(inst, owner)
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
 			owner:RemoveTag("IsDamage")
-			if owner.components.upgrader.ability[4][4] then
+			if owner.components.upgrader.ability[4][3] then
 				owner:AddTag("realyoukai")
 			end
 			inst.fx.kill_fx(inst.fx)
