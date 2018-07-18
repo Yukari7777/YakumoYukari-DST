@@ -152,8 +152,7 @@ local function DoUpgrade(inst, owner)
 	
 end
 
-local function OnFinish(inst)
-	local owner = inst.components.inventoryitem.owner
+local function OnFinish(inst, owner)
 	owner.components.upgrader.hatlevel = owner.components.upgrader.hatlevel + 1
 	owner.components.upgrader:DoUpgrade(owner)
 	owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_HATUPGRADE"))
