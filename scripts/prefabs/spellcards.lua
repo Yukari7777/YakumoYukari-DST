@@ -310,9 +310,9 @@ function MakeCard(name)
 			if inst.sighttask == nil and HasNightVision then return false else
 				owner.components.power:DoDelta(4, false)
 				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NEWSIGHT"))
-				inst.sighttask = owner.DoPeriodicTask(owner, 1, function() -- Let's not use syntactic sugar
+				inst.sighttask = owner.DoPeriodicTask(owner, 1, function()
 					if inst.components.inventoryitem:IsHeld() then 
-						if owner.components.power and owner.components.power.current >= 1 then
+						if owner.components.power.current >= 1 then
 							owner.components.playervision:ForceNightVision(true)
 							owner.components.playervision:SetCustomCCTable(NIGHTVISION_COLOURCUBES)
 							inst.components.finiteuses:Use(1)
@@ -331,7 +331,7 @@ function MakeCard(name)
 							owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
 							deletetask(inst)
 						end
-					else -- so that you can still access owner(actually it's self) even inst.components.inventoryitem.owner is nil
+					else
 						owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
 						owner.components.playervision:ForceNightVision(false)
 						owner.components.playervision:SetCustomCCTable(nil)
@@ -342,7 +342,8 @@ function MakeCard(name)
 			return true
 		end)
 
-		inst.components.finiteuses:SetOnFinished(function(inst, owner)
+		inst.components.finiteuses:SetOnFinished(function()
+			local owner = inst.components.inventoryitem.owner
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
 			owner.components.playervision:ForceNightVision(false)
 			owner.components.playervision:SetCustomCCTable(nil)
@@ -412,6 +413,9 @@ function MakeCard(name)
 		end
 		inst.components.spellcard:SetSpellFn(function(inst, owner)
 			if inst.barriertask then
+				if owner.components.upgrader.ability[4][3] then
+					owner:AddTag("realyoukai")
+				end
 				owner:RemoveTag("IsDamage")
 				inst.fx.kill_fx(inst.fx)
 				inst.fx = nil
@@ -420,7 +424,7 @@ function MakeCard(name)
 			else
 				inst.fx = barrier(inst)
 				inst.barriertask = owner.DoPeriodicTask(owner, 1, function()
-					if owner.components.power and owner.components.power.current >= 1 then
+					if inst.components.inventoryitem:IsHeld() and owner.components.power.current >= 1 then
 						owner.components.power:DoDelta(-1, false)
 						if not owner:HasTag("isDamage") then
 							owner:AddTag("IsDamage")
@@ -437,7 +441,11 @@ function MakeCard(name)
 						end
 						inst.components.finiteuses:Use(1)
 					else 
-						owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_LOWPOWER"))
+						if owner.components.power.current < 1 then
+							owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_LOWPOWER"))
+						else
+							owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
+						end
 						owner:RemoveTag("IsDamage")
 						if owner.components.upgrader.ability[4][3] then
 							owner:AddTag("realyoukai")
@@ -451,7 +459,8 @@ function MakeCard(name)
 			end
 			return true
 		end)
-		inst.components.finiteuses:SetOnFinished(function(inst, owner)
+		inst.components.finiteuses:SetOnFinished(function()
+			local owner = inst.components.inventoryitem.owner
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
 			owner:RemoveTag("IsDamage")
 			if owner.components.upgrader.ability[4][3] then
