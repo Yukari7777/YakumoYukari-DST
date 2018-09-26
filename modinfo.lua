@@ -1,7 +1,7 @@
 name = "Yakumo Yukari"
 description = "Yakumo Yukari comes from unknown world to manipulate Don't Starve Together world!"
 author = "Yakumo Yukari"
-version = "0.6.7"
+version = "0.6.9"
 forumthread = ""
 api_version = 6
 api_version_dst = 10
@@ -40,17 +40,6 @@ configuration_options = {
 			{ description = "false", data = false },
 		},
 		default = true,
-	},
-	
-	{
-		name = "berries",
-		label = "Hunger Upgrade Ingredient",
-		options = 
-		{
-			{ description = "Juicy Berries", data = "juicy" },
-			{ description = "Berries", data = "normal" },
-		},
-		default = "juicy",
 	}
 
 }

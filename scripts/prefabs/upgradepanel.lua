@@ -1,9 +1,8 @@
 local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
-local berries = GetModConfigData("berries", modname) == "juicy" and "berries_juicy" or "berries"
 
 local Ingredients = {
 	{"honey", "healingsalve", "bandage"},
-	{berries, "meatballs", "bonestew"},
+	{"berries", "meatballs", "bonestew"},
 	{"petals", "nightmarefuel", "livinglog"},
 	{"goldnugget", "purplegem", "thulecite"}
 }
@@ -81,7 +80,7 @@ local function CountInventoryItem(owner, item)
 	end
 	
 	for k,v in pairs(inventory.itemslots) do
-		if v.prefab == item then
+		if item == "berries" and (v.prefab == "berries" or v.prefab == "berries_juicy") or v.prefab == item then
 			count = countitem(v, count)
 		end
 	end
@@ -89,7 +88,7 @@ local function CountInventoryItem(owner, item)
 	for k,v in pairs(inventory.equipslots) do
 		if type(v) == "table" and v.components.container then
 			for k, v2 in pairs(v.components.container.slots) do
-				if v2.prefab == item then
+				if item == "berries" and (v2.prefab == "berries" or v2.prefab == "berries_juicy") or v2.prefab == item then
 					count = countitem(v2, count)
 				end
 			end
@@ -189,7 +188,7 @@ local function DoUpgrade(inst, owner)
 
 		while left_count > 0 do
 			for k,v in pairs(inventory.itemslots) do
-				if v.prefab == items[i] then
+				if items[i] == "berries" and (v.prefab == "berries" or v.prefab == "berries_juicy") or v.prefab == items[i] then
 					left_count = remove(v, left_count)
 				end
 			end
@@ -197,7 +196,7 @@ local function DoUpgrade(inst, owner)
 			for k,v in pairs(inventory.equipslots) do
 				if type(v) == "table" and v.components.container then
 					for k, v2 in pairs(v.components.container.slots) do
-						if v2.prefab == items[i] then
+						if items[i] == "berries" and (v2.prefab == "berries" or v2.prefab == "berries_juicy") or v2.prefab == items[i] then
 							left_count = remove(v2, left_count)
 						end
 					end
@@ -210,7 +209,6 @@ local function DoUpgrade(inst, owner)
 end
 
 local function OnFinish(inst, owner)
-	--local owner = inst.components.inventoryitem.owner
 	local condition = GetCanpell(inst, owner)
 	inst.components.spellcard:SetCondition(condition)
 	inst.canspell:set(condition)
