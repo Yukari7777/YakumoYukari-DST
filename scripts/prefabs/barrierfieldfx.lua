@@ -12,9 +12,9 @@ end
 local function fn(Sim)
 	local inst = CreateEntity()
 	inst.entity:AddNetwork()
-	local trans = inst.entity:AddTransform()
-    local anim = inst.entity:AddAnimState()
-    local sound = inst.entity:AddSoundEmitter()
+	inst.entity:AddTransform()
+    inst.entity:AddAnimState()
+	inst.entity:AddSoundEmitter()
 
     anim:SetBank("forcefield")
     anim:SetBuild("barrifield")
@@ -28,7 +28,7 @@ local function fn(Sim)
 
     inst.kill_fx = kill_fx
 
-    sound:PlaySound("dontstarve/wilson/forcefield_LP", "loop") -- Custom Sound
+    sound:PlaySound("dontstarve/wilson/forcefield_LP", "loop")
 
     return inst
 end

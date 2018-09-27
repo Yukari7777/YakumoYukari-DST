@@ -145,7 +145,7 @@ local function OnAttackedEvent(attacked, data)
 	if attacked.components.health and attacked.components.upgrader.IsFight then
 		if not attacked.components.health.invincible then -- Check another invinciblity.
 			attacked.components.health:SetInvincible(true)
-			scheduler:ExecuteInTime(1, attacked.components.health:SetInvincible(false))
+			attacked:DoTaskInTime(1, attacked.components.health:SetInvincible(false))
 		end
 	end
 end
@@ -190,16 +190,16 @@ function GoInvincible(inst)
 	if  inst.components.health 
 	and inst.components.health.currenthealth <= 50 
 	and inst.components.upgrader.InvincibleLearned
-	and inst.components.upgrader.CanbeInvincible then
-		inst.components.health:SetInvincible(true)
-		inst.invin_cool = 1450
-		inst.components.upgrader.CanbeInvincible = false
-		inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_INVINCIBILITY_ACTIVE"))
+	and inst.components.upgrader.CanbeInvincibled then
+		inst.components.upgrader.CanbeInvincibled = false
 		inst.components.upgrader.emergency = 4
 		inst.IsInvincible = true
-		scheduler:ExecuteInTime(10, function() -- Execute after 10 seconds.
-			inst.components.upgrader.emergency = 0
+		inst.components.health:SetInvincible(true)
+		inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_INVINCIBILITY_ACTIVATE"))
+		inst:DoTaskInTime(10, function() -- Execute after 10 seconds.
 			inst.IsInvincible = false
+			inst.invin_cool = 1440
+			inst.components.upgrader.emergency = 0
 			inst.components.health:SetInvincible(false)
 			inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_INVINCIBILITY_DONE"))
 		end)
@@ -207,24 +207,6 @@ function GoInvincible(inst)
 end
 
 local function PeriodicFunction(inst, data)
-	
-	local function GetPoint(pt)
-		local theta = math.random() * 2 * PI
-		local radius = 6 + math.random() * 6
-	
-		local result_offset = FindValidPositionByFan(theta, radius, 12, function(offset)
-			local ground = TheWorld
-			local spawn_point = pt + offset
-			if not (ground.Map and ground.Map:GetTileAtPoint(spawn_point.x, spawn_point.y, spawn_point.z) == GROUND.IMPASSABLE) then
-				return true
-			end
-			return false
-		end)
-	
-		if result_offset then
-			return pt+result_offset
-		end
-	end
 
 	local Light = inst.entity:AddLight()
 	
@@ -281,7 +263,7 @@ local function CooldownFunction(inst)
 	if inst.invin_cool > 0 then
 		inst.invin_cool = inst.invin_cool - 1
 	elseif inst.invin_cool == 0 then
-		inst.components.upgrader.CanbeInvincible = true
+		inst.components.upgrader.CanbeInvincibled = true
 	end
 	
 end
@@ -297,7 +279,7 @@ local function EquippingEvent(inst, data)
 	inst.components.upgrader:DoUpgrade(inst)
 end
 
-local function OnItemUpdate(inst) -- Character PushEvent to item.
+local function OnItemUpdate(inst) -- Let character PushEvents to items.
 	
 	local inventory = inst.components.inventory
 
@@ -332,10 +314,12 @@ end
 local function common_init(inst) -- things before SetPristine()
 	inst.MiniMapEntity:SetIcon( "yakumoyukari.tex" )
 
+	inst.IsInvincible = false
 	inst.regen_cool = 0
 	inst.poison_cool = 0
 	inst.invin_cool = 0
 	inst.grazecnt = 0
+	inst.info = 0
 
 	inst.maxpower = net_ushortint(inst.GUID, "maxpower")
 	inst.currentpower = net_ushortint(inst.GUID, "currentpower")
@@ -352,7 +336,9 @@ local function common_init(inst) -- things before SetPristine()
 	STRINGS.NAMES.SHADOWSKITTISH = "Shadow Creature"
 	STRINGS.NAMES.SHADOWSKITTISH_WATER = "Shadow Creature"
 	STRINGS.NAMES.CREEPYEYES = "Eyes"
-	-- TUNING.HAMMER_DAMAGE = 10
+
+	inst:AddComponent("keyhandler")
+	inst.components.keyhandler:AddActionListener("yakumoyukari", 98, "SayInfo")
 end
 
 local master_postinit = function(inst) -- after SetPristine()
@@ -443,6 +429,7 @@ local master_postinit = function(inst) -- after SetPristine()
 			or food.prefab == "batwing" 
 			or food.prefab == "froglegs" 
 			or food.prefab == "fish_raw_small"
+			or food.prefab == "meatballs"
 			or food.prefab == "frogglebunwich" then
 				food.components.edible.sanityvalue = 0
 				DoPowerRestore(inst, 10)
@@ -502,11 +489,6 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:ListenForEvent("refreshinventory", OnItemUpdate)
 	inst:ListenForEvent("stacksizechange", OnItemUpdate)
 
-	if TheNet:GetServerGameMode() == "lavaarena" then
-        event_server_data("lavaarena", "prefabs/yakumoyukari").master_postinit(inst)
-    elseif TheNet:GetServerGameMode() == "quagmire" then
-        event_server_data("quagmire", "prefabs/yakumoyukari").master_postinit(inst)
-    end
 end
 
 return MakePlayerCharacter("yakumoyukari", prefabs, assets, common_init, master_postinit)

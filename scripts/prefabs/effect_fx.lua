@@ -3,10 +3,6 @@ local assets_graze =
 	Asset("ANIM", "anim/graze_fx.zip"),
 }
 
-local function kill(inst)
-	inst:Remove()
-end
-
 local function fn_graze(Sim)
 	local inst = CreateEntity()
 	inst.entity:AddTransform()
@@ -39,7 +35,7 @@ local function fn_graze(Sim)
 	inst.components.locomotor:RunForward() 
 
 	inst.SoundEmitter:PlaySound("soundpack/spell/graze")
-	inst:DoTaskInTime(0.6, kill)
+	inst:DoTaskInTime(0.6, inst.Remove)
 	
 	return inst
 end

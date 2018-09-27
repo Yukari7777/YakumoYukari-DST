@@ -50,20 +50,16 @@ require "class"
 
 local STRINGS = GLOBAL.STRINGS
 local ProfileStatsSet = GLOBAL.ProfileStatsSet
-local TheCamera = GLOBAL.TheCamera
-local IsDLCEnabled = GLOBAL.IsDLCEnabled
 local SpawnPrefab = GLOBAL.SpawnPrefab
 local ThePlayer = GLOBAL.ThePlayer
 local GetString = GLOBAL.GetString
 local TheInput = GLOBAL.TheInput
 local EQUIPSLOTS = GLOBAL.EQUIPSLOTS
---local TheWorld = GLOBAL.TheWorld
-local Inspect = GetModConfigData("inspect")
-local Language = GetModConfigData("language")
 local FindEntity = GLOBAL.FindEntity
---local IsMaster = GLOBAL.TheWorld and GLOBAL.TheWorld.ismastersim
 local SpringCombatMod = GLOBAL.SpringCombatMod
 local IsYukari = ThePlayer and ThePlayer.prefab == "yakumoyukari"
+local Inspect = GetModConfigData("inspect")
+local Language = GetModConfigData("language")
 
 ----- Basic settings for Yukari -----
 STRINGS.CHARACTER_TITLES.yakumoyukari = "Youkai of Boundaries"
@@ -217,7 +213,7 @@ local function BunnymanNormalRetargetFn(inst)
 			{ "realyoukai" }, -- not even be targetted with meat
 			{ "monster", "player" })
 	end
-	inst.components.combat:SetRetargetFunction(1, NormalRetargetFn)
+	inst.components.combat:SetRetargetFunction(3, NormalRetargetFn)
 end
 -- Pigman Retarget Function
 local function PigmanNormalRetargetFn(inst)
@@ -388,116 +384,61 @@ end
 
 
 ---------- print current upgrade & ability
---[[function DebugUpgrade(inst)
-	if inst and inst.components.upgrader then
-		local HP = inst.components.upgrader.health_level
-		local HN = inst.components.upgrader.hunger_level
-		local SA = inst.components.upgrader.sanity_level
-		local PO = inst.components.upgrader.power_level
-		
-		local str = "Health Upgrade - "..HP.."\nHunger Upgrade - "..HN.."\nSanity Upgrade - "..SA.."\nPower Upgrade - "..PO
-		if Language == "chinese" then
-			str = "生 命 升 级 - "..HP.."\n饥 饿 升 级 - "..HN.."\n心 智 升 级 - "..SA.."\n妖 力 升 级 - "..PO
-		end
-		inst.components.talker:Say(str)
-	end
-end]]--
-
-function DebugAbility()
+function SayInfo(inst)
+	local index = inst.info % 3
 	local HP = 0
 	local HN = 0
 	local SA = 0
 	local PO = 0
-	
-	for i = 1, 4, 1 do
-		for j = 1, 6, 1 do
-			if ThePlayer and ThePlayer.components.upgrader and ThePlayer.components.upgrader.ability[i][j] then
-				if i == 1 then
-					HP = HP + 1
-				elseif i == 2 then
-					HN = HN + 1
-				elseif i == 3 then
-					SA = SA + 1
-				elseif i == 4 then
-					PO = PO + 1
+	local str = ""
+
+	if index == 0 then
+		HP = inst.components.upgrader.health_level
+		HN = inst.components.upgrader.hunger_level
+		SA = inst.components.upgrader.sanity_level
+		PO = inst.components.upgrader.power_level
+
+		str = STRINGS.NAMES.HEALTHPANEL.." - "..HP.."\n"..STRINGS.NAMES.HUNGERPANEL.." - "..HN.."\n"..STRINGS.NAMES.SANITYPANEL.." - "..SA.."\n"..STRINGS.NAMES.POWERPANEL.." - "..PO
+	elseif index == 1 then
+		for i = 1, inst.components.upgrader.skillsort, 1 do
+			for j = 1, inst.components.upgrader.skilllevel, 1 do
+				if inst.components.upgrader.ability[i][j] then
+					if i == 1 then
+						HP = HP + 1
+					elseif i == 2 then
+						HN = HN + 1
+					elseif i == 3 then
+						SA = SA + 1
+					elseif i == 4 then
+						PO = PO + 1
+					end
 				end
 			end
 		end
-	end
-	local str = "Health Ability - lev."..HP.."\nHunger Ability - lev."..HN.."\nSanity Ability - lev."..SA.."\nPower Ability - lev."..PO
-	if Language == "chinese" then
-		str = "生 命 能 力 - lev."..HP.."\n饥 饿 能 力 - lev."..HN.."\n心 智 能 力 - lev."..SA.."\n妖 力 能 力 - lev."..PO
-	end
-	ThePlayer.components.talker:Say(str)
-end
 
-function DebugCooltime()
-	
-	local Invincible = ""
-	
-	if ThePlayer and ThePlayer.components.upgrader.InvincibleLearned then
-		if ThePlayer.invin_cool then
-			if Language == "chinese" then
-				if ThePlayer.invin_cool >= 1440 then
-					Invincible = "無 敵  -  ? 行"
-				elseif ThePlayer.invin_cool > 0 then
-					Invincible = "無 敵  -  "..ThePlayer.invin_cool.." 秒 "
-				elseif ThePlayer.invin_cool == 0 then
-					Invincible = "無 敵  -  準 備"
-				end
+		str = STRINGS.HEALTH.." "..STRINGS.ABILITY.." - lev."..HP.."\n"..STRINGS.HUNGER.." "..STRINGS.ABILITY.." - lev."..HN.."\n"..STRINGS.SANITY.." "..STRINGS.ABILITY.." - lev."..SA.."\n"..STRINGS.POWER.." "..STRINGS.ABILITY.." - lev."..PO
+	else -- TODO : RECODE(with table)
+		if inst.components.upgrader.InvincibleLearned then
+			if inst.IsInvincible then
+				invincibility = STRINGS.INVINCIBILITY.." - "..STRINGS.ACTIVATED
+			elseif inst.invin_cool > 0 then
+				invincibility = STRINGS.INVINCIBILITY.." - "..inst.invin_cool..STRINGS.SECONDS
 			else
-				if ThePlayer.invin_cool >= 1440 then
-					Invincible = "Invincibility - On"
-				elseif ThePlayer.invin_cool > 0 then
-					Invincible = "Invincibility - "..ThePlayer.invin_cool.."s"
-				elseif ThePlayer.invin_cool == 0 then
-					Invincible = "Invincibility - Ready"
-				end
+				invincibility = STRINGS.INVINCIBILITY.." - "..STRINGS.READY
 			end
 		end
-	end
-	
-	local str = Invincible
-	if str == "" then 
-		ThePlayer.components.talker:Say(GetString(ThePlayer.prefab, "DESCRIBE_NOSKILL"))
-	else
-		ThePlayer.components.talker:Say(str)
-	end
-end
 
-function Status_1(inst)
-	--if not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
-	--and TheInput:IsKeyDown(GLOBAL.KEY_SHIFT) then 
-		DebugUpgrade(inst) 
-	--end
-end
-
-function Status_2()
-	if ThePlayer and ThePlayer:HasTag("yakumoyukari") then 
-		if not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
-		and TheInput:IsKeyDown(GLOBAL.KEY_SHIFT) then 
-			DebugAbility() 
+		str = invincibility or ""
+		if str == "" then
+			str = STRINGS.YUKARI_NOSKILL
 		end
 	end
+
+	inst.components.talker:Say(str)
+	inst.info = inst.info + 1
 end
 
-function Status_3()
-	if ThePlayer and ThePlayer:HasTag("yakumoyukari") then 
-		if not TheInput:IsKeyDown(GLOBAL.KEY_CTRL) 
-		and TheInput:IsKeyDown(GLOBAL.KEY_SHIFT) then 
-			DebugCooltime() 
-		end
-	end
-end
---[[
-AddPlayerPostInit(function(inst)
-	if inst.prefab == "yakumoyukari" then
-		TheInput:AddKeyDownHandler(98, Status_1)
-		TheInput:AddKeyDownHandler(118, Status_2)
-		TheInput:AddKeyDownHandler(110, Status_3)
-	end
-end)
-]]--
+AddModRPCHandler("yakumoyukari", "SayInfo", SayInfo)
 
 -------------------------------
 modimport "scripts/power_init.lua"

@@ -18,7 +18,7 @@ local function GetIngameName(prefab)
 	return STRINGS.NAMES[string.upper(prefab)]
 end
 
-local function GetIndex(inst) -- enum..
+local function GetIndex(inst)
 	local utype = inst.components.spellcard.name
 	if utype == "healthpanel" then return 1
 	elseif utype == "hungerpanel" then return 2
