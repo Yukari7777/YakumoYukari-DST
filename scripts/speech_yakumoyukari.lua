@@ -1653,7 +1653,7 @@ return {
 	DESCRIBE_HATUPGRADE = "Hat Upgraded",
 	DESCRIBE_NOHANDED = "I should bring something on my hand.",
 	DESCRIBE_DONEUPGRADE = "\nUpgrade Finished",
-	DESCRIBE_INVINCIBILITY_ACTIVE = "Invincibility Activated",
+	DESCRIBE_INVINCIBILITY_ACTIVATE = "Invincibility Activated",
 	DESCRIBE_INVINCIBILITY_DONE = "I'm no longer invincible.",
 	DESCRIBE_UPGRADE_FREE = "\nFree to Upgrade",
 	DESCRIBE_UPGRADE_HEALTH = "My heart is mighter.",

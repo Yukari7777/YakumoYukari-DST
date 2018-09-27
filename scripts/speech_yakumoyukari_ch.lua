@@ -1643,7 +1643,7 @@ return {
 	DESCRIBE_HATUPGRADE = "帽 子 升 级",
 	DESCRIBE_NOHANDED = "我 手 里 必 须 拿 点 东 西.",
 	DESCRIBE_DONEUPGRADE = "\n升 级 完 成",
-	DESCRIBE_INVINCIBILITY_ACTIVE = "触 发 无 敌",
+	DESCRIBE_INVINCIBILITY_ACTIVATE = "触 发 无 敌",
 	DESCRIBE_INVINCIBILITY_DONE = "我 不 再 是 无 敌 的.",
 	DESCRIBE_UPGRADE_FREE = "\n现 在 可 以 免 费 升 级",
 	DESCRIBE_UPGRADE_HEALTH = "我 不 能 变 得 更 强 了.",
