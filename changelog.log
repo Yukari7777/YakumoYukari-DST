@@ -1,6 +1,6 @@
-Alpha v6
+Alpha v7
 
-- Changed first health upgrade to honey.
-- Other characters no longer describe about Yukari's special item.
-- Scheme(item) and upgradepanel can now be examinated and show status even when it's not at inventory.
-- Fixed issue that somethimes it doesn't incease bonus stats after upgrading.
+- Press B to see your upgrade stats.
+- Fixed meatball doesn't give any power on eat.
+- Fixed issue Bunnymen retargets too fast.
+- Fixed some wrong spellings.
