@@ -1623,6 +1623,13 @@ return {
 		LIMPETS_COOKED = "很 好 闻 呢",
 		RAWLING = "有 点 怪 异.",
 	},
+
+	NECRO = {
+		"你 只 不 过 是 一 张 纸...",
+		"在 虚 空 中 永 眠 吧..",
+		"你 什 么 都 不 是..",
+	},
+
 	DESCRIBE_GENERIC = "我 甚 至 对 它 一 无 所 知.",
 	DESCRIBE_TOODARK = "太 黑 了!",
 	DESCRIBE_SMOLDERING = "那 东 西 就 要 着 火 了.",

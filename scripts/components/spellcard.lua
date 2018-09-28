@@ -1,6 +1,5 @@
 local Spellcard = Class(function(self, inst)
 	self.inst = inst
-	self.spell = nil
 	self.onfinish = nil
 	self.othercondition = nil
 	
@@ -28,10 +27,6 @@ end
 
 function Spellcard:SetCondition(fn)
 	self.othercondition = fn
-end
-
-function Spellcard:SetAction(act)
-	self.action = act
 end
 
 function Spellcard:GetLevel(inst, index)

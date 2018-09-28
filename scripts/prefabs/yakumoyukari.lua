@@ -302,6 +302,7 @@ end
 
 local function DebugFunction(inst)
 	inst:DoPeriodicTask(1, function()
+		inst.infpower = true
 		if inst.components.power and inst.infpower then
 			inst.components.power.max = 300
 			inst.components.power.current = 300

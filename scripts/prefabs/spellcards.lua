@@ -104,17 +104,18 @@ function MakeCard(name)
 	
 	local function necro(inst)
 		inst:RemoveComponent("finiteuses")
-		inst.components.spellcard.action = ACTIONS.CASTTOHOH
+		inst:AddTag("heavyaction")
 		inst.components.spellcard.costpower = 300
 		inst.costpower:set(300)
 		inst.components.spellcard:SetSpellFn(function(inst, owner)
 			local x,y,z = owner.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x, y, z, 40)
-			local Language = GetModConfigData("language", "YakumoYukari")
+			local Language = GetModConfigData("language", "Yakumo Yukari")
 			for k,v in pairs(ents) do
 
-				if v.components.health and not v:HasTag("player") and not v:HasTag("epic") then
-					v.components.health:DoDelta(-1000)
+				if v.components.health and not v:HasTag("player") then
+					local maxhealth = v.components.health.maxhealth
+					v.components.health:DoDelta(-maxhealth * 0.33 - 500)
 				end
 				
 				if v.components.pickable then
@@ -142,22 +143,15 @@ function MakeCard(name)
 				end
 				
 			end
-			-- TODO : Delete moleworm
+
 			if owner.components.power then
 				owner.components.power:DoDelta(-300, false)
 			end
 
-			local str = {}
-				str[1] = "You were nothing but a piece of paper..."
-				str[2] = "Go rest in the void.."
-				str[3] = "You were just nothing.."
-			if Language == "chinese" then
-				str[1] = "你 只 不 过 是 一 张 纸..."
-				str[2] = "在 虚 空 中 永 眠 吧.."
-				str[3] = "你 什 么 都 不 是.."
-			end
+			local str = GetString(owner.prefab, "NECRO")
+
 			if owner.components.talker then
-				owner.components.talker:Say(str[math.random(3)], 3, nil, nil, true)
+				owner.components.talker:Say(str, 3)
 			end
 			inst:Remove()
 		end)

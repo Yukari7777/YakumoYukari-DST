@@ -385,13 +385,14 @@ end
 
 ---------- print current upgrade & ability
 function SayInfo(inst)
+	local TheInput = TheInput
 	local index = inst.info % 3
 	local HP = 0
 	local HN = 0
 	local SA = 0
 	local PO = 0
 	local str = ""
-
+	
 	if index == 0 then
 		HP = inst.components.upgrader.health_level
 		HN = inst.components.upgrader.hunger_level

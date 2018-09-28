@@ -288,8 +288,12 @@ local function spell_inv(inst, doer, actions, right)
     if doer:HasTag("yakumoyukari") then
 		if doer.replica.power and inst.costpower and doer.replica.power:GetCurrent() >= inst.costpower:value()
 		or inst.canspell and inst.canspell:value() 
-		or inst:HasTag("ultpanel")then
-			table.insert(actions, ACTIONS.CASTTOHO)
+		or inst:HasTag("ultpanel") then
+			if inst:HasTag("heavyaction") then 
+				table.insert(actions, ACTIONS.CASTTOHOH)
+			else
+				table.insert(actions, ACTIONS.CASTTOHO)
+			end
 		end
     end
 end
@@ -297,11 +301,12 @@ AddComponentAction("INVENTORY", "spellcard", spell_inv)
 
 
 local CASTTOHOH = AddAction("CASTTOHOH", "castspell", function(act) -- necro fantasia, ultupgrade
-	if doer:HasTag("yakumoyukari") 
-	and inst.components.spellcard ~= nil
-	and inst.components.spellcard:CanCast(doer) then
-        table.insert(actions, ACTIONS.CASTTOHOH)
-    end
+	local item = act.invobject or act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
+
+	if item and item.components.spellcard then
+		item.components.spellcard:CastSpell(act.doer, act.target)
+		return true
+	end
 end)
 
 CASTTOHOH.priority = -1
@@ -339,14 +344,13 @@ local casttohoh = State({ -- server
 		
 	timeline = 
 	{
-        TimeEvent(17 * FRAMES, function(inst)
+        TimeEvent(10 * FRAMES, function(inst)
             inst.SoundEmitter:PlaySound("soundpack/spell/bigspell")
         end),
-        TimeEvent(53 * FRAMES, function(inst)
+        TimeEvent(67 * FRAMES, function(inst)
 			inst.SoundEmitter:PlaySound("soundpack/spell/border")
-            inst.sg.statemem.stafffx = nil --Can't be cancelled anymore
+            inst.sg.statemem.stafffx = nil 
             inst.sg.statemem.stafflight = nil --Can't be cancelled anymore
-            --V2C: NOTE! if we're teleporting ourself, we may be forced to exit state here!
             inst:PerformBufferedAction()
         end),
     },
@@ -379,7 +383,6 @@ local casttohohc = State({
 
     onenter = function(inst)
         inst.components.locomotor:Stop()
-		inst.components.health:SetInvincible(true)
         inst.AnimState:PlayAnimation("staff_pre")
         inst.AnimState:PushAnimation("staff_lag", false)
 
@@ -398,13 +401,8 @@ local casttohohc = State({
     end,
 
     ontimeout = function(inst)
-		inst.components.health:SetInvincible(false)
         inst:ClearBufferedAction()
         inst.sg:GoToState("idle")
-    end,
-
-	onexit = function(inst)
-        inst.components.health:SetInvincible(false)
     end,
 })
 

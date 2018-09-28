@@ -9,7 +9,7 @@ return {
 		},
 		STORE =
 		{
-			GENERIC = "No enough stores left.",
+			GENERIC = "Not enough stores left.",
 			NOTALLOWED = "This is not for here.",
 		},
 		REPAIRBOAT = {
@@ -508,7 +508,7 @@ return {
 		CUTSTONE = "Stuff for building.",
 		DEADLYFEAST = "For suicide",
 		DEERCLOPS = "A giant one-eyed creture",
-		DEERCLOPS_EYEBALL = "It's not bloody.",
+		DEERCLOPS_EYEBALL = "Hope this doesn't read my mind.",
 		EYEBRELLAHAT =	"So Creepy.",
 		DEPLETED_GRASS =
 		{
@@ -981,13 +981,13 @@ return {
 			LOW = "The lava's crusting over.",
 			NORMAL = "Nice and comfy.",
 		},
-		ROCK = "I think it's around 9.63 cubic meter.",
+		ROCK = "I think it's your skull.",
 		ROCK_ICE = 
 		{
 			GENERIC = "Icy as Chirno.",
-			MELTED = "She's melted.",
+			MELTED = "Chirno has been melted.",
 		},
-		ROCK_ICE_MELTED = "She's melted.",
+		ROCK_ICE_MELTED = "Chirno has been melted.",
 		ICE = "Part of Chirno.",
 		ROCKS = "Like your brain.",
         ROOK = "He doesn't Rook good.",
@@ -1015,9 +1015,9 @@ return {
 		SKULLCHEST = "Heh",
 		SMALLBIRD =
 		{
-			GENERIC = "Eh.. It's so cute!",
+			GENERIC = "Ew.. So cute!",
 			HUNGRY = "It's hungry, but it didn't know how to explain it.",
-			STARVING = "I think It's going to die because of starving.",
+			STARVING = "I think It's about to die because of starving.",
 		},
 		SMALLMEAT = "It's a meat. Though it's small.",
 		SMALLMEAT_DRIED = "It's so stiff!",
@@ -1055,7 +1055,7 @@ return {
 		TALLBIRDEGG_COOKED = "Look at that 'bolks!'",
 		TALLBIRDEGG_CRACKED =
 		{
-			COLD = "He's vibrating",
+			COLD = "It's vibrating",
 			GENERIC = "It's hatching.",
 			HOT = "It can't put the heat out itself.",
 			LONG = "I should not help him with hatching.",
@@ -1633,6 +1633,13 @@ return {
 		SHADOWSKITTISH_WATER = "Viscidus. You are the scrap.",
 		CREEPYEYES = "Superintentor. But you can't see inside.",
 	},
+
+	NECRO = {
+		"You were nothing but a piece of paper...",
+		"Go rest in the void..",
+		"You were just nothing..",
+	},
+
 	DESCRIBE_GENERIC = "I don't even know about this.",
 	DESCRIBE_TOODARK = "It's BLACK!",
 	DESCRIBE_SMOLDERING = "That thing is about to catch fire.",
@@ -1660,4 +1667,5 @@ return {
 	DESCRIBE_UPGRADE_HUNGER = "My Stomach is tougher",
 	DESCRIBE_UPGRADE_SANITY = "Things are getting.. fresh!",
 	DESCRIBE_UPGRADE_POWER = "I can feel my inner power is getting grown.",
+
 }
