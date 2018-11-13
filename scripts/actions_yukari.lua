@@ -173,6 +173,101 @@ end
 
 AddComponentAction("POINT", "makegate", action_umbre)
 
+local ERASEG = AddAction("ERASEG", "Delete Scheme Tunnel", function(act)
+	local staff = act.invobject or act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
+	if staff and staff.components.makegate then
+		return staff.components.makegate:Erase(act.target, act.doer)
+	end
+end)
+
+ERASEG.priority = 8
+ERASEG.distance = 2
+
+local INDEXG = AddAction("INDEXG", "Change Destination", function(act)
+	local staff = act.invobject or act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
+	if staff and staff.components.makegate then
+		return staff.components.makegate:Index(act.target, act.doer)
+	end
+end)
+
+INDEXG.priority = 8
+INDEXG.distance = 1
+
+local eraseg = State({
+    name = "eraseg",
+    tags = {"doing", "busy", "canrotate"},
+
+    onenter = function(inst)
+		inst.components.locomotor:Stop()
+        inst.AnimState:PlayAnimation("atk_pre")
+        inst.AnimState:PushAnimation("atk", false)
+        inst.SoundEmitter:PlaySound("dontstarve/wilson/attack_weapon")
+    end,
+
+    timeline = 
+    {
+        TimeEvent(15*FRAMES, function(inst) inst:PerformBufferedAction() end),
+    },
+
+    events = {
+        EventHandler("animqueueover", function(inst)
+            if inst.AnimState:AnimDone() then
+                inst.sg:GoToState("idle")
+            end
+        end),
+    },
+})
+
+local erasec = State({
+	name = "erasec",
+    tags = { "doing", "busy", "canrotate" },
+
+    onenter = function(inst)
+        inst.components.locomotor:Stop()
+        inst.AnimState:PlayAnimation("staff_pre")
+        inst.AnimState:PushAnimation("staff_lag", false)
+
+        inst:PerformPreviewBufferedAction()
+        inst.sg:SetTimeout(TIMEOUT)
+    end,
+
+    onupdate = function(inst)
+        if inst:HasTag("doing") then
+            if inst.entity:FlattenMovementPrediction() then
+                inst.sg:GoToState("idle", "noanim")
+            end
+        elseif inst.bufferedaction == nil then
+            inst.sg:GoToState("idle")
+        end
+    end,
+
+    ontimeout = function(inst)
+        inst:ClearBufferedAction()
+        inst.sg:GoToState("idle")
+    end,
+})
+	
+AddStategraphState("wilson", eraseg)
+AddStategraphState("wilson_client", erasec)
+AddStategraphActionHandler("wilson", ActionHandler(ACTIONS.ERASEG, "eraseg"))
+AddStategraphActionHandler("wilson", ActionHandler(ACTIONS.INDEXG, "doshortaction"))
+AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.ERASEG, "erasec"))
+AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.INDEXG, "doshortaction"))
+
+local function scheme(inst, doer, target, actions, right)
+	if right then
+		if target:HasTag("tunnel") then
+			table.insert(actions, ACTIONS.ERASEG)
+		end
+	else
+		if target:HasTag("tunnel") then
+			table.insert(actions, ACTIONS.INDEXG)
+		end
+	end
+end
+
+AddComponentAction("EQUIPPED", "makegate", scheme)
+
 ------------------------------------------------------------------------------------------------------------------------
 local CASTTOHO = AddAction("CASTTOHO", "castspell", function(act)
 	local item = act.invobject or act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
@@ -418,10 +513,10 @@ ACTIONS.JUMPIN.fn = function(act)
         if act.target ~= nil and act.target.components.teleporter ~= nil and act.target.components.teleporter:IsActive() then
             act.doer.sg:GoToState("jumpin", { teleporter = act.target })
             return true
-		elseif act.target ~= nil and act.target.components.schemeteleport ~= nil and act.target.components.schemeteleport.islinked then
+		elseif act.target ~= nil and act.target.components.scheme ~= nil and act.target.components.scheme:IsConnected() then
 			act.doer.sg:GoToState("jumpin", { teleporter = act.target })
 			act.doer:DoTaskInTime(0.8, function()
-				act.target.components.schemeteleport:Activate(act.doer)
+				act.target.components.scheme:Activate(act.doer)
 			end)
 			act.doer:DoTaskInTime(1.5, function()
 				if not act.doer:IsOnValidGround() then
@@ -446,7 +541,7 @@ local function tunnelfn(inst, doer, actions, right)
 		table.insert(actions, ACTIONS.JUMPIN)
     end
 end
-AddComponentAction("SCENE", "schemeteleport", tunnelfn)
+AddComponentAction("SCENE", "scheme", tunnelfn)
 
 if Language == "chinese" then
 UTELEPORT.str = "´« ËÍ"

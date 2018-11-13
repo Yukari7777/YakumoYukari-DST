@@ -10,7 +10,8 @@ PrefabFiles = {
 	"spellcards",
 	"barrierfieldfx",
 	"scheme",
-	"effect_fx"
+	"effect_fx",
+	"taggable_classified",
 }
 
 Assets = {
@@ -47,6 +48,10 @@ Assets = {
 local require = GLOBAL.require
 local assert = GLOBAL.assert
 require "class"
+GLOBAL.TUNNELNETWORK = {}
+GLOBAL.TUNNELFIRSTINDEX = nil
+GLOBAL.TUNNELLASTINDEX = nil
+GLOBAL.NUMTUNNEL = 0
 
 local STRINGS = GLOBAL.STRINGS
 local ProfileStatsSet = GLOBAL.ProfileStatsSet
@@ -81,40 +86,15 @@ AddMinimapAtlas("images/map_icons/minimap_tunnel.xml")
 AddMinimapAtlas("images/map_icons/scheme.xml")
 
 ------ Function ------
+AddReplicableComponent("taggable")
 
-function AddSchemeManager(inst)
-	inst:AddComponent("scheme_manager")
+SetTaggableText = function(player, target, text)
+    local taggable = target.components.taggable
+    if taggable ~= nil then
+        taggable:Write(player, text)
+    end
 end
-
-function GodTelePort()
-	if ThePlayer and IsYukari then
-		if ThePlayer.components.upgrader.GodTeleport and ThePlayer.istelevalid then
-			local Chara = ThePlayer
-			if Chara.components.power and Chara.components.power.current >= 20 then
-				local function isvalid(x,y,z)
-					local ground = GLOBAL.TheWorld
-					if ground then
-						local tile = ground.Map:GetTileAtPoint(x,y,z)
-						return tile ~= 1--[[return value of GROUND.IMPASSIBLE]] and tile < 128--return value of GROUND.UNDERGROUND
-					end
-					return false
-				end
-				local x,y,z = TheInput:GetWorldPosition():Get()
-				if isvalid(x,y,z) then Chara.Transform:SetPosition(x,y,z) else return false end
-				Chara.SoundEmitter:PlaySound("soundpack/spell/teleport")
-				Chara:Hide()
-				Chara:DoTaskInTime(0.2, function() Chara:Show() end)
-				Chara.components.power:DoDelta(-20, false)
-			else
-				Chara.components.talker:Say(GetString(Chara.prefab, "DESCRIBE_LOWPOWER"))
-			end
-			Chara.istelevalid = false
-			Chara:PushEvent("teleported")
-		end
-	end
-end
-
-TheInput:AddKeyDownHandler(116, GodTelePort)
+AddModRPCHandler("scheme", "write", SetTaggableText)
 
 ---------------- OVERRIDE -----------------
 
@@ -447,8 +427,6 @@ modimport "scripts/tunings_yukari.lua"
 modimport "scripts/strings_yukari.lua"
 modimport "scripts/actions_yukari.lua"
 modimport "scripts/recipes_yukari.lua"
-AddPrefabPostInit("cave", AddSchemeManager)
-AddPrefabPostInit("forest", AddSchemeManager)
 AddPrefabPostInit("bunnyman", BunnymanNormalRetargetFn)
 AddPrefabPostInit("pigman", PigmanNormalRetargetFn)
 AddPrefabPostInit("bat", BatRetargetFn)
