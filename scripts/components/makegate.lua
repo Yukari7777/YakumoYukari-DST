@@ -55,15 +55,12 @@ function MakeGate:RCreate(pt, caster)
 		scheme.components.scheme:InitGate()
 	end)
 	
-	self.onusefn(self.inst, pt, caster)
+	--self.onusefn(self.inst, pt, caster)
 
 	return true
 end
 
 function MakeGate:Erase(target, caster)
-	local modname = KnownModIndex:GetModActualName("Scheme")
-	local DELCOST = GetModConfigData("delcost", modname)
-
 	if caster ~= nil then
         caster.SoundEmitter:PlaySound("dontstarve/common/staff_dissassemble")
     end

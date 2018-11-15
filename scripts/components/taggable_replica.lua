@@ -1,4 +1,3 @@
-
 local writeables = require"taggables"
 
 local Taggable = Class(function(self, inst)

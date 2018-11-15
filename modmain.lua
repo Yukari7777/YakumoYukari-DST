@@ -42,6 +42,7 @@ Assets = {
 	Asset("SOUNDPACKAGE", "sound/soundpack.fev"),
 	Asset("SOUND", "sound/spell.fsb"),
 
+	Asset( "ANIM" , "anim/ui_board_5x1.zip"),
 }
 
 ----- GLOBAL & require list -----
@@ -89,6 +90,12 @@ AddMinimapAtlas("images/map_icons/scheme.xml")
 AddReplicableComponent("taggable")
 
 SetTaggableText = function(player, target, text)
+	--[[if not (checkentity(target) and
+            optstring(text)) then
+        printinvalid("SetWriteableText", player)
+        return
+    end]]--
+	print("RPC called")
     local taggable = target.components.taggable
     if taggable ~= nil then
         taggable:Write(player, text)

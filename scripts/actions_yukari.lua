@@ -255,15 +255,21 @@ AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.ERASEG, "erase
 AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.INDEXG, "doshortaction"))
 
 local function scheme(inst, doer, target, actions, right)
-	if right then
-		if target:HasTag("tunnel") then
-			table.insert(actions, ACTIONS.ERASEG)
+	if inst.isunfolded:value() then
+		if right then
+			if target:HasTag("tunnel") then
+				table.insert(actions, ACTIONS.ERASEG)
+			end
+		else
+			if target:HasTag("tunnel") then
+				table.insert(actions, ACTIONS.INDEXG)
+			end
 		end
 	else
-		if target:HasTag("tunnel") then
-			table.insert(actions, ACTIONS.INDEXG)
+		if target:HasTag("teleporter") and target.islinked:value() then
+			table.insert(actions, ACTIONS.JUMPIN)
 		end
-	end
+    end
 end
 
 AddComponentAction("EQUIPPED", "makegate", scheme)
