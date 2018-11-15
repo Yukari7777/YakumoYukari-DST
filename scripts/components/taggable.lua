@@ -86,6 +86,7 @@ function Taggable:SetText(text)
 end
 
 function Taggable:BeginWriting(doer)
+	print("taggable:BeginWriting")
     if self.writer == nil then
         self.inst:StartUpdatingComponent(self)
 
@@ -110,6 +111,7 @@ end
 function Taggable:Write(doer, text)
     --NOTE: text may be network data, so enforcing length is
     --      NOT redundant in order for rendering to be safe.
+	print("Taggable:Write")
     if self.writer == doer and doer ~= nil and
         (text == nil or text:utf8len() <= MAX_WRITEABLE_LENGTH / 4) then
         if IsRail() then

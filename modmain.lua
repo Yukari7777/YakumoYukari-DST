@@ -95,7 +95,7 @@ SetTaggableText = function(player, target, text)
         printinvalid("SetWriteableText", player)
         return
     end]]--
-	print("RPC called")
+	print("RPC recieved")
     local taggable = target.components.taggable
     if taggable ~= nil then
         taggable:Write(player, text)

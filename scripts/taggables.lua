@@ -14,6 +14,7 @@ function PlayerHud:ShowTaggableWidget(writeable, config)
             -- Have to set editing AFTER pushscreen finishes.
             self.taggablescreen.edit_text:SetEditing(true)
         end
+		print("self.taggablescreen", self.taggablescreen)
         return self.taggablescreen
     end
 end
@@ -42,6 +43,7 @@ writeables.makescreen = function(inst, doer)
 	}
 
     if doer and doer.HUD then
+		print("try to show taggableWidget")
         return doer.HUD:ShowTaggableWidget(inst, data)
     end
 end
