@@ -9,9 +9,9 @@ local Taggable = Class(function(self, inst)
     if TheWorld.ismastersim then
         self.classified = SpawnPrefab("taggable_classified")
         self.classified.entity:SetParent(inst.entity)
-		print("TheWorld.ismastersim, taggable_classified spawned", self.classified)
+		print("TheWorld.ismastersim, taggable_classified spawned", self.classified, inst.taggable_classified)
     else
-		print("Is not TheWorld.ismastersim")
+		print("Is not TheWorld.ismastersim", self.classified, inst.taggable_classified)
         if self.classified == nil and inst.taggable_classified ~= nil then
             self.classified = inst.taggable_classified
             inst.taggable_classified.OnRemoveEntity = nil
@@ -49,12 +49,14 @@ local function BeginWriting(inst, self)
 end
 
 function Taggable:AttachClassified(classified)
+	print("AttachClassified")
     self.classified = classified
 
     self.ondetachclassified = function() self:DetachClassified() end
     self.inst:ListenForEvent("onremove", self.ondetachclassified, classified)
 
     self.opentask = self.inst:DoTaskInTime(0, BeginWriting, self)
+	print("self.opentask", self.opentask)
 end
 
 function Taggable:DetachClassified()
@@ -100,7 +102,7 @@ function Taggable:Write(doer, text)
 		print("try to call RPC")
         SendModRPCToServer(MOD_RPC["scheme"]["write"], self.inst, text)
 	else
-		print("self.inst.components.taggable, self.classified, doer == ThePlayer", self.inst.components.taggable ~= nil, self.classified ~= nil, doer == ThePlayer, (text == nil or text:utf8len() <= MAX_WRITEABLE_LENGTH / 4))
+		print("self.inst.components.taggable, self.classified ~= nil, doer == ThePlayer, Text is long enough", self.inst.components.taggable ~= nil, self.classified ~= nil, doer == ThePlayer, (text == nil or text:utf8len() <= MAX_WRITEABLE_LENGTH / 4))
     end
 end
 

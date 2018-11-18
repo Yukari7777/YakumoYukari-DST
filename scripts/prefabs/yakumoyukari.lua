@@ -306,8 +306,9 @@ local function DebugFunction(inst)
 		if inst.components.power and inst.infpower then
 			inst.components.power.max = 300
 			inst.components.power.current = 300
+			inst.components.hunger.current = 150
 		end
-		inst.components.hunger:Pause(true)
+		--inst.components.hunger:Pause(true)
 		--inst.components.health:SetInvincible(true)
 	end)
 end	

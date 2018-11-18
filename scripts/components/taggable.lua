@@ -86,7 +86,7 @@ function Taggable:SetText(text)
 end
 
 function Taggable:BeginWriting(doer)
-	print("taggable:BeginWriting")
+	print("taggable:BeginWriting", self.writer)
     if self.writer == nil then
         self.inst:StartUpdatingComponent(self)
 
