@@ -9,11 +9,10 @@ local Taggable = Class(function(self, inst)
     if TheWorld.ismastersim then
         self.classified = SpawnPrefab("taggable_classified")
         self.classified.entity:SetParent(inst.entity)
-		print("TheWorld.ismastersim, taggable_classified spawned", self.classified, inst.taggable_classified)
     else
-		print("Is not TheWorld.ismastersim", self.classified, inst.taggable_classified)
         if self.classified == nil and inst.taggable_classified ~= nil then
-            self.classified = inst.taggable_classified
+			print(self.classified, inst.taggable_classified)
+			self.classified = inst.taggable_classified
             inst.taggable_classified.OnRemoveEntity = nil
             inst.taggable_classified = nil
             self:AttachClassified(self.classified)
@@ -43,20 +42,17 @@ Taggable.OnRemoveEntity = Taggable.OnRemoveFromEntity
 --------------------------------------------------------------------------
 
 local function BeginWriting(inst, self)
-	print("replica local function BeginWriting")
     self.opentask = nil
     self:BeginWriting(ThePlayer)
 end
 
 function Taggable:AttachClassified(classified)
-	print("AttachClassified")
     self.classified = classified
 
     self.ondetachclassified = function() self:DetachClassified() end
     self.inst:ListenForEvent("onremove", self.ondetachclassified, classified)
 
     self.opentask = self.inst:DoTaskInTime(0, BeginWriting, self)
-	print("self.opentask", self.opentask)
 end
 
 function Taggable:DetachClassified()
@@ -70,7 +66,6 @@ end
 --------------------------------------------------------------------------
 
 function Taggable:BeginWriting(doer)
-	print("taggable_replica:BeginWriting")
     if self.inst.components.taggable ~= nil then
         if self.opentask ~= nil then
             self.opentask:Cancel()
@@ -85,24 +80,19 @@ function Taggable:BeginWriting(doer)
         if doer.HUD == nil then
             -- abort
         else -- if not busy...
-			print("if not busy")
             self.screen = writeables.makescreen(self.inst, doer)
         end
     end
 end
 
 function Taggable:Write(doer, text)
-	print("taggable_replica:Write")
     --NOTE: text may be network data, so enforcing length is
     --      NOT redundant in order for rendering to be safe.
     if self.inst.components.taggable ~= nil then
         self.inst.components.taggable:Write(doer, text)
     elseif self.classified ~= nil and doer == ThePlayer
         and (text == nil or text:utf8len() <= MAX_WRITEABLE_LENGTH / 4) then
-		print("try to call RPC")
         SendModRPCToServer(MOD_RPC["scheme"]["write"], self.inst, text)
-	else
-		print("self.inst.components.taggable, self.classified ~= nil, doer == ThePlayer, Text is long enough", self.inst.components.taggable ~= nil, self.classified ~= nil, doer == ThePlayer, (text == nil or text:utf8len() <= MAX_WRITEABLE_LENGTH / 4))
     end
 end
 

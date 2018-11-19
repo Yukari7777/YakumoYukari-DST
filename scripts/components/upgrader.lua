@@ -22,6 +22,7 @@ local Upgrader = Class(function(self, inst)
 	self.curecool = 1
 	self.dodgechance = 0.2
 	self.hatdodgechance = 0
+	self.ResistDark = 0
 
 	self.emergency = nil
 	
@@ -33,8 +34,6 @@ local Upgrader = Class(function(self, inst)
 	self.IsAOE = false
 	self.IsEfficient = false
 	self.IsFight = false
-	self.ResistDark = false
-	self.ResistCave = false
 	self.InvincibleLearned = false
 	self.CanbeInvincibled = false
 	self.WaterProofer = false
@@ -172,20 +171,21 @@ function Upgrader:SkillManager(inst)
 	end
 	
 	if skill[3][2] then
-		self.ResistDark = true
+		self.ResistDark = 0.3
 		self.sanitybonus = 25
-		inst.components.sanity.neg_aura_mult = 0.7
+		inst.components.sanity.neg_aura_mult = 0.8
 	end
 	
 	if skill[3][3] then
 		self.sanitybonus = 50
-		self.ResistCave = true		
-		inst.components.sanity.neg_aura_mult = 0.5
+		self.ResistDark = 0.4	
+		inst.components.sanity.neg_aura_mult = 0.7
 	end
 	
 	if skill[3][4] then
+		self.ResistDark = 0.5
 		self.sanitybonus = 75	
-		inst.components.sanity.neg_aura_mult = 0.3
+		inst.components.sanity.neg_aura_mult = 0.6
 	end
 	
 	if skill[3][5] then
@@ -194,7 +194,7 @@ function Upgrader:SkillManager(inst)
 	
 	if skill[3][6] then
 		self.IsFight = true
-		inst.components.sanity.neg_aura_mult = 0.1
+		inst.components.sanity.neg_aura_mult = 0.5
 	end	
 	
 	if skill[4][1] then

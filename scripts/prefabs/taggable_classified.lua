@@ -9,7 +9,6 @@ local function OnRemoveEntity(inst)
 end
 
 local function OnEntityReplicated(inst)
-	print("OnEntityReplicated")
     inst._parent = inst.entity:GetParent()
     if inst._parent == nil then
         print("Unable to initialize classified data for taggable")
@@ -34,16 +33,13 @@ local function fn()
     inst.entity:Hide()
     inst:AddTag("CLASSIFIED")
 
-    inst.entity:SetPristine()
-
+	inst.entity:SetPristine()
     if not TheWorld.ismastersim then
-		print("In classified, not TheWorld.ismastersim")
         --Client interface
         inst.OnEntityReplicated = OnEntityReplicated
 
         return inst
     end
-	print("In classified, TheWorld.ismastersim")
     inst.persists = false
 
     return inst

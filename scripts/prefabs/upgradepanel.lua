@@ -3,8 +3,8 @@ local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
 local Ingredients = {
 	{"honey", "healingsalve", "bandage"},
 	{"berries", "meatballs", "bonestew"},
-	{"petals", "nightmarefuel", "livinglog"},
-	{"goldnugget", "purplegem", "thulecite"}
+	{"petals", "nightmarefuel", "purplegem"},
+	{"goldnugget", "livinglog", "thulecite"}
 }
 
 local Ingredients_sw = {

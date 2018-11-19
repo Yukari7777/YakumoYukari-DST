@@ -106,20 +106,15 @@ local function onpreload(inst, data)
 end
 
 local function OnhitEvent(inst, data)
-
 	local target = data.target
 	local RegenAmount = 0
 	
 	-- Life Leech
 	if inst.components.upgrader.IsVampire then
 	
-		if inst.components.upgrader.IsAOE then
-			RegenAmount = 2
-		else
-			RegenAmount = 1
-		end
+		RegenAmount = inst.components.upgrader.IsAOE and 2 or 1
 		
-		if target and target.components.health and not target:HasTag("chester") then -- Hopefully, Packim(SW Chester) also has "chester" tag.
+		if target and target.components.health and not target:HasTag("chester") then
 			inst.components.health:DoDelta(RegenAmount, nil, nil, true)
 			if math.random() < 0.15 then
 				inst.components.health:DoDelta(5, nil, nil, true)
@@ -132,7 +127,7 @@ local function OnhitEvent(inst, data)
 	
 	-- AOE Hit
 	if inst.components.upgrader.IsAOE then
-		if math.random() < 0.4 then -- remember chance of 40% is < 0.4 not <= 0.4
+		if math.random() < 0.4 then
 			inst.components.combat:SetAreaDamage(5, 0.6)
 		else
 			inst.components.combat:SetAreaDamage(0, 0)
@@ -206,22 +201,32 @@ function GoInvincible(inst)
 	end
 end
 
-local function PeriodicFunction(inst, data)
-
-	local Light = inst.entity:AddLight()
+local function Cooldown(inst)
 	
-	if inst.components.upgrader.ResistDark then
-		if inst.components.upgrader.ResistCave then
-			inst.components.sanity.night_drain_mult = 0
-		elseif not TheWorld:HasTag("cave") then
-			inst.components.sanity.night_drain_mult = 0
+	if inst.components.upgrader.ability[1][2] then
+		if inst.regen_cool > 0 then
+			inst.regen_cool = inst.regen_cool - 1
+		elseif inst.regen_cool == 0 
+		and inst.components.health 
+		and inst.components.health:IsHurt() 
+		and inst.components.hunger:GetPercent() > 0.8 then
+			HealthRegen(inst)
+			inst.regen_cool = inst.components.upgrader.regencool
 		end
-	else
-		if inst.components.upgrader and inst.components.upgrader.hatequipped then
-			inst.components.sanity.night_drain_mult = 0.5
-		end
-		inst.components.sanity.night_drain_mult = 1
 	end
+	
+	if inst.invin_cool > 0 then
+		inst.invin_cool = inst.invin_cool - 1
+	elseif inst.invin_cool == 0 then
+		inst.components.upgrader.CanbeInvincibled = true
+	end
+	
+end
+
+local function PeriodicFunction(inst, data)
+	
+	local Light = inst.light
+	inst.components.sanity.night_drain_mult = 1 - inst.components.upgrader.ResistDark - (inst.components.upgrader.hatequipped and 0.2 or 0)
 	
 	if inst.components.upgrader.NightVision then
 		if TheWorld.state.phase == "night" or TheWorld:HasTag("cave") then
@@ -244,28 +249,8 @@ local function PeriodicFunction(inst, data)
 	if inst.components.health and inst.nohealthpenalty then
 		inst.components.heath:SetPenalty(0)
 	end
-end
 
-local function CooldownFunction(inst)
-	
-	if inst.components.upgrader.ability[1][2] then
-		if inst.regen_cool > 0 then
-			inst.regen_cool = inst.regen_cool - 1
-		elseif inst.regen_cool == 0 
-		and inst.components.health 
-		and inst.components.health:IsHurt() 
-		and inst.components.hunger:GetPercent() > 0.8 then
-			HealthRegen(inst)
-			inst.regen_cool = inst.components.upgrader.regencool
-		end
-	end
-	
-	if inst.invin_cool > 0 then
-		inst.invin_cool = inst.invin_cool - 1
-	elseif inst.invin_cool == 0 then
-		inst.components.upgrader.CanbeInvincibled = true
-	end
-	
+	Cooldown(inst)
 end
 
 local function OnGrazed(inst)
@@ -334,17 +319,17 @@ local function common_init(inst) -- things before SetPristine()
 	inst:RemoveTag("inspell")
 	inst:RemoveTag("IsDamage")
 	
-	STRINGS.NAMES.SHADOWWATCHER = "Watcher"
-	STRINGS.NAMES.SHADOWSKITTISH = "Shadow Creature"
-	STRINGS.NAMES.SHADOWSKITTISH_WATER = "Shadow Creature"
-	STRINGS.NAMES.CREEPYEYES = "Eyes"
+--	STRINGS.NAMES.SHADOWWATCHER = "Watcher"
+--	STRINGS.NAMES.SHADOWSKITTISH = "Shadow Creature"
+--	STRINGS.NAMES.SHADOWSKITTISH_WATER = "Shadow Creature"
+--	STRINGS.NAMES.CREEPYEYES = "Eyes"
 
 	inst:AddComponent("keyhandler")
 	inst.components.keyhandler:AddActionListener("yakumoyukari", 98, "SayInfo")
 end
 
 local master_postinit = function(inst) -- after SetPristine()
-	
+
 	inst:AddComponent("upgrader")
 	inst:AddComponent("power")
 	
@@ -464,8 +449,6 @@ local master_postinit = function(inst) -- after SetPristine()
 		end
 		return inst.components.eater:EatMEAT(food)
 	end
-
-	inst:DoPeriodicTask(1, CooldownFunction)
 	inst:DoPeriodicTask(1, PeriodicFunction)
 	
 	inst.OnSave = onsave

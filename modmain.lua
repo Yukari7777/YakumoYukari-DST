@@ -9,8 +9,8 @@ PrefabFiles = {
 	"ultpanelsw",
 	"spellcards",
 	"barrierfieldfx",
-	"scheme",
 	"effect_fx",
+	"scheme",
 	"taggable_classified",
 }
 
@@ -90,12 +90,6 @@ AddMinimapAtlas("images/map_icons/scheme.xml")
 AddReplicableComponent("taggable")
 
 SetTaggableText = function(player, target, text)
-	--[[if not (checkentity(target) and
-            optstring(text)) then
-        printinvalid("SetWriteableText", player)
-        return
-    end]]--
-	print("RPC recieved")
     local taggable = target.components.taggable
     if taggable ~= nil then
         taggable:Write(player, text)
@@ -368,6 +362,8 @@ local function ToolEfficientFn(self)
 		self.SetAction = ToolEfficient
 	end
 end
+
+--local writeable = require"prefab/writeable_classified"
 
 
 ---------- print current upgrade & ability
