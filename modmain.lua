@@ -336,6 +336,10 @@ end
 
 
 local function SetInspectable(inst)
+	--	STRINGS.NAMES.SHADOWWATCHER = "Watcher"
+	--	STRINGS.NAMES.SHADOWSKITTISH = "Shadow Creature"
+	--	STRINGS.NAMES.SHADOWSKITTISH_WATER = "Shadow Creature"
+	--	STRINGS.NAMES.CREEPYEYES = "Eyes"
 	if Inspect and IsMaster then
 		inst:AddComponent("inspectable") 
 		if inst:HasTag("NOCLICK") then

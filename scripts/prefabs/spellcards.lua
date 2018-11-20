@@ -196,7 +196,7 @@ function MakeCard(name)
 								owner.components.locomotor.runspeed = 6
 								owner.components.combat:SetAttackPeriod(TUNING.WILSON_ATTACK_PERIOD)
 								
-								owner.components.upgrader:DoUpgrade(owner)
+								owner.components.upgrader:ApplyStatus(owner)
 								owner:RemoveTag("inspell")
 								owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NOREINFORCE"))
 							end
@@ -792,7 +792,7 @@ function MakeCard(name)
 				if v.components.fueled 
 				and v.components.fueled.fueltype ~= "MAGIC"	
 				and v.components.fueled.fueltype ~= "NIGHTMARE" then
-					  v.components.fueled:DoDelta(540)
+					  v.components.fueled:DoDelta(3600)
 				end
 				
 				if v.components.finiteuses

@@ -55,7 +55,7 @@ function MakeGate:RCreate(pt, caster)
 		scheme.components.scheme:InitGate()
 	end)
 	
-	--self.onusefn(self.inst, pt, caster)
+	self.onusefn(self.inst, pt, caster)
 
 	return true
 end

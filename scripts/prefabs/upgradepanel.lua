@@ -205,7 +205,21 @@ local function DoUpgrade(inst, owner)
 		end
 	end
 
-	owner.components.upgrader:DoUpgrade(owner, index)
+	if index == 1 then
+		owner.components.upgrader.health_level = owner.components.upgrader.health_level + 1
+		owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_UPGRADE_HEALTH"))
+	elseif index == 2 then
+		owner.components.upgrader.hunger_level = owner.components.upgrader.hunger_level + 1
+		owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_UPGRADE_HUNGER"))
+	elseif index == 3 then
+		owner.components.upgrader.sanity_level = owner.components.upgrader.sanity_level + 1
+		owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_UPGRADE_SANITY"))
+	elseif index == 4 then
+		owner.components.upgrader.power_level = owner.components.upgrader.power_level + 1
+		owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_UPGRADE_POWER"))	
+	end	
+
+	owner.components.upgrader:ApplyStatus(owner)
 end
 
 local function OnFinish(inst, owner)

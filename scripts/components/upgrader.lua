@@ -48,7 +48,7 @@ local Upgrader = Class(function(self, inst)
 		for j = 1, self.skilllevel, 1 do
 			self.ability[i][j] = false
 		end
-	end -- This is a table that stores skills.
+	end
 	
 	self.hatskill = {}
 	for i = 1, 5, 1 do
@@ -76,24 +76,16 @@ function Upgrader:AbilityManager(inst)
 		hatskill[i] = true
 	end
 	
-	self:SkillManager(inst)
-	self:HatSkillManager(inst)
+	self:UpdateSkillStatus(inst)
+	self:UpdateHatSkillStatus(inst)
 end
 
-function Upgrader:SkillManager(inst)
+function Upgrader:UpdateSkillStatus(inst)
 
 	local skill = self.ability
 	
 	if skill[1][1] then
 		self.healthbonus = 10
-		-- TUNING.HEALING_TINY = 2
-	    -- TUNING.HEALING_SMALL = 5
-	    -- TUNING.HEALING_MEDSMALL = 12
-	    -- TUNING.HEALING_MED = 30
-	    -- TUNING.HEALING_MEDLARGE = 35
-	    -- TUNING.HEALING_LARGE = 50
-	    -- TUNING.HEALING_HUGE = 75
-	    -- TUNING.HEALING_SUPERHUGE = 300
 	end
 	
 	if skill[1][2] then
@@ -138,7 +130,6 @@ function Upgrader:SkillManager(inst)
 	if skill[2][2] then
 		self.hungerbonus = 50
 		self.powerupvalue = 2
-		inst.components.eater.strongstomach = true
 		inst.components.temperature.inherentinsulation = TUNING.INSULATION_SMALL
 		inst.components.temperature.inherentsummerinsulation = TUNING.INSULATION_SMALL
 	end
@@ -146,6 +137,7 @@ function Upgrader:SkillManager(inst)
 	if skill[2][3] then
 		self.hungerbonus = 75
 		self.powerupvalue = 3
+		inst.components.eater.strongstomach = true
 		inst.components.temperature.inherentinsulation = TUNING.INSULATION_MED
 		inst.components.temperature.inherentsummerinsulation = TUNING.INSULATION_MED
 	end
@@ -153,6 +145,7 @@ function Upgrader:SkillManager(inst)
 	if skill[2][4] then
 		self.hungerbonus = 100
 		self.powerupvalue = 4
+		inst.components.eater.ignoresspoilage = true
 		inst.components.temperature.inherentinsulation = TUNING.INSULATION_LARGE
 		inst.components.temperature.inherentsummerinsulation = TUNING.INSULATION_LARGE
 	end
@@ -171,7 +164,7 @@ function Upgrader:SkillManager(inst)
 	end
 	
 	if skill[3][2] then
-		self.ResistDark = 0.3
+		self.ResistDark = 0.2
 		self.sanitybonus = 25
 		inst.components.sanity.neg_aura_mult = 0.8
 	end
@@ -183,7 +176,7 @@ function Upgrader:SkillManager(inst)
 	end
 	
 	if skill[3][4] then
-		self.ResistDark = 0.5
+		self.ResistDark = 0.6
 		self.sanitybonus = 75	
 		inst.components.sanity.neg_aura_mult = 0.6
 	end
@@ -207,18 +200,6 @@ function Upgrader:SkillManager(inst)
 		self.powerbonus = 25
 		self.powergenbonus = 0.2
 		self.bonusspeed = 1
-		-- TUNING.NIGHTSWORD_USES = 140
-		-- TUNING.ARMOR_SANITY = 1000
-	    -- TUNING.ICESTAFF_USES = 25
-	    -- TUNING.FIRESTAFF_USES = 25
-	    -- TUNING.TELESTAFF_USES = 6
-		-- TUNING.REDAMULET_USES = 25
-		-- TUNING.YELLOWSTAFF_USES = 25
-		-- TUNING.ORANGESTAFF_USES = 25
-		-- TUNING.GREENAMULET_USES = 6
-		-- TUNING.GREENSTAFF_USES = 6
-		-- TUNING.PANFLUTE_USES = 12
-		-- TUNING.HORN_USES = 12
 	end
 	
 	if skill[4][3] then
@@ -258,7 +239,7 @@ function Upgrader:SetFireDamageScale(inst)
 	end
 end
 
-function Upgrader:HatSkillManager(inst)
+function Upgrader:UpdateHatSkillStatus(inst)
 
 	local YukariHat = self.hatEquipped
 
@@ -296,7 +277,7 @@ function Upgrader:HatSkillManager(inst)
 	self:SetFireDamageScale(inst)
 end
 
-function Upgrader:DoUpgrade(inst, stat)
+function Upgrader:ApplyStatus(inst)
 	local hunger_percent = inst.components.hunger:GetPercent()
 	local health_percent = inst.components.health:GetPercent()
 	local sanity_percent = inst.components.sanity:GetPercent()
@@ -312,31 +293,8 @@ function Upgrader:DoUpgrade(inst, stat)
 	elseif difficulty == "hard" then
 		STATUS = TUNING.STATUS_HARD
 	end
-	
-	if stat ~= nil then
-		if stat == 1 then
-			self.health_level = self.health_level + 1
-			--inst.HUD.controls.status.heart:PulseGreen()
-			--inst.HUD.controls.status.heart:ScaleTo(1.3,1,.7)
-			inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_UPGRADE_HEALTH"))
-		elseif stat == 2 then
-			self.hunger_level = self.hunger_level + 1
-			--inst.HUD.controls.status.stomach:PulseGreen()
-			--inst.HUD.controls.status.stomach:ScaleTo(1.3,1,.7)
-			inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_UPGRADE_HUNGER"))
-		elseif stat == 3 then
-			self.sanity_level = self.sanity_level + 1
-			--inst.HUD.controls.status.brain:PulseGreen()
-			--inst.HUD.controls.status.brain:ScaleTo(1.3,1,.7)
-			inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_UPGRADE_SANITY"))
-		elseif stat == 4 then
-			self.power_level = self.power_level + 1
-			--inst.HUD.controls.status.power:PulseGreen()
-			--inst.HUD.controls.status.power:ScaleTo(1.3,1,.7)
-			inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_UPGRADE_POWER"))	
-		end	
-	end
 
+	self:AbilityManager(inst)
 	inst.components.health.maxhealth = STATUS.DEFAULT_HP + self.health_level * STATUS.HP_RATE + self.healthbonus + math.max(0, (self.health_level - 30) * 7.5)
 	inst.components.hunger.hungerrate = math.max( 0, (STATUS.DEFAULT_HR - self.hunger_level * STATUS.HR_RATE - math.max(0, (self.hunger_level - 30) * 0.025 )) ) * TUNING.WILSON_HUNGER_RATE 
 	inst.components.hunger.max = STATUS.DEFAULT_HU + self.hungerbonus
@@ -346,8 +304,6 @@ function Upgrader:DoUpgrade(inst, stat)
 	inst.components.locomotor.walkspeed = 4 + self.bonusspeed + self.hatbonusspeed
 	inst.components.locomotor.runspeed = 6 + self.bonusspeed + self.hatbonusspeed
 	
-	
-	self:AbilityManager(inst)
 	inst.components.health:SetPercent(health_percent)
 	inst.components.hunger:SetPercent(hunger_percent)
 	inst.components.sanity:SetPercent(sanity_percent)

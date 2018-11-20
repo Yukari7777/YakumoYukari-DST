@@ -89,7 +89,7 @@ local function onpreload(inst, data)
 			inst.components.upgrader.power_level = data.power_level or 0	
 			inst.components.upgrader.hatlevel = data.hatlevel or 1
 			inst.components.upgrader.ability = data.skilltree
-			inst.components.upgrader:DoUpgrade(inst)
+			inst.components.upgrader:ApplyStatus(inst)
 
 			--re-set these from the save data, because of load-order clipping issues
 			if data.health and data.health.health then inst.components.health.currenthealth = data.health.health end
@@ -261,7 +261,7 @@ end
 local function EquippingEvent(inst, data)
 	inst.components.upgrader.hatequipped = data.isequipped and data.inst
 	inst.components.upgrader.fireimmuned = inst.components.inventory ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == ("armordragonfly" or "armorobsidian")
-	inst.components.upgrader:DoUpgrade(inst)
+	inst.components.upgrader:ApplyStatus(inst)
 end
 
 local function OnItemUpdate(inst) -- Let character PushEvents to items.
@@ -287,16 +287,112 @@ end
 
 local function DebugFunction(inst)
 	inst:DoPeriodicTask(1, function()
-		inst.infpower = true
 		if inst.components.power and inst.infpower then
 			inst.components.power.max = 300
 			inst.components.power.current = 300
-			inst.components.hunger.current = 150
 		end
+		inst.components.hunger.current = 150
 		--inst.components.hunger:Pause(true)
 		--inst.components.health:SetInvincible(true)
 	end)
 end	
+
+local function oneat(inst, food)
+	if food.prefab == "minotaurhorn"
+	or food.prefab == "deerclops_eyeball"
+	or food.prefab == "tigereye" then
+		DzoPowerRestore(inst, 300)
+				
+	elseif food.prefab == "trunk_winter"
+	or food.prefab == "tallbirdegg"
+	or food.prefab == "tallbirdegg_cracked" then
+		food.components.edible.sanityvalue = 0
+		DoPowerRestore(inst, 70)
+			
+	elseif food.prefab == "baconeggs" 
+	or food.prefab == "surfnturf" then
+		DoPowerRestore(inst, 60)
+			
+	elseif food.prefab == "trunk_summer"
+	or food.prefab == "tallbirdegg_cooked"
+	or food.prefab == "dragoonheart" then
+		food.components.edible.sanityvalue = 0
+		DoPowerRestore(inst, 50)
+				
+	elseif food.prefab == "turkeydinner" 
+	or food.prefab == "bonestew" then
+		DoPowerRestore(inst, 45)
+		
+	elseif food.prefab == "honeyham" then
+		DoPowerRestore(inst, 30)
+			
+	elseif food.prefab == "meat"
+	or food.prefab == "plantmeat" 
+	or food.prefab == "bird_egg"
+	or food.prefab == "shark_fin"
+	or food.prefab == "doydoyegg"
+	or food.prefab == "eel"
+	or food.prefab == "trunk_cooked"
+	or food.prefab == "fish_raw"
+	or food.prefab == "fish_med"
+	or food.prefab == "hotchili"
+	or food.prefab == "perogies"
+	or food.prefab == "guacamole"
+	or food.prefab == "monstermeat" then
+		food.components.edible.sanityvalue = 0
+		DoPowerRestore(inst, 20)
+				
+	elseif food.prefab == "meat_dried"
+	or food.prefab == "monstermeat_dried" then
+		DoPowerRestore(inst, 20)
+				
+	elseif food.prefab == "drumstick" 
+	or food.prefab == "drumstick_cooked" then
+		food.components.edible.sanityvalue = 0
+		DoPowerRestore(inst, 16)
+				
+	elseif food.prefab == "doydoyegg_cooked" 
+	or food.prefab == "bird_egg_cooked"
+	or food.prefab == "cookedmonstermeat"
+	or food.prefab == "fish_med_cooked"			
+	or food.prefab == "plantmeat_cooked"
+	or food.prefab == "unagi"
+	or food.prefab == "eel_cooked" then
+		DoPowerRestore(inst, 15)
+				
+	elseif food.prefab == "smallmeat" 
+	or food.prefab == "tropical_fish"
+	or food.prefab == "batwing" 
+	or food.prefab == "froglegs" 
+	or food.prefab == "fish_raw_small"
+	or food.prefab == "meatballs"
+	or food.prefab == "frogglebunwich" then
+		food.components.edible.sanityvalue = 0
+		DoPowerRestore(inst, 10)
+				
+	elseif food.prefab == "smallmeat_dried" then
+		DoPowerRestore(inst, 10)
+				
+	elseif food.prefab == "cookedsmallmeat"
+	or food.prefab == "froglegs_cooked"
+	or food.prefab == "batwing_cooked"
+	or food.prefab == "honeynuggets"
+	or food.prefab == "kabobs"
+	or food.prefab == "frogglebunwich"
+	or food.prefab == "fish_raw_small_cooked" then
+		DoPowerRestore(inst, 8)
+			
+	end
+			
+	if food.prefab == "monstermeat" 
+	or food.prefab == "monsterlasagna" then
+		DoPowerRestore(inst, 5)
+				
+	elseif food.prefab == "monstermeat_dried"
+	or food.prefab == "cookedmonstermeat" then
+		DoPowerRestore(inst, 3)
+	end
+end
 
 local function common_init(inst) -- things before SetPristine()
 	inst.MiniMapEntity:SetIcon( "yakumoyukari.tex" )
@@ -318,11 +414,6 @@ local function common_init(inst) -- things before SetPristine()
 	inst:RemoveTag("notarget")
 	inst:RemoveTag("inspell")
 	inst:RemoveTag("IsDamage")
-	
---	STRINGS.NAMES.SHADOWWATCHER = "Watcher"
---	STRINGS.NAMES.SHADOWSKITTISH = "Shadow Creature"
---	STRINGS.NAMES.SHADOWSKITTISH_WATER = "Shadow Creature"
---	STRINGS.NAMES.CREEPYEYES = "Eyes"
 
 	inst:AddComponent("keyhandler")
 	inst.components.keyhandler:AddActionListener("yakumoyukari", 98, "SayInfo")
@@ -340,127 +431,21 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.components.health:SetMaxHealth(80)
 	inst.components.health:SetInvincible(false)
 	inst.components.hunger:SetMax(150)
+	inst.components.eater:SetOnEatFn(oneat)
 	inst.components.hunger.hungerrate = 1.5 * TUNING.WILSON_HUNGER_RATE
 	inst.components.combat.damagemultiplier = TUNING.YDEFAULT.DAMAGE_MULTIPLIER
 	inst.components.builder.science_bonus = 1
-	
-	inst.components.eater.EatMEAT = inst.components.eater.Eat
-	function inst.components.eater:Eat( food )
-		if self:CanEat(food) then
-		
-			if food.prefab == "minotaurhorn"
-			or food.prefab == "deerclops_eyeball"
-			or food.prefab == "tigereye" then
-				DoPowerRestore(inst, 300)
-				
-			elseif food.prefab == "trunk_winter"
-			or food.prefab == "tallbirdegg"
-			or food.prefab == "tallbirdegg_cracked" then
-				food.components.edible.sanityvalue = 0
-				DoPowerRestore(inst, 70)
-			
-			elseif food.prefab == "baconeggs" 
-			or food.prefab == "surfnturf" then
-				DoPowerRestore(inst, 60)
-			
-			elseif food.prefab == "trunk_summer"
-			or food.prefab == "tallbirdegg_cooked"
-			or food.prefab == "dragoonheart" then
-				food.components.edible.sanityvalue = 0
-				DoPowerRestore(inst, 50)
-				
-			elseif food.prefab == "turkeydinner" 
-			or food.prefab == "bonestew" then
-				DoPowerRestore(inst, 45)
-		
-			elseif food.prefab == "honeyham" then
-				DoPowerRestore(inst, 30)
-			
-			elseif food.prefab == "meat"
-			or food.prefab == "plantmeat" 
-			or food.prefab == "bird_egg"
-			or food.prefab == "shark_fin"
-			or food.prefab == "doydoyegg"
-			or food.prefab == "eel"
-			or food.prefab == "trunk_cooked"
-			or food.prefab == "fish_raw"
-			or food.prefab == "fish_med"
-			or food.prefab == "hotchili"
-			or food.prefab == "perogies"
-			or food.prefab == "guacamole"
-			or food.prefab == "monstermeat" then
-				food.components.edible.sanityvalue = 0
-				DoPowerRestore(inst, 20)
-				
-			elseif food.prefab == "meat_dried"
-			or food.prefab == "monstermeat_dried" then
-				DoPowerRestore(inst, 20)
-				
-			elseif food.prefab == "drumstick" 
-			or food.prefab == "drumstick_cooked" then
-				food.components.edible.sanityvalue = 0
-				DoPowerRestore(inst, 16)
-				
-			elseif food.prefab == "doydoyegg_cooked" 
-			or food.prefab == "bird_egg_cooked"
-			or food.prefab == "cookedmonstermeat"
-			or food.prefab == "bird_egg_cooked"
-			or food.prefab == "fish_med_cooked"			
-			or food.prefab == "plantmeat_cooked"
-			or food.prefab == "unagi"
-			or food.prefab == "eel_cooked" then
-				DoPowerRestore(inst, 15)
-				
-			elseif food.prefab == "smallmeat" 
-			or food.prefab == "tropical_fish"
-			or food.prefab == "batwing" 
-			or food.prefab == "froglegs" 
-			or food.prefab == "fish_raw_small"
-			or food.prefab == "meatballs"
-			or food.prefab == "frogglebunwich" then
-				food.components.edible.sanityvalue = 0
-				DoPowerRestore(inst, 10)
-				
-			elseif food.prefab == "smallmeat_dried" then
-				DoPowerRestore(inst, 10)
-				
-			elseif food.prefab == "cookedsmallmeat"
-			or food.prefab == "froglegs_cooked"
-			or food.prefab == "batwing_cooked"
-			or food.prefab == "honeynuggets"
-			or food.prefab == "kabobs"
-			or food.prefab == "frogglebunwich"
-			or food.prefab == "fish_raw_small_cooked" then
-				DoPowerRestore(inst, 8)
-			
-			end
-			
-			if food.prefab == "monstermeat" 
-			or food.prefab == "monsterlasagna" then
-				food.components.edible.healthvalue = -20	
-				DoPowerRestore(inst, 5)
-				
-			elseif food.prefab == "monstermeat_dried"
-			or food.prefab == "cookedmonstermeat" then
-				food.components.edible.healthvalue = -3
-				DoPowerRestore(inst, 3)
-			end
-			
-		end
-		return inst.components.eater:EatMEAT(food)
-	end
-	inst:DoPeriodicTask(1, PeriodicFunction)
 	
 	inst.OnSave = onsave
 	inst.OnPreLoad = onpreload
 	inst.OnLoad = function(inst)
 		inst.valid = true
-		inst.components.upgrader:DoUpgrade(inst)
+		inst.components.upgrader:ApplyStatus(inst)
 		OnItemUpdate(inst)
 		inst:PushEvent("yukariloaded")
 	end
 	
-	inst:ListenForEvent("debugmode", DebugFunction, inst)
+	inst:DoPeriodicTask(1, PeriodicFunction)
 	inst:ListenForEvent("hungerdelta", DoHungerUp )
 	inst:ListenForEvent("healthdelta", GoInvincible )
 	inst:ListenForEvent("onhitother", OnhitEvent )
@@ -473,6 +458,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:ListenForEvent("gotnewitem", OnItemUpdate)
 	inst:ListenForEvent("refreshinventory", OnItemUpdate)
 	inst:ListenForEvent("stacksizechange", OnItemUpdate)
+	inst:ListenForEvent("debugmode", DebugFunction, inst)
 
 end
 
