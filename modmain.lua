@@ -292,8 +292,7 @@ local function FrogRetargetFn(inst)
 			end
 		end,
 		{"_combat","_health"},
-		{"realyoukai"}
-		)
+		{"realyoukai"})
 	end
 	end
 	if inst.components.combat ~= nil then
@@ -310,7 +309,7 @@ local function FindTarget(inst, radius)
                 and not (inst.components.follower ~= nil and inst.components.follower.leader == guy)
         end,
         { "_combat", "character" },
-        { "monster", "INLIMBO", "realyoukai" }
+        { "monster", "INLIMBO", "spiderwhisperer" }
     )
 end
 
@@ -373,56 +372,54 @@ end
 ---------- print current upgrade & ability
 function SayInfo(inst)
 	local TheInput = TheInput
-	local index = inst.info % 3
 	local HP = 0
 	local HN = 0
 	local SA = 0
 	local PO = 0
 	local str = ""
+	local skilltable = {}
+	inst.info = inst.info >= (inst.components.upgrader.skilltextpage or 3) and 0 or inst.info
 	
-	if index == 0 then
+	if inst.info == 0 then
 		HP = inst.components.upgrader.health_level
 		HN = inst.components.upgrader.hunger_level
 		SA = inst.components.upgrader.sanity_level
 		PO = inst.components.upgrader.power_level
 
-		str = STRINGS.NAMES.HEALTHPANEL.." - "..HP.."\n"..STRINGS.NAMES.HUNGERPANEL.." - "..HN.."\n"..STRINGS.NAMES.SANITYPANEL.." - "..SA.."\n"..STRINGS.NAMES.POWERPANEL.." - "..PO
-	elseif index == 1 then
+		str = STRINGS.NAMES.HEALTHPANEL.." : "..HP.."\n"..STRINGS.NAMES.HUNGERPANEL.." : "..HN.."\n"..STRINGS.NAMES.SANITYPANEL.." : "..SA.."\n"..STRINGS.NAMES.POWERPANEL.." : "..PO
+	elseif inst.info == 1 then
 		for i = 1, inst.components.upgrader.skillsort, 1 do
 			for j = 1, inst.components.upgrader.skilllevel, 1 do
 				if inst.components.upgrader.ability[i][j] then
-					if i == 1 then
-						HP = HP + 1
-					elseif i == 2 then
-						HN = HN + 1
-					elseif i == 3 then
-						SA = SA + 1
-					elseif i == 4 then
-						PO = PO + 1
+					if i == 1 then HP = HP + 1
+					elseif i == 2 then HN = HN + 1
+					elseif i == 3 then SA = SA + 1
+					elseif i == 4 then PO = PO + 1
 					end
 				end
 			end
 		end
 
-		str = STRINGS.HEALTH.." "..STRINGS.ABILITY.." - lev."..HP.."\n"..STRINGS.HUNGER.." "..STRINGS.ABILITY.." - lev."..HN.."\n"..STRINGS.SANITY.." "..STRINGS.ABILITY.." - lev."..SA.."\n"..STRINGS.POWER.." "..STRINGS.ABILITY.." - lev."..PO
-	else -- TODO : RECODE(with table)
-		if inst.components.upgrader.InvincibleLearned then
-			if inst.IsInvincible then
-				invincibility = STRINGS.INVINCIBILITY.." - "..STRINGS.ACTIVATED
-			elseif inst.invin_cool > 0 then
-				invincibility = STRINGS.INVINCIBILITY.." - "..inst.invin_cool..STRINGS.SECONDS
-			else
-				invincibility = STRINGS.INVINCIBILITY.." - "..STRINGS.READY
-			end
+		str = STRINGS.HEALTH.." "..STRINGS.ABILITY.." : lev."..HP.."\n"..STRINGS.HUNGER.." "..STRINGS.ABILITY.." : lev."..HN.."\n"..STRINGS.SANITY.." "..STRINGS.ABILITY.." : lev."..SA.."\n"..STRINGS.POWER.." "..STRINGS.ABILITY.." : lev."..PO
+	else
+		local skillindex = 0
+		inst.components.upgrader:UpdateSkillStatus()
+
+		for k, v in pairs(inst.components.upgrader.skill) do
+			skillindex = skillindex + 1
+			skilltable[skillindex] = v
+		end
+		inst.components.upgrader.skilltextpage = 3 + math.floor(skillindex / 4)
+		for k = 1, 4 do
+			str = str..(skilltable[(inst.info-2) * 4 + k] or "").."\n"
 		end
 
-		str = invincibility or ""
 		if str == "" then
 			str = STRINGS.YUKARI_NOSKILL
 		end
 	end
 
-	inst.components.talker:Say(str)
+	inst.components.talker:Say(str, 5)
 	inst.info = inst.info + 1
 end
 

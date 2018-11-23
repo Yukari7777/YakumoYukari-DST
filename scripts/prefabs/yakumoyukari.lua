@@ -89,7 +89,7 @@ local function onpreload(inst, data)
 			inst.components.upgrader.power_level = data.power_level or 0	
 			inst.components.upgrader.hatlevel = data.hatlevel or 1
 			inst.components.upgrader.ability = data.skilltree
-			inst.components.upgrader:ApplyStatus(inst)
+			inst.components.upgrader:ApplyStatus()
 
 			--re-set these from the save data, because of load-order clipping issues
 			if data.health and data.health.health then inst.components.health.currenthealth = data.health.health end
@@ -209,7 +209,7 @@ local function Cooldown(inst)
 		elseif inst.regen_cool == 0 
 		and inst.components.health 
 		and inst.components.health:IsHurt() 
-		and inst.components.hunger:GetPercent() > 0.8 then
+		and inst.components.hunger:GetPercent() > 0.5 then
 			HealthRegen(inst)
 			inst.regen_cool = inst.components.upgrader.regencool
 		end
@@ -261,7 +261,7 @@ end
 local function EquippingEvent(inst, data)
 	inst.components.upgrader.hatequipped = data.isequipped and data.inst
 	inst.components.upgrader.fireimmuned = inst.components.inventory ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == ("armordragonfly" or "armorobsidian")
-	inst.components.upgrader:ApplyStatus(inst)
+	inst.components.upgrader:ApplyStatus()
 end
 
 local function OnItemUpdate(inst) -- Let character PushEvents to items.
@@ -306,25 +306,23 @@ local function oneat(inst, food)
 	elseif food.prefab == "trunk_winter"
 	or food.prefab == "tallbirdegg"
 	or food.prefab == "tallbirdegg_cracked" then
-		food.components.edible.sanityvalue = 0
-		DoPowerRestore(inst, 70)
+		DoPowerRestore(inst, 55)
 			
 	elseif food.prefab == "baconeggs" 
 	or food.prefab == "surfnturf" then
-		DoPowerRestore(inst, 60)
+		DoPowerRestore(inst, 48)
 			
 	elseif food.prefab == "trunk_summer"
 	or food.prefab == "tallbirdegg_cooked"
 	or food.prefab == "dragoonheart" then
-		food.components.edible.sanityvalue = 0
-		DoPowerRestore(inst, 50)
+		DoPowerRestore(inst, 40)
 				
 	elseif food.prefab == "turkeydinner" 
 	or food.prefab == "bonestew" then
-		DoPowerRestore(inst, 45)
+		DoPowerRestore(inst, 33)
 		
 	elseif food.prefab == "honeyham" then
-		DoPowerRestore(inst, 30)
+		DoPowerRestore(inst, 24)
 			
 	elseif food.prefab == "meat"
 	or food.prefab == "plantmeat" 
@@ -339,17 +337,15 @@ local function oneat(inst, food)
 	or food.prefab == "perogies"
 	or food.prefab == "guacamole"
 	or food.prefab == "monstermeat" then
-		food.components.edible.sanityvalue = 0
-		DoPowerRestore(inst, 20)
+		DoPowerRestore(inst, 16)
 				
 	elseif food.prefab == "meat_dried"
 	or food.prefab == "monstermeat_dried" then
-		DoPowerRestore(inst, 20)
+		DoPowerRestore(inst, 16)
 				
 	elseif food.prefab == "drumstick" 
 	or food.prefab == "drumstick_cooked" then
-		food.components.edible.sanityvalue = 0
-		DoPowerRestore(inst, 16)
+		DoPowerRestore(inst, 13)
 				
 	elseif food.prefab == "doydoyegg_cooked" 
 	or food.prefab == "bird_egg_cooked"
@@ -358,7 +354,7 @@ local function oneat(inst, food)
 	or food.prefab == "plantmeat_cooked"
 	or food.prefab == "unagi"
 	or food.prefab == "eel_cooked" then
-		DoPowerRestore(inst, 15)
+		DoPowerRestore(inst, 12)
 				
 	elseif food.prefab == "smallmeat" 
 	or food.prefab == "tropical_fish"
@@ -367,11 +363,10 @@ local function oneat(inst, food)
 	or food.prefab == "fish_raw_small"
 	or food.prefab == "meatballs"
 	or food.prefab == "frogglebunwich" then
-		food.components.edible.sanityvalue = 0
-		DoPowerRestore(inst, 10)
+		DoPowerRestore(inst, 8)
 				
 	elseif food.prefab == "smallmeat_dried" then
-		DoPowerRestore(inst, 10)
+		DoPowerRestore(inst, 8)
 				
 	elseif food.prefab == "cookedsmallmeat"
 	or food.prefab == "froglegs_cooked"
@@ -380,17 +375,16 @@ local function oneat(inst, food)
 	or food.prefab == "kabobs"
 	or food.prefab == "frogglebunwich"
 	or food.prefab == "fish_raw_small_cooked" then
-		DoPowerRestore(inst, 8)
-			
+		DoPowerRestore(inst, 6)
 	end
 			
 	if food.prefab == "monstermeat" 
 	or food.prefab == "monsterlasagna" then
-		DoPowerRestore(inst, 5)
+		DoPowerRestore(inst, 4)
 				
 	elseif food.prefab == "monstermeat_dried"
 	or food.prefab == "cookedmonstermeat" then
-		DoPowerRestore(inst, 3)
+		DoPowerRestore(inst, 2)
 	end
 end
 

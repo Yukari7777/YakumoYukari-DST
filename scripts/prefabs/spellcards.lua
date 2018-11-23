@@ -196,7 +196,7 @@ function MakeCard(name)
 								owner.components.locomotor.runspeed = 6
 								owner.components.combat:SetAttackPeriod(TUNING.WILSON_ATTACK_PERIOD)
 								
-								owner.components.upgrader:ApplyStatus(owner)
+								owner.components.upgrader:ApplyStatus()
 								owner:RemoveTag("inspell")
 								owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NOREINFORCE"))
 							end

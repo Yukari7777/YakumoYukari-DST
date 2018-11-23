@@ -102,7 +102,7 @@ STRINGS.ABILITY = "ability"
 STRINGS.INVINCIBILITY = "Invincibility"
 STRINGS.ACTIVATED = "activated"
 STRINGS.READY = "ready"
-STRINGS.SECONDS = "seconds"
+STRINGS.SECONDS = "秒"
 
 if Language == "chinese" then
 

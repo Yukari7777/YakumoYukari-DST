@@ -266,7 +266,7 @@ local function scheme(inst, doer, target, actions, right)
 			end
 		end
 	else
-		if target:HasTag("teleporter") and target.islinked:value() then
+		if target:HasTag("tunnel") and target.islinked:value() then
 			table.insert(actions, ACTIONS.JUMPIN)
 		end
     end

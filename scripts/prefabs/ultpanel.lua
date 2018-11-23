@@ -38,7 +38,7 @@ function MakeUltimate(name, index)
 			if not caster.components.upgrader.ability[index][5] then
 				caster.components.talker:Say(str[index])
 				caster.components.upgrader.ability[index][5] = true
-				caster.components.upgrader:ApplyStatus(caster)
+				caster.components.upgrader:ApplyStatus()
 				inst:Remove()
 			else
 				if caster.components.talker then

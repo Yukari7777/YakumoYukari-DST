@@ -219,7 +219,7 @@ local function DoUpgrade(inst, owner)
 		owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_UPGRADE_POWER"))	
 	end	
 
-	owner.components.upgrader:ApplyStatus(owner)
+	owner.components.upgrader:ApplyStatus()
 end
 
 local function OnFinish(inst, owner)
