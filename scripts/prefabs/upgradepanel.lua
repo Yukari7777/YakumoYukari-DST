@@ -121,7 +121,7 @@ end
 local function GetCanpell(inst, owner)
 	local index = GetIndex(inst)
 	local items = Ingredients[index]
-	local condition = owner.components.inventory ~= nil and true
+	local condition = owner.components.inventory ~= nil
 	local count = GetIngreCount(owner, index)
 	local currentLevel = GetStatLevel(owner, index)
 	local maxlevel = GetMaxLevel()

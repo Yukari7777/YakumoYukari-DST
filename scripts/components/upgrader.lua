@@ -21,6 +21,7 @@ local Upgrader = Class(function(self, inst)
 	self.hatdodgechance = 0
 	self.ResistDark = 0
 
+	self.EatmeatMultiplier = 1
 	self.dodgechance = 0.2
 	self.skilltextpage = 3
 
@@ -202,6 +203,7 @@ function Upgrader:UpdateAbilityStatus()
 	
 	if ability[4][1] then
 		self.inst.components.moisture.baseDryingRate = 0.7
+		self.EatmeatMultiplier = 1.5
 	end
 	
 	if ability[4][2] then
@@ -209,6 +211,7 @@ function Upgrader:UpdateAbilityStatus()
 		self.inst:AddTag("fastpicker")
 		self.powerbonus = 25
 		self.bonusspeed = 1
+		self.EatmeatMultiplier = 2
 	end
 	
 	if ability[4][3] then
@@ -216,12 +219,14 @@ function Upgrader:UpdateAbilityStatus()
 		self.inst:AddTag("realyoukai")
 		self.powerbonus = 50
 		self.bonusspeed = 2
+		self.EatmeatMultiplier = 2.5
 	end
 	
 	if ability[4][4] then
 		self.inst.components.locomotor:SetTriggersCreep(false)
 		self.inst:AddTag("spiderwhisperer")
 		self.powerbonus = 75
+		self.EatmeatMultiplier = 3
 	end
 	
 	if ability[4][5] then
@@ -292,6 +297,10 @@ function Upgrader:UpdateSkillStatus()
 		skill.speed = self.bonusspeed + (self.hatEquipped and self.hatbonusspeed)
 	end	
 
+	if self.EatmeatMultiplier ~= 1 then
+		skill.powermult = "Gain more power eating meat by "..((self.EatmeatMultiplier - 1) * 100).."%"
+	end
+
 	if self.IsVampire then
 		skill.lifeleech = "Heals"..(self.IsAOE and 2 or 1).."every hit"
 	end
@@ -310,7 +319,7 @@ function Upgrader:UpdateSkillStatus()
 	end
 
 	if self.curecool ~= 0 then
-		skill.cure = "Cure poison every"..self.curecool
+		skill.cure = "Cure poison every "..self.curecool.." seconds"
 	end
 
 	if self.InvincibleLearned and skill.invincibility == nil then

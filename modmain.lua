@@ -9,7 +9,7 @@ PrefabFiles = {
 	"ultpanelsw",
 	"spellcards",
 	"barrierfieldfx",
-	"effect_fx",
+	"graze_fx",
 	"scheme",
 	"taggable_classified",
 }

@@ -152,7 +152,8 @@ local function TelePortDelay(player)
 end
 
 local function DoPowerRestore(inst, amount)
-	inst.components.power:DoDelta(amount, false)
+	local delta = amount * inst.components.upgrader.EatmeatMultiplier
+	inst.components.power:DoDelta(delta, false)
 	--inst.HUD.controls.status.power:PulseGreen() 
 	--inst.HUD.controls.status.power:ScaleTo(1.3,1,.7)
 end
@@ -264,7 +265,7 @@ local function EquippingEvent(inst, data)
 	inst.components.upgrader:ApplyStatus()
 end
 
-local function OnItemUpdate(inst) -- Let character PushEvents to items.
+local function OnItemUpdate(inst)
 	
 	local inventory = inst.components.inventory
 
@@ -301,7 +302,7 @@ local function oneat(inst, food)
 	if food.prefab == "minotaurhorn"
 	or food.prefab == "deerclops_eyeball"
 	or food.prefab == "tigereye" then
-		DzoPowerRestore(inst, 300)
+		DoPowerRestore(inst, 300)
 				
 	elseif food.prefab == "trunk_winter"
 	or food.prefab == "tallbirdegg"
@@ -438,6 +439,7 @@ local master_postinit = function(inst) -- after SetPristine()
 		OnItemUpdate(inst)
 		inst:PushEvent("yukariloaded")
 	end
+	inst.itemupdate = OnItemUpdate
 	
 	inst:DoPeriodicTask(1, PeriodicFunction)
 	inst:ListenForEvent("hungerdelta", DoHungerUp )
