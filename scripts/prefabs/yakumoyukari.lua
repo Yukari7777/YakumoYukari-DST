@@ -203,7 +203,6 @@ function GoInvincible(inst)
 end
 
 local function Cooldown(inst)
-	
 	if inst.components.upgrader.ability[1][2] then
 		if inst.regen_cool > 0 then
 			inst.regen_cool = inst.regen_cool - 1
@@ -215,16 +214,15 @@ local function Cooldown(inst)
 			inst.regen_cool = inst.components.upgrader.regencool
 		end
 	end
-	
+
 	if inst.invin_cool > 0 then
 		inst.invin_cool = inst.invin_cool - 1
 	elseif inst.invin_cool == 0 then
 		inst.components.upgrader.CanbeInvincibled = true
 	end
-	
 end
 
-local function PeriodicFunction(inst, data)
+local function PeriodicFunction(inst)
 	
 	local Light = inst.light
 	inst.components.sanity.night_drain_mult = 1 - inst.components.upgrader.ResistDark - (inst.components.upgrader.hatequipped and 0.2 or 0)
@@ -254,9 +252,14 @@ local function PeriodicFunction(inst, data)
 	Cooldown(inst)
 end
 
-local function OnGrazed(inst)
+local function Graze(inst)
+	local pt = Vector3(inst.Transform:GetWorldPosition())
+	for i = 1, math.random(3,10) do
+		local fx = SpawnPrefab("graze_fx")
+		fx.Transform:SetPosition(pt.x + math.random() / 2, pt.y + 0.7 + math.random() / 2 , pt.z + math.random() / 2 )
+	end
 	inst.grazecnt = inst.grazecnt + 1
-	inst.components.power:DoDelta(math.random(0, 2), false)
+	DoPowerRestore(inst, math.random(0, 2))
 end
 
 local function EquippingEvent(inst, data)
@@ -448,7 +451,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:ListenForEvent("attacked", OnAttackedEvent, inst )
 	inst:ListenForEvent("teleported", TelePortDelay, inst )
 	inst:ListenForEvent("hatequipped", EquippingEvent )
-	inst:ListenForEvent("grazed", OnGrazed )
+	inst:ListenForEvent("graze", Graze )
 	inst:ListenForEvent("itemget", OnItemUpdate)
 	inst:ListenForEvent("itemlose", OnItemUpdate)
 	inst:ListenForEvent("gotnewitem", OnItemUpdate)

@@ -3,39 +3,34 @@ local assets =
 	Asset("ANIM", "anim/graze_fx.zip"),
 }
 
-local brain = require("brains/grazebrain")
-
-local function fn(Sim)
+local function fn()
 	local inst = CreateEntity()
 	inst.entity:AddTransform()
-	inst.entity:AddPhysics()
 	inst.entity:AddAnimState()
-	inst.entity:AddNetwork()
 	inst.entity:AddSoundEmitter()
+	inst.entity:AddNetwork()
 
-	--inst.Physics:SetMass(0)
-    --inst.Physics:SetCapsule(0, 0)
-
+	inst.entity:AddPhysics() -- minimal setup to move thing. no collision
+	inst.Physics:SetMass(1)
+	inst.Physics:SetCapsule(0, 1)
+	
 	inst.AnimState:SetBank("graze_fx")
     inst.AnimState:SetBuild("graze_fx")
 	inst.AnimState:PlayAnimation("idle")
+	inst.AnimState:SetLayer(math.random(2, 4)) -- this is real rendering hack
 
-	--inst.persists = false -- handled in a special way
+	inst.persists = false -- handled in a special way
 
-	--inst:AddTag("NOCLICK")
-	--inst:AddTag("FX")
+	inst:AddTag("NOCLICK")
+	inst:AddTag("FX")
 	
 	inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
         return inst
     end
-
-	inst:AddComponent("locomotor")
-	inst.components.locomotor.runspeed = math.random(50) / 10
-	inst.components.locomotor.directdrive = true
-
-	inst:SetBrain(brain)
+	inst.Transform:SetRotation(math.random() * 360)
+	inst.Physics:SetMotorVel(math.random(50)/10, 3, 0)
 
 	inst.SoundEmitter:PlaySound("soundpack/spell/graze")
 	inst:DoTaskInTime(0.6, inst.Remove)
@@ -43,4 +38,4 @@ local function fn(Sim)
 	return inst
 end
 
-return Prefab( "graze_fx", fn, assets)
+return Prefab("fx/graze_fx", fn, assets)

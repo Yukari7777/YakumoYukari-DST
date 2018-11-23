@@ -106,13 +106,7 @@ local function OnTakeDamage(self)
 		if self.inst.prefab == "yakumoyukari" then
 			local totaldodge = Chara.components.upgrader and (Chara.components.upgrader.dodgechance + Chara.components.upgrader.hatdodgechance)
 			if math.random() < totaldodge then
-				local pt = GLOBAL.Vector3(Chara.Transform:GetWorldPosition())
-				for i = 1, math.random(3,5), 1 do
-					local fx = SpawnPrefab("graze_fx")
-					fx.Transform:SetPosition(pt.x + math.random() / 2, pt.y + 0.7 + math.random() / 2 , pt.z + math.random() / 2 )
-				end
-				Chara:PushEvent("grazed")
-				
+				Chara:PushEvent("graze")
 				return 0
 			end
 		end

@@ -158,6 +158,7 @@ local function DoUpgrade(inst, owner)
 	local count = GetIngreCount(owner, index)
 	local inventory = owner.components.inventory
 
+	inst.OnItemUpdate(inst)
 	if not GetCanpell(inst, owner) then
 		inst.components.spellcard:SetCondition(false)
 		inst.canspell:set(false)
