@@ -30,16 +30,5 @@ configuration_options = {
 		},
 		default = "default",
 	},
-	
-	{
-		name = "inspect",
-		label = "Inspect Shadow Creatures",
-		options = 
-		{
-			{ description = "true", data = true },
-			{ description = "false", data = false },
-		},
-		default = true,
-	}
 
 }

@@ -64,13 +64,12 @@ local EQUIPSLOTS = GLOBAL.EQUIPSLOTS
 local FindEntity = GLOBAL.FindEntity
 local SpringCombatMod = GLOBAL.SpringCombatMod
 local IsYukari = ThePlayer and ThePlayer.prefab == "yakumoyukari"
-local Inspect = GetModConfigData("inspect")
 local Language = GetModConfigData("language")
 
 ----- Basic settings for Yukari -----
 STRINGS.CHARACTER_TITLES.yakumoyukari = "Youkai of Boundaries"
 STRINGS.CHARACTER_NAMES.yakumoyukari = "Yakumo Yukari"
-STRINGS.CHARACTER_DESCRIPTIONS.yakumoyukari = "has own ability 'youkai power'.\nbecomes dreadful when she get 'power' from her world."
+STRINGS.CHARACTER_DESCRIPTIONS.yakumoyukari = "has own ability 'youkai power'.\nbecomes dreadful when she obtains the power from the world."
 STRINGS.CHARACTER_QUOTES.yakumoyukari = "\"I have taken the first napkin.\""
 STRINGS.CHARACTERS.YAKUMOYUKARI = require "speech_yakumoyukari"
 if Language == "chinese" then
@@ -327,20 +326,6 @@ local function WarriorRetargetFn(inst)
 	inst.components.combat:SetRetargetFunction(2, WarriorRetarget)
 end
 
-
-local function SetInspectable(inst)
-	--	STRINGS.NAMES.SHADOWWATCHER = "Watcher"
-	--	STRINGS.NAMES.SHADOWSKITTISH = "Shadow Creature"
-	--	STRINGS.NAMES.SHADOWSKITTISH_WATER = "Shadow Creature"
-	--	STRINGS.NAMES.CREEPYEYES = "Eyes"
-	if Inspect and IsMaster then
-		inst:AddComponent("inspectable") 
-		if inst:HasTag("NOCLICK") then
-			inst:RemoveTag("NOCLICK")
-		end
-	end
-end
-
 local function ToolEfficientFn(self)
 	if IsMaster then
 		local function ToolEfficient(self, action, effectiveness, ...)
@@ -403,9 +388,9 @@ function SayInfo(inst)
 			skillindex = skillindex + 1
 			skilltable[skillindex] = v
 		end
-		inst.components.upgrader.skilltextpage = 3 + math.floor(skillindex / 4)
-		for k = 1, 4 do
-			str = str..(skilltable[(inst.info-2) * 4 + k] or "").."\n"
+		inst.components.upgrader.skilltextpage = 3 + math.floor(skillindex / 3)
+		for k = 1, 3 do
+			str = str..(skilltable[(inst.info-2) * 3 + k] or "").."\n"
 		end
 
 		if str == "" then
@@ -433,14 +418,5 @@ AddPrefabPostInit("killerbee", KillerbeeRetargetFn)
 AddPrefabPostInit("frog", FrogRetargetFn)
 AddPrefabPostInit("spider", SpiderRetargetFn)
 AddPrefabPostInit("spider_warrior", WarriorRetargetFn)
-AddPrefabPostInit("shadowwatcher", SetInspectable)
-AddPrefabPostInit("shadowskittish", SetInspectable)
-AddPrefabPostInit("shadowskittish_water", SetInspectable)
-AddPrefabPostInit("creepyeyes", SetInspectable)
-AddPrefabPostInit("crawlinghorror", SetInspectable)
-AddPrefabPostInit("terrorbeak", SetInspectable)
-AddPrefabPostInit("swimminghorror", SetInspectable)
-AddPrefabPostInit("crawlingnightmare", SetInspectable)
-AddPrefabPostInit("nightmarebeak", SetInspectable)
 AddComponentPostInit("inventory", OnTakeDamage)
 AddComponentPostInit("tool", ToolEfficientFn)

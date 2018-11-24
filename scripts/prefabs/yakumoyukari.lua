@@ -50,17 +50,14 @@ local function GetStartInv()
 				"meat",
 				"scheme",
 				"yukariumbre",
-				"yukarihat",}
-	else return {
-				"scheme",
+				"yukarihat"}
+	else return {"scheme",
 				"yukariumbre",
-				"yukarihat",
-				}
+				"yukarihat"}
 	end
 end
 
 local start_inv = GetStartInv()
---{"scheme", "yukariumbre", "yukarihat",}
 
 local function onsave(inst, data)
 	data.regen_cool = inst.regen_cool
@@ -76,7 +73,6 @@ local function onsave(inst, data)
 end
 
 local function onpreload(inst, data)
-	
 	if data then
 		if inst.components.power then
 			inst.regen_cool = data.regen_cool or 0 
@@ -102,41 +98,32 @@ local function onpreload(inst, data)
 			inst.components.power:DoDelta(0)
 		end
 	end
-	
 end
 
 local function OnhitEvent(inst, data)
-	local target = data.target
-	local RegenAmount = 0
-	
 	-- Life Leech
-	if inst.components.upgrader.IsVampire then
+	local CanAOE = math.random() < 0.4
 	
-		RegenAmount = inst.components.upgrader.IsAOE and 2 or 1
-		
-		if target and target.components.health and not target:HasTag("chester") then
+	if inst.components.upgrader.IsVampire then
+		local target = data.target
+		local RegenAmount = inst.components.upgrader.IsAOE and 2 or 1
+		if target and target.components.health and not target:HasTag("chester") or
+		(target.components.follower and target.components.follower.leader == inst) then
 			inst.components.health:DoDelta(RegenAmount, nil, nil, true)
-			if math.random() < 0.15 then
+			if CanAOE then
 				inst.components.health:DoDelta(5, nil, nil, true)
-				if inst.components.poisonable and inst.components.upgrader.IsPoisonCure then
-					inst.components.poisonable:Cure(inst)
-				end
 			end
 		end
 	end
 	
 	-- AOE Hit
-	if inst.components.upgrader.IsAOE then
-		if math.random() < 0.4 then
-			inst.components.combat:SetAreaDamage(5, 0.6)
-		else
-			inst.components.combat:SetAreaDamage(0, 0)
-		end
+	if inst.components.upgrader.IsAOE and CanAOE then
+		inst.components.combat:DoAreaAttack(data.target, 5, data.weapon, nil, data.stimuli)
 	end
 	
 end
 
-local function OnAttackedEvent(attacked, data)
+local function OnAttackedEvent(attacked)
 	if attacked.components.health and attacked.components.upgrader.IsFight then
 		if not attacked.components.health.invincible then -- Check another invinciblity.
 			attacked.components.health:SetInvincible(true)
@@ -145,14 +132,14 @@ local function OnAttackedEvent(attacked, data)
 	end
 end
 
-local function TelePortDelay(player)
-	player:DoTaskInTime(0.5, function()
-		player.istelevalid = true 
+local function TelePortDelay(inst)
+	inst:DoTaskInTime(0.5, function()
+		inst.istelevalid = true 
 	end)
 end
 
 local function DoPowerRestore(inst, amount)
-	local delta = amount * inst.components.upgrader.EatmeatMultiplier
+	local delta = amount * inst.components.upgrader.PowerGainMultiplier
 	inst.components.power:DoDelta(delta, false)
 	--inst.HUD.controls.status.power:PulseGreen() 
 	--inst.HUD.controls.status.power:ScaleTo(1.3,1,.7)
@@ -170,15 +157,15 @@ end
 
 local function HealthRegen(inst)
 	if inst.components.health then
-		local amount = inst.components.upgrader.regenamount
-		inst.components.health:DoDelta(amount)
+		local delta = inst.components.upgrader.regenamount
+		inst.components.health:DoDelta(delta)
 	end
 end
 
 local function InvincibleRegen(inst)
 	if inst.components.health and inst.components.upgrader.emergency then
-		local emergency = inst.components.upgrader.emergency
-		inst.components.health:DoDelta(emergency, nil, nil, true) -- DoDelta(amount, overtime, cause, ignore_invincible)
+		local delta = inst.components.upgrader.emergency
+		inst.components.health:DoDelta(delta, nil, nil, true) -- DoDelta(amount, overtime, cause, ignore_invincible)
 	end
 end
 
@@ -223,7 +210,6 @@ local function Cooldown(inst)
 end
 
 local function PeriodicFunction(inst)
-	
 	local Light = inst.light
 	inst.components.sanity.night_drain_mult = 1 - inst.components.upgrader.ResistDark - (inst.components.upgrader.hatequipped and 0.2 or 0)
 	
@@ -268,13 +254,12 @@ local function EquippingEvent(inst, data)
 	inst.components.upgrader:ApplyStatus()
 end
 
-local function OnItemUpdate(inst)
-	
+local function ItemUpdate(inst)
 	local inventory = inst.components.inventory
 
 	for k,v in pairs(inventory.itemslots) do
 		if v:HasTag("recieveitemupdate") then
-			v:PushEvent("onitemupdate", {owner = inst})
+			v:PushEvent("ItemUpdate", {owner = inst})
 		end
 	end
 	
@@ -282,7 +267,7 @@ local function OnItemUpdate(inst)
 		if type(v) == "table" and v.components.container then
 			for k, v2 in pairs(v.components.container.slots) do
 				if v2:HasTag("recieveitemupdate") then
-					v2:PushEvent("onitemupdate", {owner = inst})
+					v2:PushEvent("ItemUpdate", {owner = inst})
 				end
 			end
 		end
@@ -301,98 +286,37 @@ local function DebugFunction(inst)
 	end)
 end	
 
+local powertable = {
+	-- Rule : meat value per 10, reduced by 25% when cooked or dried.
+	P300 = {"minotaurhorn", "deerclops_eyeball", "tigereye"},
+	P40 = {"surfnturf"},
+	P30 = {"bonestew", "dragoonheart", "trunk_winter"},
+	P25 = {"baconeggs"},
+	P20 = {"honeyham", "tallbirdegg", "trunk_summer", "turkeydinner", "monsterlasagna"},
+	P15 = {"tallbirdegg_cooked", "trunk_cooked", "honeynuggets", "hotchili"},
+	P10 = {"meat", "plantmeat", "shark_fin", "fish_raw", "fish_med", "perogies", "guacamole", "monstermeat"},
+	P8 = {"meat_dried", "plantmeat_cooked", "fish_med_cooked"},
+	P5 = {"smallmeat", "eel", "kabobs", "tropical_fish", "batwing", "froglegs", "bird_egg", "fish_raw_small", "meatballs", "frogglebunwich", "unagi", "drumstick" , "doydoyegg"},
+	P4 = {"monstermeat_dried", "cookedsmallmeat","froglegs_cooked","batwing_cooked", "fish_raw_small_cooked", "cookedmonstermeat", "smallmeat_dried", "eel_cooked", "doydoyegg_cooked", "drumstick_cooked", "bird_egg_cooked"}
+}
+
 local function oneat(inst, food)
-	if food.prefab == "minotaurhorn"
-	or food.prefab == "deerclops_eyeball"
-	or food.prefab == "tigereye" then
-		DoPowerRestore(inst, 300)
-				
-	elseif food.prefab == "trunk_winter"
-	or food.prefab == "tallbirdegg"
-	or food.prefab == "tallbirdegg_cracked" then
-		DoPowerRestore(inst, 55)
-			
-	elseif food.prefab == "baconeggs" 
-	or food.prefab == "surfnturf" then
-		DoPowerRestore(inst, 48)
-			
-	elseif food.prefab == "trunk_summer"
-	or food.prefab == "tallbirdegg_cooked"
-	or food.prefab == "dragoonheart" then
-		DoPowerRestore(inst, 40)
-				
-	elseif food.prefab == "turkeydinner" 
-	or food.prefab == "bonestew" then
-		DoPowerRestore(inst, 33)
-		
-	elseif food.prefab == "honeyham" then
-		DoPowerRestore(inst, 24)
-			
-	elseif food.prefab == "meat"
-	or food.prefab == "plantmeat" 
-	or food.prefab == "bird_egg"
-	or food.prefab == "shark_fin"
-	or food.prefab == "doydoyegg"
-	or food.prefab == "eel"
-	or food.prefab == "trunk_cooked"
-	or food.prefab == "fish_raw"
-	or food.prefab == "fish_med"
-	or food.prefab == "hotchili"
-	or food.prefab == "perogies"
-	or food.prefab == "guacamole"
-	or food.prefab == "monstermeat" then
-		DoPowerRestore(inst, 16)
-				
-	elseif food.prefab == "meat_dried"
-	or food.prefab == "monstermeat_dried" then
-		DoPowerRestore(inst, 16)
-				
-	elseif food.prefab == "drumstick" 
-	or food.prefab == "drumstick_cooked" then
-		DoPowerRestore(inst, 13)
-				
-	elseif food.prefab == "doydoyegg_cooked" 
-	or food.prefab == "bird_egg_cooked"
-	or food.prefab == "cookedmonstermeat"
-	or food.prefab == "fish_med_cooked"			
-	or food.prefab == "plantmeat_cooked"
-	or food.prefab == "unagi"
-	or food.prefab == "eel_cooked" then
-		DoPowerRestore(inst, 12)
-				
-	elseif food.prefab == "smallmeat" 
-	or food.prefab == "tropical_fish"
-	or food.prefab == "batwing" 
-	or food.prefab == "froglegs" 
-	or food.prefab == "fish_raw_small"
-	or food.prefab == "meatballs"
-	or food.prefab == "frogglebunwich" then
-		DoPowerRestore(inst, 8)
-				
-	elseif food.prefab == "smallmeat_dried" then
-		DoPowerRestore(inst, 8)
-				
-	elseif food.prefab == "cookedsmallmeat"
-	or food.prefab == "froglegs_cooked"
-	or food.prefab == "batwing_cooked"
-	or food.prefab == "honeynuggets"
-	or food.prefab == "kabobs"
-	or food.prefab == "frogglebunwich"
-	or food.prefab == "fish_raw_small_cooked" then
-		DoPowerRestore(inst, 6)
+	local key
+
+	for k, v in pairs(powertable) do
+		for k2, v2 in pairs(v) do 
+			if food.prefab == v2 then
+				key = k
+				break
+			end
+		end
 	end
-			
-	if food.prefab == "monstermeat" 
-	or food.prefab == "monsterlasagna" then
-		DoPowerRestore(inst, 4)
-				
-	elseif food.prefab == "monstermeat_dried"
-	or food.prefab == "cookedmonstermeat" then
-		DoPowerRestore(inst, 2)
-	end
+
+	local delta = tonumber(string.sub(key, 2))
+	DoPowerRestore(inst, delta)
 end
 
-local function common_init(inst) -- things before SetPristine()
+local function common_postinit(inst) -- things before SetPristine()
 	inst.MiniMapEntity:SetIcon( "yakumoyukari.tex" )
 
 	inst.IsInvincible = false
@@ -423,7 +347,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:AddComponent("power")
 	
 	inst.soundsname = "willow"
-	inst.starting_inventory = start_inv -- starting_inventory passed as a parameter is now deprecated
+	inst.starting_inventory = start_inv -- starting_inventory passed as a parameter is deprecated
 	
 	inst.components.sanity:SetMax(75)
 	inst.components.health:SetMaxHealth(80)
@@ -439,10 +363,11 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.OnLoad = function(inst)
 		inst.valid = true
 		inst.components.upgrader:ApplyStatus(inst)
-		OnItemUpdate(inst)
+		ItemUpdate(inst)
 		inst:PushEvent("yukariloaded")
 	end
-	inst.itemupdate = OnItemUpdate
+	inst.itemupdate = ItemUpdate
+	inst.powertable = powertable
 	
 	inst:DoPeriodicTask(1, PeriodicFunction)
 	inst:ListenForEvent("hungerdelta", DoHungerUp )
@@ -452,13 +377,13 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:ListenForEvent("teleported", TelePortDelay, inst )
 	inst:ListenForEvent("hatequipped", EquippingEvent )
 	inst:ListenForEvent("graze", Graze )
-	inst:ListenForEvent("itemget", OnItemUpdate)
-	inst:ListenForEvent("itemlose", OnItemUpdate)
-	inst:ListenForEvent("gotnewitem", OnItemUpdate)
-	inst:ListenForEvent("refreshinventory", OnItemUpdate)
-	inst:ListenForEvent("stacksizechange", OnItemUpdate)
+	inst:ListenForEvent("itemget", ItemUpdate)
+	inst:ListenForEvent("itemlose", ItemUpdate)
+	inst:ListenForEvent("gotnewitem", ItemUpdate)
+	inst:ListenForEvent("refreshinventory", ItemUpdate)
+	inst:ListenForEvent("stacksizechange", ItemUpdate)
 	inst:ListenForEvent("debugmode", DebugFunction, inst)
 
 end
 
-return MakePlayerCharacter("yakumoyukari", prefabs, assets, common_init, master_postinit)
+return MakePlayerCharacter("yakumoyukari", prefabs, assets, common_postinit, master_postinit)
