@@ -388,7 +388,7 @@ function SayInfo(inst)
 			skillindex = skillindex + 1
 			skilltable[skillindex] = v
 		end
-		inst.components.upgrader.skilltextpage = 3 + math.floor(skillindex / 3)
+		inst.components.upgrader.skilltextpage = (skillindex ~= 0 and 2 + math.ceil(skillindex / 3) or 3)
 		for k = 1, 3 do
 			str = str..(skilltable[(inst.info-2) * 3 + k] or "").."\n"
 		end

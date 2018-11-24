@@ -160,12 +160,15 @@ end
 
 local function GetDesc(inst, viewer)
 	if viewer.prefab == "yakumoyukari" then
+		local condition = GetCanpell(inst, viewer)
+		SetState(inst, viewer)
 		return string.format( STRINGS.YUKARI_CURRENT_LEVEL.." - "..viewer.components.upgrader.hatlevel..GetStr(viewer) )
 	end
 end
 
 local function SetState(inst, data)
-	local condition = GetCanpell(data.owner)
+	local owner = data.owner or data
+	local condition = GetCanpell(inst, owner)
 	inst.components.spellcard:SetCondition(condition)
 	inst.canspell:set(condition)
 end
