@@ -1,8 +1,8 @@
-function MakeUltimateSW(name, value)
+function MakeUltimateSW(name, index)
 
 	local fname = name.."ultsw"
 	
-	local assets=
+	local assets =
 	{   
 		Asset("ANIM", "anim/spell.zip"),   
 		Asset("ATLAS", "images/inventoryimages/"..fname..".xml"),    
@@ -10,7 +10,6 @@ function MakeUltimateSW(name, value)
 	}
 
 	local function DoUpgrade(inst)
-		
 		local caster = inst.components.inventoryitem.owner
 		local spellcard = inst.components.spellcard
 		local index = spellcard.index
@@ -50,7 +49,7 @@ function MakeUltimateSW(name, value)
 				if difficulty == "chinese" then
 					caster.components.talker:Say("我 必 须 要 把 "..name.." 升 级 到 "..ultreq.."之 上")
 				else
-					caster.components.talker:Say("I must do "..name.." upgrade over "..ultreq)
+					caster.components.talker:Say("I must reach "..name.." level to "..ultreq)
 				end
 			end
 		end
@@ -59,40 +58,36 @@ function MakeUltimateSW(name, value)
 	local function fn()  
 		
 		local inst = CreateEntity()    
-		inst.entity:AddNetwork()
-		local trans = inst.entity:AddTransform()    
-		local anim = inst.entity:AddAnimState()   
+	
+		inst.entity:AddTransform()    
+		inst.entity:AddAnimState()    
+		inst.entity:AddSoundEmitter()  
+		inst.entity:AddNetwork()	
 		
 		MakeInventoryPhysics(inst)   
 		
-		anim:SetBank("spell")    
-		anim:SetBuild("spell")    
-		anim:PlayAnimation("idle")    
+		inst.AnimState:SetBank("spell")    
+		inst.AnimState:SetBuild("spell")    
+		inst.AnimState:PlayAnimation("idle")   
+
+		inst:AddTag("ultpanel")
 		
+		if not TheWorld.ismastersim then
+			return inst
+		end
+
+		inst.entity:SetPristine()
+
 		inst:AddComponent("inspectable")        
 		
 		inst:AddComponent("inventoryitem") 
 		inst.components.inventoryitem.imagename = fname    
 		inst.components.inventoryitem.atlasname = "images/inventoryimages/"..fname..".xml"    
-		owner = inst.components.inventoryitem.owner
 
-		local function IsHanded()
-			local hands = owner.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil
-			if hands then return false else return true end
-		end
-		
-		local function CallFn()
-			inst.components.spellcard:SetCondition( IsHanded() )
-		end
-		
 		inst:AddComponent("spellcard")
-		inst.components.spellcard.index = value
+		inst.components.spellcard.index = index
 		inst.components.spellcard.name = fname
 		inst.components.spellcard:SetSpellFn( DoUpgrade )
-		inst.components.spellcard:SetCondition( IsHanded() )
-		
-		owner:ListenForEvent("equip", CallFn )
-		owner:ListenForEvent("unequip", CallFn )
 		
 		return inst
 	end

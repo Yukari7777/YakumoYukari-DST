@@ -118,7 +118,7 @@ local function OnhitEvent(inst, data)
 	
 	-- AOE Hit
 	if inst.components.upgrader.IsAOE and CanAOE then
-		inst.components.combat:DoAreaAttack(data.target, 5, data.weapon, nil, data.stimuli)
+		inst.components.combat:DoAreaAttack(data.target, 2, data.weapon, nil, data.stimuli, {"INLIMBO"})
 	end
 	
 end
@@ -210,7 +210,7 @@ local function Cooldown(inst)
 end
 
 local function PeriodicFunction(inst)
-	local Light = inst.light
+	local Light = inst.light ~= nil or inst.entity:AddLight()
 	inst.components.sanity.night_drain_mult = 1 - inst.components.upgrader.ResistDark - (inst.components.upgrader.hatequipped and 0.2 or 0)
 	
 	if inst.components.upgrader.NightVision then
@@ -239,6 +239,12 @@ local function PeriodicFunction(inst)
 end
 
 local function Graze(inst)
+	if inst.components.upgrader.Ability_45 and not inst.IsGrazing then
+		inst.IsGrazing = true
+		inst:DoTaskInTime(0.75, function(inst)
+			inst.IsGrazing = false
+		end)
+	end
 	local pt = Vector3(inst.Transform:GetWorldPosition())
 	for i = 1, math.random(3,10) do
 		local fx = SpawnPrefab("graze_fx")
@@ -252,26 +258,6 @@ local function EquippingEvent(inst, data)
 	inst.components.upgrader.hatequipped = data.isequipped and data.inst
 	inst.components.upgrader.fireimmuned = inst.components.inventory ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == ("armordragonfly" or "armorobsidian")
 	inst.components.upgrader:ApplyStatus()
-end
-
-local function ItemUpdate(inst)
-	local inventory = inst.components.inventory
-
-	for k,v in pairs(inventory.itemslots) do
-		if v:HasTag("recieveitemupdate") then
-			v:PushEvent("ItemUpdate", {owner = inst})
-		end
-	end
-	
-	for k,v in pairs(inventory.equipslots) do
-		if type(v) == "table" and v.components.container then
-			for k, v2 in pairs(v.components.container.slots) do
-				if v2:HasTag("recieveitemupdate") then
-					v2:PushEvent("ItemUpdate", {owner = inst})
-				end
-			end
-		end
-	end
 end
 
 local function DebugFunction(inst)
@@ -307,19 +293,19 @@ local function oneat(inst, food)
 		for k2, v2 in pairs(v) do 
 			if food.prefab == v2 then
 				key = k
+				local delta = tonumber(string.sub(key, 2))
+				DoPowerRestore(inst, delta)
 				break
 			end
 		end
 	end
-
-	local delta = tonumber(string.sub(key, 2))
-	DoPowerRestore(inst, delta)
 end
 
 local function common_postinit(inst) -- things before SetPristine()
 	inst.MiniMapEntity:SetIcon( "yakumoyukari.tex" )
 
 	inst.IsInvincible = false
+	inst.IsGrazing = false
 	inst.regen_cool = 0
 	inst.poison_cool = 0
 	inst.invin_cool = 0
@@ -356,32 +342,26 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.components.eater:SetOnEatFn(oneat)
 	inst.components.hunger.hungerrate = 1.5 * TUNING.WILSON_HUNGER_RATE
 	inst.components.combat.damagemultiplier = TUNING.YDEFAULT.DAMAGE_MULTIPLIER
+	inst.components.combat.areahitdamagepercent = 0.6
 	inst.components.builder.science_bonus = 1
 	
 	inst.OnSave = onsave
 	inst.OnPreLoad = onpreload
 	inst.OnLoad = function(inst)
 		inst.valid = true
-		inst.components.upgrader:ApplyStatus(inst)
-		ItemUpdate(inst)
+		inst.components.upgrader:ApplyStatus()
 		inst:PushEvent("yukariloaded")
 	end
-	inst.itemupdate = ItemUpdate
 	inst.powertable = powertable
 	
 	inst:DoPeriodicTask(1, PeriodicFunction)
 	inst:ListenForEvent("hungerdelta", DoHungerUp )
 	inst:ListenForEvent("healthdelta", GoInvincible )
-	inst:ListenForEvent("onhitother", OnhitEvent )
+	inst:ListenForEvent("onattackother", OnhitEvent )
 	inst:ListenForEvent("attacked", OnAttackedEvent, inst )
 	inst:ListenForEvent("teleported", TelePortDelay, inst )
 	inst:ListenForEvent("hatequipped", EquippingEvent )
 	inst:ListenForEvent("graze", Graze )
-	inst:ListenForEvent("itemget", ItemUpdate)
-	inst:ListenForEvent("itemlose", ItemUpdate)
-	inst:ListenForEvent("gotnewitem", ItemUpdate)
-	inst:ListenForEvent("refreshinventory", ItemUpdate)
-	inst:ListenForEvent("stacksizechange", ItemUpdate)
 	inst:ListenForEvent("debugmode", DebugFunction, inst)
 
 end

@@ -133,12 +133,13 @@ local function GetCanpell(inst, owner)
 	else
 		condition = false 
 	end
-	
+
 	return condition
 end
 
 local function SetState(inst, data)
-	local condition = GetCanpell(inst, data.owner)
+	local owner = data.owner or data
+	local condition = GetCanpell(inst, owner)
 	inst.components.spellcard:SetCondition(condition)
 	inst.canspell:set(condition)
 end
@@ -147,8 +148,10 @@ local function GetDesc(inst, viewer)
 	if viewer.prefab == "yakumoyukari" then
 		local index = GetIndex(inst)
 		local currentLevel = GetStatLevel(viewer, index)
+		local condition = GetCanpell(inst, viewer)
+		SetState(inst, viewer)
 
-		return string.format( STRINGS.YUKARI_CURRENT_LEVEL.." - "..currentLevel..GetStr(viewer, index) )
+		return string.format( STRINGS.YUKARI_CURRENT_LEVEL.." - "..currentLevel..GetStr(viewer, index)..(condition and "\nI can spell." or "") )
 	end
 end
 
@@ -158,7 +161,6 @@ local function DoUpgrade(inst, owner)
 	local count = GetIngreCount(owner, index)
 	local inventory = owner.components.inventory
 
-	inst.OnItemUpdate(inst)
 	if not GetCanpell(inst, owner) then
 		inst.components.spellcard:SetCondition(false)
 		inst.canspell:set(false)
@@ -278,8 +280,6 @@ function MakePanel(iname)
 		inst.components.spellcard:SetSpellFn( DoUpgrade )
 		inst.components.spellcard:SetOnFinish( OnFinish )
 		inst.components.spellcard:SetCondition( false )
-		
-		inst:ListenForEvent("onitemupdate", SetState)
 		
 		return inst
 	end

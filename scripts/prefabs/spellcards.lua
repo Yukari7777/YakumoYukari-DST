@@ -575,7 +575,7 @@ function MakeCard(name)
 			{"greengem", math.random(2), "rare", nil, "rog"},
 			{"thulecite", math.random(3), "rare", nil, "rog"},
 			{"obsidian", math.random(3), "rare", nil, "sw"},
-			{"purplegem", math.random(2), "rare", nil, "sw"}, -- gives additional chance
+			{"purplegem", math.random(2), "rare", nil, "sw"},
 		}
 		local LootTable_b = {
 			{"ash", math.random(2), "bad", function() if owner.components.health then owner.components.health:DoDelta(-2, nil, nil, true) end end},

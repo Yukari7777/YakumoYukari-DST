@@ -10,7 +10,6 @@ function MakeUltimate(name, index)
 	}
 
 	local function DoUpgrade(inst)
-		
 		local caster = inst.components.inventoryitem.owner
 		local spellcard = inst.components.spellcard
 		local index = spellcard.index

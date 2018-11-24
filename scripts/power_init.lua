@@ -37,8 +37,6 @@ local function StatusDisplaysInit(class)
 			class.power:SetPercent(data.newpercent, class.owner.replica.power:Max())
 		end, class.owner)
 	end
-
-			
 	
 end
 

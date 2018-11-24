@@ -104,7 +104,7 @@ local function OnTakeDamage(self)
 		local Chara = self.inst
 		if self.inst.prefab == "yakumoyukari" then
 			local totaldodge = Chara.components.upgrader and (Chara.components.upgrader.dodgechance + Chara.components.upgrader.hatdodgechance)
-			if math.random() < totaldodge then
+			if Chara.IsGrazing or math.random() < totaldodge then
 				Chara:PushEvent("graze")
 				return 0
 			end
@@ -327,7 +327,7 @@ local function WarriorRetargetFn(inst)
 end
 
 local function ToolEfficientFn(self)
-	if IsMaster then
+	if GLOBAL.TheWorld.ismastersim  then
 		local function ToolEfficient(self, action, effectiveness, ...)
 			assert(GLOBAL.TOOLACTIONS[action.id], "invalid tool action")
 			if ThePlayer and IsYukari then

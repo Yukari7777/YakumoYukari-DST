@@ -40,7 +40,9 @@ local Upgrader = Class(function(self, inst)
 	self.WaterProofer = false
 	self.FireResist = false
 	self.GodTeleport = false
-	self.LongAttack = false
+	self.SpikeEater = false
+	self.RotEater = false
+	self.Ability_45 = false
 	
 	self.ability = {}
 	self.skill = {}
@@ -147,6 +149,7 @@ function Upgrader:UpdateAbilityStatus()
 	if ability[2][3] then
 		self.hungerbonus = 75
 		self.powerupvalue = 3
+		self.SpikeEater = true
 		self.inst.components.eater.strongstomach = true
 		self.inst.components.temperature.inherentinsulation = TUNING.INSULATION_MED
 		self.inst.components.temperature.inherentsummerinsulation = TUNING.INSULATION_MED
@@ -155,6 +158,7 @@ function Upgrader:UpdateAbilityStatus()
 	if ability[2][4] then
 		self.hungerbonus = 100
 		self.powerupvalue = 4
+		self.RotEater = true
 		self.inst.components.eater.ignoresspoilage = true
 		self.inst.components.temperature.inherentinsulation = TUNING.INSULATION_LARGE
 		self.inst.components.temperature.inherentsummerinsulation = TUNING.INSULATION_LARGE
@@ -230,15 +234,14 @@ function Upgrader:UpdateAbilityStatus()
 	end
 	
 	if ability[4][5] then
-		self.bonusspeed = 3
-		self.LongAttack = true
+		self.Ability_45 = true
 		self.inst.components.combat:SetAttackPeriod(0)
         self.inst.components.combat:SetRange(3.2)
 	end
 	
 	if ability[4][6] then
+		self.bonusspeed = 3
 		self.IsEfficient = true
-		self.bonusspeed = 4
 	end
 end
 
@@ -282,7 +285,9 @@ end
 function Upgrader:UpdateSkillStatus()
 	local skill = self.skill
 
-	skill.dmgmult = "Damage multiplier : "..string.format("%.2f", self.inst.components.combat.damagemultiplier).." (max : "..TUNING.YDEFAULT.DAMAGE_MULTIPLIER + 0.2 * self.powerupvalue..")"
+	if self.powerupvalue ~= 0 then
+		skill.dmgmult = "Damage multiplier : "..string.format("%.2f", self.inst.components.combat.damagemultiplier).." (max : "..TUNING.YDEFAULT.DAMAGE_MULTIPLIER + 0.2 * self.powerupvalue..")"
+	end
 
 	if self.ResistDark ~= 0 then
 		skill.insulation = "Reduces sanity decrement from darkness by "..(self.ResistDark * 100).."%" 
@@ -294,7 +299,7 @@ function Upgrader:UpdateSkillStatus()
 	end
 
 	if self.bonusspeed ~= 0 and self.hatbonusspeed ~= 0 then
-		skill.speed = self.bonusspeed + (self.hatEquipped and self.hatbonusspeed)
+		skill.speed = "Bonus Speed : "..self.bonusspeed + (self.hatEquipped and self.hatbonusspeed)
 	end	
 
 	if self.PowerGainMultiplier ~= 1 then
@@ -302,12 +307,12 @@ function Upgrader:UpdateSkillStatus()
 	end
 
 	if self.IsVampire then
-		skill.lifeleech = "Heals"..(self.IsAOE and 2 or 1).."every hit"
+		skill.lifeleech = "Heals "..(self.IsAOE and 2 or 1).." every hit"
 	end
 
-	local befriendlevel = 0 + (self.inst:HasTag("youkai") and 0 or 1) + (self.inst:HasTag("realyoukai") and 1 or 0) + (self.inst:HasTag("spiderwhisperer") and 1 or 0)
-	if befriendlevel ~= 0 then
-		skill.befriendlevel = "Befriend Level : "..befriendlevel
+	local friendlylevel = 0 + (self.inst:HasTag("youkai") and 0 or 1) + (self.inst:HasTag("realyoukai") and 1 or 0) + (self.inst:HasTag("spiderwhisperer") and 1 or 0)
+	if friendlylevel ~= 0 then
+		skill.friendlylevel = "Friendly Level : "..friendlylevel
 	end
 
 	if self.inst.components.sanity.neg_aura_mult ~= 1 then
@@ -363,12 +368,24 @@ function Upgrader:UpdateSkillStatus()
 		skill.isfight = "Absorbs damage by 30%"
 	end
 
-	if self.LongAttack and skill.longattack == nil then
+	if self.Ability_45 and skill.longattack == nil then
 		skill.longattack = "Inscreased attack range"
 	end
 
-	if self.IsEfficient and skill.efficient then
+	if self.Ability_45 and skill.realgraze == nil then
+		skill.realgraze = "Grazing grants invincibility for a short time"
+	end
+
+	if self.IsEfficient and skill.efficient == nil then
 		skill.efficient = "Uses tool more durably"
+	end
+
+	if self.SpikeEater and skill.spikeeater == nil then
+		skill.spikeeater = "Can eat monster meat."
+	end
+
+	if self.RotEater and skill.roteater == nil then
+		self.roteater = "Not a picky eater."
 	end
 end
 
