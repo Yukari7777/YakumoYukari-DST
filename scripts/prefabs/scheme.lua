@@ -6,16 +6,9 @@ local assets=
 
 local Ingredients = {
 	{{"rocks", 40}, {"log", 40}},
-	{{"silk", 30}, {"pigskin", 20}, {"tentaclespots", 10}, {"strawhat", 1}},
-	{{"monstermeat", 50}, {"nightmarefuel", 30}, {"livinglog", 20}, {"dragon_scales", 1}},
+	{{"silk", 30}, {"pigskin", 20}, {"tentaclespots", 5}, {"strawhat", 1}},
+	{{"monstermeat", 60}, {"nightmarefuel", 30}, {"livinglog", 20}, {"dragon_scales", 1}},
 	{{"thulecite", 20}, {"spellcard_away", 10}, {"spellcard_matter", 5}, {"spellcard_laplace", 2}, {"spellcard_necro", 1}}
-}
-
-local Ingredients_sw = {
-	{{"rocks", 20}, {"log", 20}, {"bamboo", 10}, {"vine", 10}},
-	{{"silk", 25}, {"pigskin", 15}, {"limestone", 10}, {"strawhat", 1}},
-	{{"monstermeat", 30}, {"fish", 30}, {"antivenom", 10}, {"shark_gills", 1}},
-	{{"obsidian", 25}, {"spellcard_away", 10}, {"spellcard_matter", 5}, {"spellcard_laplace", 2}, {"spellcard_necro", 1}}
 }
 
 local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
@@ -162,7 +155,7 @@ local function GetDesc(inst, viewer)
 	if viewer.prefab == "yakumoyukari" then
 		local condition = GetCanpell(inst, viewer)
 		SetState(inst, viewer)
-		return string.format( STRINGS.YUKARI_CURRENT_LEVEL.." - "..viewer.components.upgrader.hatlevel..GetStr(viewer) )
+		return string.format( STRINGS.YUKARI_CURRENT_LEVEL.." - "..viewer.components.upgrader.hatlevel..GetStr(viewer)..(condition and "\nI can spell." or "") )
 	end
 end
 

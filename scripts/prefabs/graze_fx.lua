@@ -33,7 +33,7 @@ local function fn()
 	inst.Physics:SetMotorVel(math.random(50)/10, 3, 0)
 
 	inst.SoundEmitter:PlaySound("soundpack/spell/graze")
-	inst:DoTaskInTime(0.6, inst.Remove)
+	inst:DoTaskInTime(math.random(), inst.Remove)
 	
 	return inst
 end
