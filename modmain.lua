@@ -8,8 +8,9 @@ PrefabFiles = {
 	"ultpanel",
 	"ultpanelsw",
 	"spellcards",
-	"barrierfieldfx",
+	"barrierfield_fx",
 	"graze_fx",
+	"puff_fx",
 	"scheme",
 	"taggable_classified",
 }
@@ -344,9 +345,6 @@ local function ToolEfficientFn(self)
 		self.SetAction = ToolEfficient
 	end
 end
-
---local writeable = require"prefab/writeable_classified"
-
 
 ---------- print current upgrade & ability
 function SayInfo(inst)

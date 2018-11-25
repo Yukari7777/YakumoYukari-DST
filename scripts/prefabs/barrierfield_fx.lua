@@ -33,4 +33,4 @@ local function fn(Sim)
     return inst
 end
 
-return Prefab( "common/barrierfieldfx", fn, assets) 
+return Prefab( "common/barrierfield_fx", fn, assets) 

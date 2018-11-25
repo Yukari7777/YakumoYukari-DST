@@ -18,7 +18,7 @@ AddRecipe("healthpanel", HealthIngredient, TOUHOU, TECH.SCIENCE_TWO, nil, nil, n
 AddRecipe("hungerpanel", HungerIngredient, TOUHOU, TECH.SCIENCE_ONE, nil, nil, nil, nil, nil, "images/inventoryimages/hungerpanel.xml", "hungerpanel.tex")
 AddRecipe("sanitypanel", SanityIngredient, TOUHOU, TECH.MAGIC_ONE, nil, nil, nil, nil, nil, "images/inventoryimages/sanitypanel.xml", "sanitypanel.tex")
 AddRecipe("powerpanel", PowerIngredient, TOUHOU, TECH.MAGIC_TWO, nil, nil, nil, nil, nil, "images/inventoryimages/powerpanel.xml", "powerpanel.tex")
---AddRecipe("spellcard_lament", {Ingredient("boards", 3), Ingredient("nightmarefuel", 1)}, TOUHOU, TECH.SCIENCE_ONE, nil, nil, nil, nil, nil, "images/inventoryimages/spellcard_lament.xml", "spellcard_lament.tex")
+AddRecipe("spellcard_lament", {Ingredient("boards", 3), Ingredient("nightmarefuel", 1)}, TOUHOU, TECH.SCIENCE_ONE, nil, nil, nil, nil, nil, "images/inventoryimages/spellcard_lament.xml", "spellcard_lament.tex")
 AddRecipe("spellcard_butter", {Ingredient("butter", 1), Ingredient("honey", 2)}, TOUHOU, TECH.SCIENCE_ONE, nil, nil, nil, nil, nil, "images/inventoryimages/spellcard_butter.xml", "spellcard_butter.tex")
 AddRecipe("spellcard_bait", {Ingredient("honey", 4), Ingredient("armorgrass", 1)}, TOUHOU, TECH.SCIENCE_ONE, nil, nil, nil, nil, nil, "images/inventoryimages/spellcard_bait.xml", "spellcard_bait.tex")
 AddRecipe("spellcard_away", {Ingredient("cutreeds", 10), Ingredient("goose_feather", 3)}, TOUHOU, TECH.MAGIC_ONE, nil, nil, nil, nil, nil, "images/inventoryimages/spellcard_away.xml", "spellcard_away.tex")

@@ -1640,6 +1640,21 @@ return {
 		"You were just nothing..",
 	},
 
+	LAMENT_B = {
+		"Oops",
+		"Oh, this is not good.",
+		"What is this?!",
+		"What? wait,"
+	},
+
+	LAMENT_H = {
+		"I'll never do this again!",
+		"What the f..",
+		"What the,",
+		"Oh, no.",
+		"Ahh!!",
+	},
+
 	DESCRIBE_GENERIC = "I don't even know about this.",
 	DESCRIBE_TOODARK = "It's BLACK!",
 	DESCRIBE_SMOLDERING = "That thing is about to catch fire.",

@@ -64,6 +64,7 @@ local function onsave(inst, data)
 	data.poison_cool = inst.poison_cool
 	data.invin_cool = inst.invin_cool
 	data.grazecnt = inst.grazecnt
+	data.naughtiness = inst.naughtiness
 	data.health_level = inst.components.upgrader.health_level
 	data.hunger_level = inst.components.upgrader.hunger_level
 	data.sanity_level = inst.components.upgrader.sanity_level
@@ -207,6 +208,10 @@ local function Cooldown(inst)
 	elseif inst.invin_cool == 0 then
 		inst.components.upgrader.CanbeInvincibled = true
 	end
+
+	if inst.naughtiness > 0 then
+		inst.naughtiness = inst.naughtiness - 1
+	end
 end
 
 local function PeriodicFunction(inst)
@@ -306,6 +311,7 @@ local function common_postinit(inst) -- things before SetPristine()
 
 	inst.IsInvincible = false
 	inst.IsGrazing = false
+	inst.naughtiness = 0
 	inst.regen_cool = 0
 	inst.poison_cool = 0
 	inst.invin_cool = 0

@@ -151,41 +151,40 @@ local function OnFinish(inst, owner)
 	owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_HATUPGRADE"))
 end
 
+local function SetState(inst, data)
+	local owner = data.owner or data
+	local condition = GetCanpell(owner)
+	inst.components.spellcard:SetCondition(condition)
+	inst.canspell:set(condition)
+end
+
+
 local function GetDesc(inst, viewer)
 	if viewer.prefab == "yakumoyukari" then
-		local condition = GetCanpell(inst, viewer)
+		local condition = GetCanpell(viewer)
 		SetState(inst, viewer)
 		return string.format( STRINGS.YUKARI_CURRENT_LEVEL.." - "..viewer.components.upgrader.hatlevel..GetStr(viewer)..(condition and "\nI can spell." or "") )
 	end
-end
-
-local function SetState(inst, data)
-	local owner = data.owner or data
-	local condition = GetCanpell(inst, owner)
-	inst.components.spellcard:SetCondition(condition)
-	inst.canspell:set(condition)
 end
 
 local function fn()  
 
 	local inst = CreateEntity() 
 	
-	inst.entity:AddTransform()    
-	inst.entity:AddAnimState()    
-	inst.entity:AddNetwork()	
-	inst.entity:AddSoundEmitter() 
+	inst.entity:AddTransform()
+	inst.entity:AddAnimState()
+	inst.entity:AddNetwork()
+	inst.entity:AddSoundEmitter()
 	inst.entity:AddMiniMapEntity()
-    inst.MiniMapEntity:SetIcon("scheme.tex") 
+    inst.MiniMapEntity:SetIcon("scheme.tex")
 
 	MakeInventoryPhysics(inst)
-	
+
 	inst.AnimState:SetBank("spell")    
 	inst.AnimState:SetBuild("spell")    
 	inst.AnimState:PlayAnimation("idle")    
 
 	inst:AddTag("scheme")
-	inst:AddTag("recieveitemupdate")
-
 	inst.canspell = net_bool(inst.GUID, "canspell")
 
 	inst.entity:SetPristine()
@@ -205,8 +204,6 @@ local function fn()
 	inst.components.spellcard:SetSpellFn( DoUpgrade )
 	inst.components.spellcard:SetOnFinish( OnFinish )
 	inst.components.spellcard:SetCondition( false )
-	
-	inst:ListenForEvent("onitemupdate", SetState)
 	
 	return inst
 end
