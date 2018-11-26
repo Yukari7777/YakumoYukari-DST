@@ -1,36 +1,35 @@
 local MakePlayerCharacter = require "prefabs/player_common"
 
 local assets = {
+	Asset( "ANIM", "anim/player_basic.zip" ),
+	Asset( "ANIM", "anim/player_idles_shiver.zip" ),
+	Asset( "ANIM", "anim/player_actions.zip" ),
+	Asset( "ANIM", "anim/player_actions_axe.zip" ),
+	Asset( "ANIM", "anim/player_actions_pickaxe.zip" ),
+	Asset( "ANIM", "anim/player_actions_shovel.zip" ),
+	Asset( "ANIM", "anim/player_actions_blowdart.zip" ),
+	Asset( "ANIM", "anim/player_actions_eat.zip" ),
+	Asset( "ANIM", "anim/player_actions_item.zip" ),
+	Asset( "ANIM", "anim/player_actions_uniqueitem.zip" ),
+	Asset( "ANIM", "anim/player_actions_bugnet.zip" ),
+	Asset( "ANIM", "anim/player_actions_fishing.zip" ),
+	Asset( "ANIM", "anim/player_actions_boomerang.zip" ),
+	Asset( "ANIM", "anim/player_bush_hat.zip" ),
+	Asset( "ANIM", "anim/player_attacks.zip" ),
+	Asset( "ANIM", "anim/player_idles.zip" ),
+	Asset( "ANIM", "anim/player_rebirth.zip" ),
+	Asset( "ANIM", "anim/player_jump.zip" ),
+	Asset( "ANIM", "anim/player_amulet_resurrect.zip" ),
+	Asset( "ANIM", "anim/player_teleport.zip" ),
+	Asset( "ANIM", "anim/wilson_fx.zip" ),
+	Asset( "ANIM", "anim/player_one_man_band.zip" ),
+	Asset( "ANIM", "anim/shadow_hands.zip" ),
+	Asset( "ANIM", "anim/beard.zip" ),
+	Asset( "SOUND", "sound/sfx.fsb" ),
+	Asset( "SOUND", "sound/wilson.fsb" ),
 
-        Asset( "ANIM", "anim/player_basic.zip" ),
-        Asset( "ANIM", "anim/player_idles_shiver.zip" ),
-        Asset( "ANIM", "anim/player_actions.zip" ),
-        Asset( "ANIM", "anim/player_actions_axe.zip" ),
-        Asset( "ANIM", "anim/player_actions_pickaxe.zip" ),
-        Asset( "ANIM", "anim/player_actions_shovel.zip" ),
-        Asset( "ANIM", "anim/player_actions_blowdart.zip" ),
-        Asset( "ANIM", "anim/player_actions_eat.zip" ),
-        Asset( "ANIM", "anim/player_actions_item.zip" ),
-        Asset( "ANIM", "anim/player_actions_uniqueitem.zip" ),
-        Asset( "ANIM", "anim/player_actions_bugnet.zip" ),
-        Asset( "ANIM", "anim/player_actions_fishing.zip" ),
-        Asset( "ANIM", "anim/player_actions_boomerang.zip" ),
-        Asset( "ANIM", "anim/player_bush_hat.zip" ),
-        Asset( "ANIM", "anim/player_attacks.zip" ),
-        Asset( "ANIM", "anim/player_idles.zip" ),
-        Asset( "ANIM", "anim/player_rebirth.zip" ),
-        Asset( "ANIM", "anim/player_jump.zip" ),
-        Asset( "ANIM", "anim/player_amulet_resurrect.zip" ),
-        Asset( "ANIM", "anim/player_teleport.zip" ),
-        Asset( "ANIM", "anim/wilson_fx.zip" ),
-        Asset( "ANIM", "anim/player_one_man_band.zip" ),
-        Asset( "ANIM", "anim/shadow_hands.zip" ),
-        Asset( "ANIM", "anim/beard.zip" ),
-		Asset( "SOUND", "sound/sfx.fsb" ),
-        Asset( "SOUND", "sound/wilson.fsb" ),
-
-		Asset( "ATLAS", "images/avatars/avatar_yakumoyukari.xml"),
-		Asset( "ATLAS", "images/avatars/avatar_ghost_yakumoyukari.xml"),
+	Asset( "ATLAS", "images/avatars/avatar_yakumoyukari.xml"),
+	Asset( "ATLAS", "images/avatars/avatar_ghost_yakumoyukari.xml"),
 }
 
 local prefabs = { -- deps; should be a list of prefabs that it wants to have loaded in order to be able to create prefab.
@@ -122,15 +121,6 @@ local function OnhitEvent(inst, data)
 		inst.components.combat:DoAreaAttack(data.target, 2, data.weapon, nil, data.stimuli, {"INLIMBO"})
 	end
 	
-end
-
-local function OnAttackedEvent(attacked)
-	if attacked.components.health and attacked.components.upgrader.IsFight then
-		if not attacked.components.health.invincible then -- Check another invinciblity.
-			attacked.components.health:SetInvincible(true)
-			attacked:DoTaskInTime(1, attacked.components.health:SetInvincible(false))
-		end
-	end
 end
 
 local function TelePortDelay(inst)
@@ -280,6 +270,8 @@ end
 local powertable = {
 	-- Rule : meat value per 10, reduced by 25% when cooked or dried.
 	P300 = {"minotaurhorn", "deerclops_eyeball", "tigereye"},
+	P100 = {"humanmeat"},
+	P80 = {"humanmeat_cooked", "humanmeat_dried"},
 	P40 = {"surfnturf"},
 	P30 = {"bonestew", "dragoonheart", "trunk_winter"},
 	P25 = {"baconeggs"},
@@ -306,6 +298,35 @@ local function oneat(inst, food)
 	end
 end
 
+local function MakeSaneOnMeatEat(inst)
+	inst.components.eater.eatmeat = inst.components.eater.Eat
+	function inst.components.eater:Eat(food)
+		if self:CanEat(food) then
+			if food.components.edible.foodtype == FOODTYPE.MEAT and food.components.edible.sanityvalue < 0 then
+				food.components.edible.sanityvalue = 0
+			end
+			if food.prefab == "humanmeat" or food.prefab == "humanmeat_cooked" or food.prefab == "humanmeat_dried" then
+				food.components.edible.sanityvalue = TUNING.SANITY_LARGE
+				food.components.edible.healthvalue = TUNING.HEALING_MED
+				inst.components.talker:Say(GetString(inst.prefab, "ONEATHUMAN"))
+			end
+		end
+		return inst.components.eater:eatmeat(food)
+	end
+end
+
+local function MakeGrazeable(inst)
+	inst.components.inventory.NewTakeDamage = inst.components.inventory.ApplyDamage
+	function inst.components.inventory:ApplyDamage(damage, attacker, weapon, ...)
+		local totaldodge = inst.components.upgrader.dodgechance + inst.components.upgrader.hatdodgechance
+		if inst.IsGrazing or math.random() < totaldodge then
+			inst:PushEvent("graze")
+			return 0
+		end
+		return inst.components.inventory:NewTakeDamage(damage, attacker, weapon, ...)
+	end
+end
+
 local function common_postinit(inst) -- things before SetPristine()
 	inst.MiniMapEntity:SetIcon( "yakumoyukari.tex" )
 
@@ -324,17 +345,12 @@ local function common_postinit(inst) -- things before SetPristine()
 	inst:AddTag("youkai")
 	inst:AddTag("yakumoga")
 	inst:AddTag("yakumoyukari")
-	
-	inst:RemoveTag("notarget")
-	inst:RemoveTag("inspell")
-	inst:RemoveTag("IsDamage")
 
 	inst:AddComponent("keyhandler")
 	inst.components.keyhandler:AddActionListener("yakumoyukari", 98, "SayInfo")
 end
 
 local master_postinit = function(inst) -- after SetPristine()
-
 	inst:AddComponent("upgrader")
 	inst:AddComponent("power")
 	
@@ -343,13 +359,14 @@ local master_postinit = function(inst) -- after SetPristine()
 	
 	inst.components.sanity:SetMax(75)
 	inst.components.health:SetMaxHealth(80)
-	inst.components.health:SetInvincible(false)
 	inst.components.hunger:SetMax(150)
-	inst.components.eater:SetOnEatFn(oneat)
 	inst.components.hunger.hungerrate = 1.5 * TUNING.WILSON_HUNGER_RATE
 	inst.components.combat.damagemultiplier = TUNING.YDEFAULT.DAMAGE_MULTIPLIER
-	inst.components.combat.areahitdamagepercent = 0.6
+	inst.components.combat.areahitdamagepercent = TUNING.YDEFAULT.AREA_DAMAGE_PERCENT
 	inst.components.builder.science_bonus = 1
+	inst.components.eater:SetOnEatFn(oneat)
+	MakeSaneOnMeatEat(inst)
+	MakeGrazeable(inst)
 	
 	inst.OnSave = onsave
 	inst.OnPreLoad = onpreload
@@ -364,12 +381,10 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:ListenForEvent("hungerdelta", DoHungerUp )
 	inst:ListenForEvent("healthdelta", GoInvincible )
 	inst:ListenForEvent("onattackother", OnhitEvent )
-	inst:ListenForEvent("attacked", OnAttackedEvent, inst )
 	inst:ListenForEvent("teleported", TelePortDelay, inst )
 	inst:ListenForEvent("hatequipped", EquippingEvent )
 	inst:ListenForEvent("graze", Graze )
 	inst:ListenForEvent("debugmode", DebugFunction, inst)
-
 end
 
 return MakePlayerCharacter("yakumoyukari", prefabs, assets, common_postinit, master_postinit)
