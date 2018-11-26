@@ -257,7 +257,7 @@ function MakePanel(iname)
 		inst.AnimState:PlayAnimation("idle")   
 
 		inst:AddTag("spellcard")
-		inst:AddTag("recieveitemupdate")
+		inst:AddTag("yakumoyukari")
 
 		inst.canspell = net_bool(inst.GUID, "canspell")
 

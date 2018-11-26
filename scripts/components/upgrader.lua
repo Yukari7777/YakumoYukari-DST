@@ -20,6 +20,7 @@ local Upgrader = Class(function(self, inst)
 	self.curecool = 0
 	self.hatdodgechance = 0
 	self.ResistDark = 0
+	self.hatabsorption = 0
 
 	self.PowerGainMultiplier = 1
 	self.dodgechance = 0.2
@@ -63,11 +64,9 @@ local Upgrader = Class(function(self, inst)
 end)
 
 function Upgrader:SetFireDamageScale()
-	local fireimmunedbody = self.inst.valid
-		  and self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY)
-		  and self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == ("armordragonfly" or "armorobsidian")
+	local shouldimmune = self.fireimmuned or (self.hatequipped and self.FireResist)
 	if self.inst.components.health then
-		self.inst.components.health.fire_damage_scale = (fireimmunedbody or self.FireResist) and 0 or 1
+		self.inst.components.health.fire_damage_scale = shouldimmune and 0 or 1
 	end
 end
 
@@ -90,7 +89,6 @@ function Upgrader:AbilityManager()
 	end
 	
 	self:UpdateAbilityStatus()
-	self:UpdateHatAbilityStatus()
 end
 
 function Upgrader:UpdateAbilityStatus()
@@ -201,6 +199,7 @@ function Upgrader:UpdateAbilityStatus()
 	end	
 	
 	if ability[3][6] then
+		self.dodgechance = 0.4
 		self.inst.components.sanity.neg_aura_mult = 0.5
 	end	
 	
@@ -244,40 +243,43 @@ function Upgrader:UpdateAbilityStatus()
 	end
 end
 
-function Upgrader:UpdateHatAbilityStatus(inst)
-	local YukariHat = self.hatEquipped
-
-	if YukariHat then
+function Upgrader:UpdateHatAbilityStatus(hat)	
+	if self.hatequipped then
 		local skill = self.hatskill
 		
 		if skill[2] then
 			self.hatdodgechance = 0.1
+			self.hatabsorption = 0.6
 		end
 		
 		if skill[3] then
-			--YukariHat.components.waterproofer:SetEffectiveness(1)
+			hat.components.waterproofer:SetEffectiveness(1)
 			self.WaterProofer = true
 			self.hatdodgechance = 0.2
+			self.hatabsorption = 0.8
 		end
 		
 		if skill[4] then
 			self.FireResist = true
 			self.hatbonusspeed = 1
 			self.hatdodgechance = 0.3
+			self.hatabsorption = 0.9
 		end
 		
 		if skill[5] then
-			self.dtmult = 2.5
 			self.hatdodgechance = 0.4
+			self.hatabsorption = 0.95
 			self.GodTeleport = true
 		end
 		
+		hat:SetAbsorbPercent(self.hatabsorption)
 	else
 		self.WaterProofer = false
 		self.FireResist = false
 		self.GodTeleport = false
 		self.hatdodgechance = 0
 	end
+	
 	self:SetFireDamageScale()
 end
 
@@ -298,7 +300,7 @@ function Upgrader:UpdateSkillStatus()
 	end
 
 	if self.bonusspeed ~= 0 and self.hatbonusspeed ~= 0 then
-		skill.speed = "Bonus Speed : "..self.bonusspeed + (self.hatEquipped and self.hatbonusspeed)
+		skill.speed = "Bonus Speed : "..self.bonusspeed + (self.hatequipped and self.hatbonusspeed)
 	end	
 
 	if self.PowerGainMultiplier ~= 1 then

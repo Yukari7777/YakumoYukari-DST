@@ -5,6 +5,18 @@ local assets =
 	Asset("ATLAS", "images/inventoryimages/yukarihat.xml"),    
 }
 
+local function InitializeStatus(inst)
+	inst.components.waterproofer:SetEffectiveness(0)
+	inst.components.armor.absorb_percent = 0
+end
+
+local function SetAbsorbPercent(inst, percent)
+	print("onset absorbpercent", inst, percent)
+	if inst.components.armor ~= nil then
+		inst.components.armor.absorb_percent = percent
+	end
+end
+
 local function fn()  
 	
 	local function onequiphat(inst, owner)
@@ -22,6 +34,7 @@ local function fn()
         owner.AnimState:Show("HAIR_NOHAT")
         owner.AnimState:Show("HAIR") 
 		owner:PushEvent("hatequipped", {isequipped = false, inst = inst})
+		InitializeStatus(inst)
     end
 
 	local inst = CreateEntity()    
@@ -41,6 +54,7 @@ local function fn()
 	inst.AnimState:PlayAnimation("idle")    
 
 	inst:AddTag("hat")
+	inst:AddTag("yakumoyukari")
 	
 	if not TheWorld.ismastersim then
 		return inst
@@ -57,10 +71,15 @@ local function fn()
 	inst:AddComponent("waterproofer")
 	inst.components.waterproofer:SetEffectiveness(0)
 	
+	inst:AddComponent("armor")
+	inst.components:InitIndestructible(0)
+	
 	inst:AddComponent("equippable")    
 	inst.components.equippable.equipslot = EQUIPSLOTS.HEAD
 	inst.components.equippable:SetOnEquip( onequiphat )
     inst.components.equippable:SetOnUnequip( onunequiphat )
+	
+	inst.SetAbsorbPercent = SetAbsorbPercent
 	
 	return inst
 end

@@ -105,6 +105,7 @@ local function fn()
 
 	inst:AddTag("nopunch")
 	inst:AddTag("umbrella")
+	inst:AddTag("yakumoyukari")
 	
 	inst.isunfolded = net_bool(inst.GUID, "isunfolded")
 

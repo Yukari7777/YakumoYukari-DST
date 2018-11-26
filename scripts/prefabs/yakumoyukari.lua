@@ -249,9 +249,13 @@ local function Graze(inst)
 	DoPowerRestore(inst, math.random(0, 2))
 end
 
-local function EquippingEvent(inst, data)
-	inst.components.upgrader.hatequipped = data.isequipped and data.inst
-	inst.components.upgrader.fireimmuned = inst.components.inventory ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == ("armordragonfly" or "armorobsidian")
+local function OnEquipHat(inst, data)
+	inst.components.upgrader.hatequipped = data.isequipped
+	inst.components.upgrader:UpdateHatAbilityStatus(data.inst)
+end
+
+local function SetFireImmuned(inst, data) -- I don't like how Klei sets the fire_damage_scale.
+	inst.components.upgrader.fireimmuned = inst.components.inventory ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == ("armordragonfly" or "armorobsidian")	
 	inst.components.upgrader:ApplyStatus()
 end
 
@@ -382,7 +386,9 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:ListenForEvent("healthdelta", GoInvincible )
 	inst:ListenForEvent("onattackother", OnhitEvent )
 	inst:ListenForEvent("teleported", TelePortDelay, inst )
-	inst:ListenForEvent("hatequipped", EquippingEvent )
+	inst:ListenForEvent("hatequipped", OnEquipHat )
+	inst:ListenForEvent("equipped", SetFireImmuned )
+	inst:ListenForEvent("unequipped", SetFireImmuned )
 	inst:ListenForEvent("graze", Graze )
 	inst:ListenForEvent("debugmode", DebugFunction, inst)
 end
