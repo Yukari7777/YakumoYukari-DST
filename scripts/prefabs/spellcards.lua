@@ -179,7 +179,7 @@ function MakeCard(name)
 			if inst.Activated == true then
 				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_CANNOTRESIST"))
 			else
-				inst.Duration = 20
+				inst.Duration = 30
 				if inst.Activated == nil then
 					owner:DoPeriodicTask(1, function()
 						if inst.Duration > 0 then
@@ -244,6 +244,10 @@ function MakeCard(name)
 				end
 			end
 			
+			for i = 1, rotcnt, 1 do
+				owner.components.inventory:GiveItem(SpawnPrefab("wetgoop"))
+			end
+			
 			for k,v in pairs(Inventory.itemslots) do
 				refresh(v)
 			end
@@ -258,10 +262,6 @@ function MakeCard(name)
 				end
 			end
 			
-			for i = 1, rotcnt, 1 do
-				owner.components.inventory:GiveItem(SpawnPrefab("wetgoop"))
-			end
-
 			if owner.components.power then
 				owner.components.power:DoDelta(-150, false)
 			end
@@ -405,10 +405,8 @@ function MakeCard(name)
 		end
 		inst.components.spellcard:SetSpellFn(function(inst, owner)
 			if inst.barriertask then
-				if owner.components.upgrader.ability[4][3] then
-					owner:AddTag("realyoukai")
-				end
-				owner:RemoveTag("IsDamage")
+				owner:RemoveTag("SpellBait")
+				owner.components.upgrader:ApplyStatus()
 				inst.fx.kill_fx(inst.fx)
 				inst.fx = nil
 				inst.barriertask:Cancel()
@@ -418,10 +416,11 @@ function MakeCard(name)
 				inst.barriertask = owner.DoPeriodicTask(owner, 1, function()
 					if inst.components.inventoryitem:IsHeld() and owner.components.power.current >= 1 then
 						owner.components.power:DoDelta(-1, false)
-						if not owner:HasTag("isDamage") then
-							owner:AddTag("IsDamage")
+						if not owner:HasTag("SpellBait") then
+							owner:AddTag("SpellBait")
 						end
-						if owner.components.upgrader.ability[4][3] and owner:HasTag("realyoukai") then
+						owner.components.upgrader:ApplyStatus()
+						if owner:HasTag("realyoukai") then
 							owner:RemoveTag("realyoukai")
 						end
 						local x,y,z = owner.Transform:GetWorldPosition()
@@ -438,10 +437,8 @@ function MakeCard(name)
 						else
 							owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
 						end
-						owner:RemoveTag("IsDamage")
-						if owner.components.upgrader.ability[4][3] then
-							owner:AddTag("realyoukai")
-						end
+						owner:RemoveTag("SpellBait")
+						owner.components.upgrader:ApplyStatus()
 						inst.fx.kill_fx(inst.fx)
 						inst.fx = nil
 						inst.barriertask:Cancel()
@@ -454,10 +451,8 @@ function MakeCard(name)
 		inst.components.finiteuses:SetOnFinished(function()
 			local owner = inst.components.inventoryitem.owner
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
-			owner:RemoveTag("IsDamage")
-			if owner.components.upgrader.ability[4][3] then
-				owner:AddTag("realyoukai")
-			end
+			owner:RemoveTag("SpellBait")
+			owner.components.upgrader:ApplyStatus()
 			inst.fx.kill_fx(inst.fx)
 			inst.fx = nil
 			inst.barriertask:Cancel()

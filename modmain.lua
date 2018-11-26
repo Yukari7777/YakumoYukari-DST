@@ -98,74 +98,6 @@ end
 AddModRPCHandler("scheme", "write", SetTaggableText)
 
 ---------------- OVERRIDE -----------------
-
-local function OnTakeDamage(self)
-	local function NewTakeDamage(self, damage, attacker, weapon, ...)
-		-- GRAZE MECHANISM
-		local Chara = self.inst
-		if self.inst.prefab == "yakumoyukari" then
-			local totaldodge = Chara.components.upgrader and (Chara.components.upgrader.dodgechance + Chara.components.upgrader.hatdodgechance)
-			if Chara.IsGrazing or math.random() < totaldodge then
-				Chara:PushEvent("graze")
-				return 0
-			end
-		end
-
-		local absorbers = {}
-
-		for k, v in pairs(self.equipslots) do
-			if v.components.resistance ~= nil and
-				v.components.resistance:HasResistance(attacker, weapon) and
-				v.components.resistance:ShouldResistDamage() then
-				v.components.resistance:ResistDamage(damage)
-				return 0
-			elseif v.components.armor ~= nil then
-				absorbers[v.components.armor] = v.components.armor:GetAbsorption(attacker, weapon)
-			end
-		end
-
-		local absorbed_percent = 0
-		local total_absorption = 0
-		for armor, amt in pairs(absorbers) do
-			-- print("\t", armor.inst, "absorbs", amt)
-			absorbed_percent = math.max(amt, absorbed_percent)
-			total_absorption = total_absorption + amt
-		end
-
-		local absorbed_damage = damage * absorbed_percent
-		local leftover_damage = damage - absorbed_damage
-
-		-- print("\tabsorbed%", absorbed_percent, "total_absorption", total_absorption, "absorbed_damage", absorbed_damage, "leftover_damage", leftover_damage)
-
-		if total_absorption > 0 then
-			GLOBAL.ProfileStatsAdd("armor_absorb", absorbed_damage)
-
-			for armor, amt in pairs(absorbers) do -- it doesn't increases armor durability efficiency.
-				armor:TakeDamage(absorbed_damage * amt / total_absorption + armor:GetBonusDamage(attacker, weapon))
-			end
-		end
-
-		-- custom damage reduction
-		if self.inst.prefab == "yakumoyukari" then
-			if self.inst.components.upgrader.hatequipped then
-				for i = 1, Chara.components.upgrader.hatlevel, 1 do
-					leftover_damage = leftover_damage * 0.6 -- 40%, 64%, 78.4%, 87%, 92.2%
-				end
-			end
-			
-			if Chara.components.upgrader.IsDamage then
-				leftover_damage = leftover_damage * 0.7
-			end
-			
-			if Chara:HasTag("IsDamage") then
-				leftover_damage = leftover_damage * 0.5
-			end
-		end
-		
-		return leftover_damage
-	end
-	self.ApplyDamage = NewTakeDamage
-end
 -- Bunnyman Retarget Function
 local function BunnymanNormalRetargetFn(inst)
 	if not GLOBAL.TheWorld.ismastersim then
@@ -327,25 +259,6 @@ local function WarriorRetargetFn(inst)
 	inst.components.combat:SetRetargetFunction(2, WarriorRetarget)
 end
 
-local function ToolEfficientFn(self)
-	if GLOBAL.TheWorld.ismastersim  then
-		local function ToolEfficient(self, action, effectiveness, ...)
-			assert(GLOBAL.TOOLACTIONS[action.id], "invalid tool action")
-			if ThePlayer and IsYukari then
-				if ThePlayer.components.upgrader and ThePlayer.components.upgrader.IsEfficient then
-					if action ~= GLOBAL.ACTIONS.HAMMER then -- Hammering efficiency should not be inceased.
-						effectiveness = effectiveness + 0.5
-					end
-				end
-			end
-			self.actions[action] = effectiveness or 1
-			self.inst:AddTag(action.id.."_tool")
-		end
-	
-		self.SetAction = ToolEfficient
-	end
-end
-
 ---------- print current upgrade & ability
 function SayInfo(inst)
 	local TheInput = TheInput
@@ -416,5 +329,3 @@ AddPrefabPostInit("killerbee", KillerbeeRetargetFn)
 AddPrefabPostInit("frog", FrogRetargetFn)
 AddPrefabPostInit("spider", SpiderRetargetFn)
 AddPrefabPostInit("spider_warrior", WarriorRetargetFn)
---AddComponentPostInit("inventory", OnTakeDamage)
-AddComponentPostInit("tool", ToolEfficientFn)

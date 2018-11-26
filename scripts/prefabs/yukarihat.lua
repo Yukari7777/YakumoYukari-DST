@@ -12,9 +12,7 @@ end
 
 local function SetAbsorbPercent(inst, percent)
 	print("onset absorbpercent", inst, percent)
-	if inst.components.armor ~= nil then
-		inst.components.armor.absorb_percent = percent
-	end
+	inst.components.armor.absorb_percent = percent
 end
 
 local function fn()  
@@ -72,8 +70,8 @@ local function fn()
 	inst.components.waterproofer:SetEffectiveness(0)
 	
 	inst:AddComponent("armor")
-	inst.components:InitIndestructible(0)
-	
+	inst.components.armor:InitIndestructible(0)
+
 	inst:AddComponent("equippable")    
 	inst.components.equippable.equipslot = EQUIPSLOTS.HEAD
 	inst.components.equippable:SetOnEquip( onequiphat )

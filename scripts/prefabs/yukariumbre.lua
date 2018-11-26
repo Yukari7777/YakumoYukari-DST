@@ -42,7 +42,7 @@ local function OnEquipYukari(inst, owner)
 	owner.AnimState:OverrideSymbol("swap_object", "swap_yukariumbre", "swap")
 	owner.AnimState:Show("ARM_carry")        
 	owner.AnimState:Hide("ARM_normal")
-	
+
 	inst.components.useableitem.inuse = false
 end    
 
@@ -67,6 +67,7 @@ local function unfoldit(inst)
 		owner.DynamicShadow:SetSize(1.3, 0.6)
 		inst.components.weapon:SetDamage(TUNING.YDEFAULT.YUKARI_UMBRE_DAMAGE)
 		inst.components.waterproofer:SetEffectiveness(0)
+		inst:RemoveTag("umbrella")
 		
 		inst.isunfolded:set(false)
 	else
@@ -77,6 +78,7 @@ local function unfoldit(inst)
 		owner.DynamicShadow:SetSize(2.2, 1.4)
 		inst.components.weapon:SetDamage(TUNING.YDEFAULT.YUKARI_UMBRE_DAMAGE_SMALL)
 		inst.components.waterproofer:SetEffectiveness(1)
+		inst:AddTag("umbrella")
 		
 		inst.isunfolded:set(true)
 	end
@@ -104,7 +106,6 @@ local function fn()
 	inst.AnimState:PlayAnimation("idle")  
 
 	inst:AddTag("nopunch")
-	inst:AddTag("umbrella")
 	inst:AddTag("yakumoyukari")
 	
 	inst.isunfolded = net_bool(inst.GUID, "isunfolded")

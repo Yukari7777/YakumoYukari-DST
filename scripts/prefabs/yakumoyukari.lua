@@ -249,16 +249,6 @@ local function Graze(inst)
 	DoPowerRestore(inst, math.random(0, 2))
 end
 
-local function OnEquipHat(inst, data)
-	inst.components.upgrader.hatequipped = data.isequipped
-	inst.components.upgrader:UpdateHatAbilityStatus(data.inst)
-end
-
-local function SetFireImmuned(inst, data) -- I don't like how Klei sets the fire_damage_scale.
-	inst.components.upgrader.fireimmuned = inst.components.inventory ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == ("armordragonfly" or "armorobsidian")	
-	inst.components.upgrader:ApplyStatus()
-end
-
 local function DebugFunction(inst)
 	inst:DoPeriodicTask(1, function()
 		if inst.components.power and inst.infpower then
@@ -319,6 +309,33 @@ local function MakeSaneOnMeatEat(inst)
 	end
 end
 
+local function MakeToolEfficient(item)
+	item.components.tool.NewEffectiveness = item.components.tool.GetEffectiveness
+	function item.components.tool.GetEffectiveness(self, action)
+		local owner = item.components.inventoryitem ~= nil and item.components.inventoryitem.owner
+		if owner ~= nil and owner.components.upgrader ~= nil and owner.components.upgrader.IsEfficient and action ~= ACTIONS.HAMMER then
+			return self.actions[action] * 1.5 or 0
+		end
+		return item.components.tool.NewEffectiveness(self, action)
+	end
+end
+
+local function OnEquipHat(inst, data)
+	inst.components.upgrader.hatequipped = data.isequipped
+	inst.components.upgrader:UpdateHatAbilityStatus(data.inst)
+end
+
+local function OnEquip(inst, data) 
+	if data.eslot == EQUIPSLOTS.HANDS and data.item ~= nil and data.item.components.tool ~= nil then
+		MakeToolEfficient(data.item)
+	end
+
+	inst.components.upgrader.fireimmuned = inst.components.inventory ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == ("armordragonfly" or "armorobsidian")	
+	-- I don't like how Klei sets the fire_damage_scale.
+	inst.components.upgrader:ApplyStatus()
+end
+
+
 local function MakeGrazeable(inst)
 	inst.components.inventory.NewTakeDamage = inst.components.inventory.ApplyDamage
 	function inst.components.inventory:ApplyDamage(damage, attacker, weapon, ...)
@@ -370,6 +387,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.components.builder.science_bonus = 1
 	inst.components.eater:SetOnEatFn(oneat)
 	MakeSaneOnMeatEat(inst)
+	--MakeToolEfficient(inst)
 	MakeGrazeable(inst)
 	
 	inst.OnSave = onsave
@@ -387,8 +405,8 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:ListenForEvent("onattackother", OnhitEvent )
 	inst:ListenForEvent("teleported", TelePortDelay, inst )
 	inst:ListenForEvent("hatequipped", OnEquipHat )
-	inst:ListenForEvent("equipped", SetFireImmuned )
-	inst:ListenForEvent("unequipped", SetFireImmuned )
+	inst:ListenForEvent("equip", OnEquip )
+	inst:ListenForEvent("unequip", OnEquip )
 	inst:ListenForEvent("graze", Graze )
 	inst:ListenForEvent("debugmode", DebugFunction, inst)
 end

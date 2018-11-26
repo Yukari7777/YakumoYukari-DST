@@ -200,6 +200,7 @@ function Upgrader:UpdateAbilityStatus()
 	
 	if ability[3][6] then
 		self.dodgechance = 0.4
+		self.IsFight = false
 		self.inst.components.sanity.neg_aura_mult = 0.5
 	end	
 	
@@ -409,6 +410,7 @@ function Upgrader:ApplyStatus()
 
 	self:AbilityManager()
 	self.inst.components.health.maxhealth = STATUS.DEFAULT_HP + self.health_level * STATUS.HP_RATE + self.healthbonus + math.max(0, (self.health_level - 30) * 7.5)
+	self.inst.components.health:SetAbsorptionAmount(1 - (self.IsDamage and 0.7 or 1) * (self.inst:HasTag("SpellBait") and 0.5 or 1) )
 	self.inst.components.hunger.hungerrate = math.max( 0, (STATUS.DEFAULT_HR - self.hunger_level * STATUS.HR_RATE - math.max(0, (self.hunger_level - 30) * 0.025 )) ) * TUNING.WILSON_HUNGER_RATE 
 	self.inst.components.hunger.max = STATUS.DEFAULT_HU + self.hungerbonus
 	self.inst.components.sanity.max = STATUS.DEFAULT_SN + self.sanity_level * STATUS.SN_RATE + self.sanitybonus + math.max(0, (self.sanity_level - 30) * 5)

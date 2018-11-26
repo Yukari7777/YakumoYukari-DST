@@ -254,7 +254,7 @@ function MakePanel(iname)
 		
 		inst.AnimState:SetBank(fname)    
 		inst.AnimState:SetBuild(fname)    
-		inst.AnimState:PlayAnimation("idle")   
+		inst.AnimState:PlayAnimation("idle")
 
 		inst:AddTag("spellcard")
 		inst:AddTag("yakumoyukari")
