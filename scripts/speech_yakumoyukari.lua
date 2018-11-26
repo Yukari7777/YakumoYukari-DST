@@ -1634,6 +1634,12 @@ return {
 		CREEPYEYES = "Superintentor. But you can't see inside.",
 	},
 
+	ONEATHUMAN = {
+		"Youkai's basic instinct.",
+		"This is really.. fresh",
+		"Try not to stand out, Player. Or..",
+	},
+
 	NECRO = {
 		"You were nothing but a piece of paper...",
 		"Go rest in the void..",

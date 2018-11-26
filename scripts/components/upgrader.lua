@@ -201,7 +201,6 @@ function Upgrader:UpdateAbilityStatus()
 	end	
 	
 	if ability[3][6] then
-		self.IsFight = true
 		self.inst.components.sanity.neg_aura_mult = 0.5
 	end	
 	
