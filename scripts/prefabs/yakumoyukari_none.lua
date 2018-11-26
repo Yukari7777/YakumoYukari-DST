@@ -10,17 +10,15 @@ local skins =
 	ghost_skin = "ghost_yakumoyukari_build",
 }
 
-local base_prefab = "yakumoyukari"
-
-local tags = {"yakumoyukari", "CHARACTER"}
-
 return CreatePrefabSkin("yakumoyukari_none",
 {
-	base_prefab = base_prefab,
-	skins = skins,
+	base_prefab = "yakumoyukari",
+	type = "base",
 	assets = assets,
-	tags = tags,
-	
+	skins = skins,
+	skin_tags = {"yakumoyukari", "CHARACTER", "BASE"},
+	rarity = "Common",
+	build_name = "yakumoyukari",
 	skip_item_gen = true,
 	skip_giftable_gen = true,
 })

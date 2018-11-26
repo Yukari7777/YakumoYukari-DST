@@ -145,7 +145,7 @@ local function fn()
 	
 	inst:AddComponent("useableitem")
     inst.components.useableitem:SetOnUseFn(unfoldit)
-
+	
 	return inst
 end
 	

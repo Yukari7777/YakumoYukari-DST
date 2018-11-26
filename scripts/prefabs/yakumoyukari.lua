@@ -387,7 +387,6 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.components.builder.science_bonus = 1
 	inst.components.eater:SetOnEatFn(oneat)
 	MakeSaneOnMeatEat(inst)
-	--MakeToolEfficient(inst)
 	MakeGrazeable(inst)
 	
 	inst.OnSave = onsave
