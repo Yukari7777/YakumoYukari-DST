@@ -300,12 +300,13 @@ function SayInfo(inst)
 			skilltable[skillindex] = v
 		end
 		inst.components.upgrader.skilltextpage = (skillindex ~= 0 and 2 + math.ceil(skillindex / 3) or 3)
-		for k = 1, 3 do
-			str = str..(skilltable[(inst.info-2) * 3 + k] or "").."\n"
-		end
 
 		if str == "" then
 			str = STRINGS.YUKARI_NOSKILL
+		else
+			for k = 1, 3 do
+				str = str..(skilltable[(inst.info-2) * 3 + k] or "").."\n"
+			end
 		end
 	end
 

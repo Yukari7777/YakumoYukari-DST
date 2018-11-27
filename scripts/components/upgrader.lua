@@ -21,6 +21,7 @@ local Upgrader = Class(function(self, inst)
 	self.hatdodgechance = 0
 	self.ResistDark = 0
 	self.hatabsorption = 0
+	self.absorbsanity = 0 
 
 	self.PowerGainMultiplier = 1
 	self.dodgechance = 0.2
@@ -176,18 +177,21 @@ function Upgrader:UpdateAbilityStatus()
 	end
 	
 	if ability[3][2] then
+		self.absorbsanity = 0.3
 		self.ResistDark = 0.2
 		self.sanitybonus = 25
 		self.inst.components.sanity.neg_aura_mult = 0.8
 	end
 	
 	if ability[3][3] then
+		self.absorbsanity = 0.6
 		self.sanitybonus = 50
 		self.ResistDark = 0.3
 		self.inst.components.sanity.neg_aura_mult = 0.7
 	end
 	
 	if ability[3][4] then
+		self.absorbsanity = 0.9
 		self.ResistDark = 0.5
 		self.sanitybonus = 75	
 		self.inst.components.sanity.neg_aura_mult = 0.6
@@ -234,7 +238,6 @@ function Upgrader:UpdateAbilityStatus()
 	
 	if ability[4][5] then
 		self.Ability_45 = true
-		self.inst.components.combat:SetAttackPeriod(0)
         self.inst.components.combat:SetRange(3.2)
 	end
 	
@@ -409,8 +412,9 @@ function Upgrader:ApplyStatus()
 	end
 
 	self:AbilityManager()
+	self.inst.components.combat:SetAttackPeriod(self.Ability_45 and 0 or TUNING.WILSON_ATTACK_PERIOD)
 	self.inst.components.health.maxhealth = STATUS.DEFAULT_HP + self.health_level * STATUS.HP_RATE + self.healthbonus + math.max(0, (self.health_level - 30) * 7.5)
-	self.inst.components.health:SetAbsorptionAmount(1 - (self.IsDamage and 0.7 or 1) * (self.inst:HasTag("SpellBait") and 0.5 or 1) )
+	self.inst.components.health:SetAbsorptionAmount(1 - (self.IsDamage and 0.7 or 1) * (self.inst:HasTag("spellbait") and 0.5 or 1) )
 	self.inst.components.hunger.hungerrate = math.max( 0, (STATUS.DEFAULT_HR - self.hunger_level * STATUS.HR_RATE - math.max(0, (self.hunger_level - 30) * 0.025 )) ) * TUNING.WILSON_HUNGER_RATE 
 	self.inst.components.hunger.max = STATUS.DEFAULT_HU + self.hungerbonus
 	self.inst.components.sanity.max = STATUS.DEFAULT_SN + self.sanity_level * STATUS.SN_RATE + self.sanitybonus + math.max(0, (self.sanity_level - 30) * 5)

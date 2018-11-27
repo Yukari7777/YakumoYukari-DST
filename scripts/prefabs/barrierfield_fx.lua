@@ -9,26 +9,34 @@ local function kill_fx(inst)
     inst:DoTaskInTime(0.6, function() inst:Remove() end)    
 end
 
-local function fn(Sim)
+local function fn()
 	local inst = CreateEntity()
 	inst.entity:AddNetwork()
 	inst.entity:AddTransform()
     inst.entity:AddAnimState()
 	inst.entity:AddSoundEmitter()
+	inst.entity:AddLight()
 
-    anim:SetBank("forcefield")
-    anim:SetBuild("barrifield")
-    anim:PlayAnimation("open")
-    anim:PushAnimation("idle_loop", true)
+    inst.AnimState:SetBank("forcefield")
+    inst.AnimState:SetBuild("barrifield")
+    inst.AnimState:PlayAnimation("open")
+    inst.AnimState:PushAnimation("idle_loop", true)
+
+	inst:AddTag("FX")
+	
+	inst.entity:SetPristine()
+	if not TheWorld.ismastersim then
+        return inst
+    end
 
     inst:AddComponent("lighttweener")
-    local light = inst.entity:AddLight()
-    inst.components.lighttweener:StartTween(light, 0, .9, 0.9, {1,1,1}, 0)
+    inst.components.lighttweener:StartTween(inst.light, 0, .9, 0.9, {1,1,1}, 0)
     inst.components.lighttweener:StartTween(nil, 1.6, .9, 0.9, nil, .2)
 
     inst.kill_fx = kill_fx
 
-    sound:PlaySound("dontstarve/wilson/forcefield_LP", "loop")
+	inst.persists = false
+    inst.SoundEmitter:PlaySound("dontstarve/wilson/forcefield_LP", "loop")
 
     return inst
 end

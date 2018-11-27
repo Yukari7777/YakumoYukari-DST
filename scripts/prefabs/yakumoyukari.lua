@@ -257,19 +257,15 @@ local function Graze(inst)
 	DoPowerRestore(inst, math.random(0, 2))
 end
 
-local function SetNightVision(inst, data)
-	if TheWorld.ismastersim then
-		print("run in server")
-	else
-		print("run in client")
-	end
-	inst.components.playervision:ForceNightVision(data.set)
-	inst.components.playervision:SetCustomCCTable(data.set and NIGHTVISION_COLOURCUBES or nil)
+local function SetNightVision(inst)
+	local set = inst.nightvision:value()
+	inst.components.playervision:ForceNightVision(set)
+	inst.components.playervision:SetCustomCCTable(set and NIGHTVISION_COLOURCUBES or nil)
 end
 
 local function SetNightVisable(inst)
 	if TheWorld.ismastersim or inst.HUD then
-		inst:ListenForEvent("setnightvision", SetNightVision)
+		inst:ListenForEvent("setnightvisiondirty", SetNightVision)
 	end
 end
 
@@ -340,7 +336,7 @@ local function MakeToolEfficient(item)
 		if owner ~= nil and owner.components.upgrader ~= nil and owner.components.upgrader.IsEfficient and action ~= ACTIONS.HAMMER then
 			return self.actions[action] * 1.5 or 0
 		end
-		return item.components.tool.NewEffectiveness(self, action)
+		return item.components.tool:NewEffectiveness(action)
 	end
 end
 
@@ -350,7 +346,7 @@ local function OnEquipHat(inst, data)
 end
 
 local function OnEquip(inst, data) 
-	if data.eslot == EQUIPSLOTS.HANDS and data.item ~= nil and data.item.components.tool ~= nil then
+	if inst.components.upgrader ~= nil and inst.components.upgrader.IsEfficient and data.eslot == EQUIPSLOTS.HANDS and data.item ~= nil and data.item.components.tool ~= nil then
 		MakeToolEfficient(data.item)
 	end
 
@@ -372,6 +368,23 @@ local function MakeGrazeable(inst)
 	end
 end
 
+local function MakeDapperOnEquipItem(inst)
+	inst.components.sanity.PreRecalc = inst.components.sanity.Recalc
+	function inst.components.sanity.Recalc(self, dt)
+		local item_dapperness = 0
+		for k, v in pairs(self.inst.components.inventory.equipslots) do
+			if v.components.equippable ~= nil then
+				item_dapperness = item_dapperness + v.components.equippable:GetDapperness(self.inst)
+			end
+		end
+		if item_dapperness < 0 then
+			item_dapperness = item_dapperness * self.inst.components.upgrader.absorbsanity
+		end
+		self.dapperness = -item_dapperness
+		return inst.components.sanity:PreRecalc(dt)
+	end
+end
+
 local function common_postinit(inst) -- things before SetPristine()
 	inst.MiniMapEntity:SetIcon( "yakumoyukari.tex" )
 
@@ -386,7 +399,7 @@ local function common_postinit(inst) -- things before SetPristine()
 
 	inst.maxpower = net_ushortint(inst.GUID, "maxpower")
 	inst.currentpower = net_ushortint(inst.GUID, "currentpower")
-	inst.nightvision = net_bool(inst.GUID, "player.isnightvision", "setnightvision")
+	inst.nightvision = net_bool(inst.GUID, "player.isnightvision", "setnightvisiondirty")
 	inst.nightvision:set(false)
 
 	inst:AddTag("youkai")
@@ -416,6 +429,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.components.eater:SetOnEatFn(oneat)
 	MakeSaneOnMeatEat(inst)
 	MakeGrazeable(inst)
+	MakeDapperOnEquipItem(inst)
 	
 	inst.OnSave = onsave
 	inst.OnPreLoad = onpreload

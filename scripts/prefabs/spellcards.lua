@@ -51,54 +51,36 @@ function MakeCard(name)
 	end
 	
 	local function away(inst)
-		inst.components.spellcard.costpower = 50
-		inst.costpower:set(50)
-		inst.components.finiteuses:SetMaxUses(10)
-		inst.components.finiteuses:SetUses(10)
-		inst.IsInvisible = nil
-		inst.Duration = 0
+		inst.components.spellcard.costpower = 1
+		inst.costpower:set(1)
+		inst.components.finiteuses:SetMaxUses(200)
+		inst.components.finiteuses:SetUses(200)
 		inst.components.spellcard:SetSpellFn(function(inst, owner)
-			if inst.IsInvisible == true then
-				inst.Duration = inst.Duration + 20
-				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_INVINCIBILITY_DURATION"))
-				if owner.components.power then
-					owner.components.power:DoDelta(-50, false)
+			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_CLOAKING"))
+			owner.AnimState:SetMultColour(0.3,0.3,0.3,.3)
+			owner:AddTag("notarget")
+		end)
+		inst.components.spellcard:SetTaskFn(function(inst, owner)
+			local x,y,z = owner.Transform:GetWorldPosition()
+			local ents = TheSim:FindEntities(x, y, z, 100)
+			for k,v in pairs(ents) do
+				if v.components.combat and v.components.combat.target == owner then
+					v.components.combat.target = nil
 				end
-				inst.components.finiteuses:Use(1)
-			else
-				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_CLOAKING"))
-				owner.AnimState:SetMultColour(0.3,0.3,0.3,.3)
-				owner:AddTag("notarget")
-				inst.Duration = 20
-				if inst.IsInvisible == nil then
-					owner:DoPeriodicTask(1, function()
-						if inst.IsInvisible == true and inst.Duration > 0 then
-							local x,y,z = owner.Transform:GetWorldPosition()
-							local ents = TheSim:FindEntities(x, y, z, 100)
-							for k,v in pairs(ents) do
-								if v.components.combat and v.components.combat.target == owner then
-									v.components.combat.target = nil
-								end
-							end
-						end
-						if inst.Duration > 0 then
-							inst.Duration = inst.Duration - 1
-						end
-						if inst.Duration <= 0 and inst.IsInvisible == true then
-							owner:RemoveTag("notarget")
-							owner.AnimState:SetMultColour(1,1,1,1)
-							inst.IsInvisible = false
-							owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DECLOAKING"))
-						end
-					end)
-				end
-				inst.IsInvisible = true
-				if owner.components.power then
-					owner.components.power:DoDelta(-50, false)
-				end
-				inst.components.finiteuses:Use(1)
-				return true
 			end
+			owner.components.power:DoDelta(-1, false)
+			inst.components.finiteuses:Use(1)
+		end)
+		inst.components.spellcard:SetOnRemoveTask(function(inst, owner)
+			owner:RemoveTag("notarget")
+			owner.AnimState:SetMultColour(1,1,1,1)
+			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DECLOAKING"))
+		end)
+		inst.components.finiteuses:SetOnFinished(function()
+			owner:RemoveTag("notarget")
+			owner.AnimState:SetMultColour(1,1,1,1)
+			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DECLOAKING"))
+			inst:Remove()
 		end)
 	end
 	
@@ -110,9 +92,7 @@ function MakeCard(name)
 		inst.components.spellcard:SetSpellFn(function(inst, owner)
 			local x,y,z = owner.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x, y, z, 40)
-			local Language = GetModConfigData("language", "Yakumo Yukari")
 			for k,v in pairs(ents) do
-
 				if v.components.health and not v:HasTag("player") then
 					local maxhealth = v.components.health.maxhealth
 					v.components.health:DoDelta(math.min(-maxhealth * 0.33, -500))
@@ -141,7 +121,6 @@ function MakeCard(name)
 					Evil.Transform:SetPosition(v:GetPosition():Get())
 					v:Remove()
 				end
-				
 			end
 
 			if owner.components.power then
@@ -151,73 +130,38 @@ function MakeCard(name)
 			local str = GetString(owner.prefab, "NECRO")
 
 			if owner.components.talker then
-				owner.components.talker:Say(str, 3)
+				owner.components.talker:Say(str)
 			end
 			inst:Remove()
 		end)
 	end
 	
 	local function curse(inst)
-		inst.components.spellcard.costpower = 50
-		inst.costpower:set(50)
-		inst.components.finiteuses:SetMaxUses(3)
-		inst.components.finiteuses:SetUses(3)
-		inst.Duration = 0
-		inst.Activated = nil
+		inst.components.spellcard.costpower = 1
+		inst.costpower:set(1)
+		inst.components.finiteuses:SetMaxUses(100)
+		inst.components.finiteuses:SetUses(100)
 		inst.components.spellcard:SetSpellFn(function(inst, owner)
-			local old_dmg = owner.components.combat.damagemultiplier
-			local old_speed = owner.components.upgrader.bonusspeed
-			local isfast = 1
-			if owner:HasTag("realyoukai") then
-				isfast = 0
-			end
-			local function GetMultipulier()
-				if owner.components.sanity then
-					return 3 * (1 - math.ceil(10 * owner.components.sanity:GetPercent())/10)
-				end
-			end
-			if inst.Activated == true then
-				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_CANNOTRESIST"))
-			else
-				inst.Duration = 30
-				if inst.Activated == nil then
-					owner:DoPeriodicTask(1, function()
-						if inst.Duration > 0 then
-							inst.Activated = true
-							inst.Duration = inst.Duration - 1
-							if owner:HasTag("inspell") then else
-								owner:AddTag("inspell")
-							end
-							if inst.Duration == 0 then
-								inst.Activated = false
-								
-								owner.components.combat.damagemultiplier = 1.2
-								owner.components.locomotor.walkspeed = 4
-								owner.components.locomotor.runspeed = 6
-								owner.components.combat:SetAttackPeriod(TUNING.WILSON_ATTACK_PERIOD)
-								
-								owner.components.upgrader:ApplyStatus()
-								owner:RemoveTag("inspell")
-								owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NOREINFORCE"))
-							end
-						end
-						if inst.Activated then
-							if owner.components.sanity then
-								owner.components.sanity:DoDelta(- owner.components.sanity:GetMaxWithPenalty() * 0.025)
-							end
-							owner.components.combat.damagemultiplier = math.max(GetMultipulier(), old_dmg)
-							owner.components.locomotor.walkspeed = 6 + math.max(GetMultipulier(), old_speed)
-							owner.components.locomotor.runspeed = 8 + math.max(GetMultipulier(), old_speed)
-							owner.components.combat:SetAttackPeriod(TUNING.WILSON_ATTACK_PERIOD * math.min(1, 1 - GetMultipulier()/3, isfast))
-						end
-					end)
-				end
-				if owner.components.power then
-					owner.components.power:DoDelta(-50, false)
-				end
-				inst.components.finiteuses:Use(1)
-			end
-			return true
+			inst.olddmg = owner.components.combat.damagemultiplier
+		end)
+		inst.components.spellcard:SetTaskFn(function(inst, owner)
+			local delta = math.max(3 * (1 - owner.components.sanity:GetPercent()), inst.olddmg)
+			owner.components.sanity:DoDelta(- owner.components.sanity:GetMaxWithPenalty() * 0.025)
+			owner.components.combat.damagemultiplier = delta * 1.25
+			owner.components.locomotor.walkspeed = 6 + delta
+			owner.components.locomotor.runspeed = 8 + delta
+			owner.components.combat:SetAttackPeriod(0)
+			owner.components.power:DoDelta(-1, false)
+			inst.components.finiteuses:Use(1)
+		end)
+		inst.components.spellcard:SetOnRemoveTask(function(inst, owner)
+			owner.components.upgrader:ApplyStatus()
+			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NOREINFORCE"))
+		end)
+		inst.components.finiteuses:SetOnFinished(function()
+			local owner = inst.components.inventoryitem.owner
+			owner.components.upgrader:ApplyStatus()
+			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NOREINFORCE"))
 		end)
 	end
 		
@@ -271,68 +215,34 @@ function MakeCard(name)
 	end
 	
 	local function laplace(inst)
-		inst.components.spellcard.costpower = 5
-		table.insert(assets, Asset("IMAGE", "images/colour_cubes/purple_moon_cc.tex"))
-		table.insert(assets, Asset("IMAGE", "images/colour_cubes/mole_vision_on_cc.tex"))
-        table.insert(assets, Asset("IMAGE", "images/colour_cubes/mole_vision_off_cc.tex"))
+		inst.components.spellcard.costpower = 0.5
+		inst.costpower:set(1)
 		inst.components.finiteuses:SetMaxUses(1500)
 		inst.components.finiteuses:SetUses(1500)
-		inst:AddComponent("stackable")
-		inst.components.stackable.maxsize = TUNING.STACK_SIZE_LARGEITEM
-		local function deletetask(inst)
-			inst.sighttask:Cancel()
-			inst.sighttask = nil
-		end
-
 		inst.components.spellcard:SetSpellFn(function(inst, owner)
-			local CCTABLE = inst.cctable
-			local HasNightVision = owner.components.playervision ~= nil and owner.components.playervision:HasNightVision()
-			local HasGoggleVision = owner.components.playervision ~= nil and owner.components.playervision:HasGoggleVision()
-
-			if inst.sighttask then
-				deletetask(inst)
-				owner:PushEvent("setnightvision", {set = false})
-				-- owner.components.playervision:SetCustomCCTable(nil)
-				-- owner.components.playervision:ForceNightVision(false)
-			end
-
-			if inst.sighttask == nil and HasNightVision then return false else
-				owner.components.power:DoDelta(4, false)
-				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NEWSIGHT"))
-				inst.sighttask = owner.DoPeriodicTask(owner, 1, function()
-					if inst.components.inventoryitem:IsHeld() then 
-						if owner.components.power.current >= 1 then
-							owner:PushEvent("setnightvision", {set = true})
-							inst.components.finiteuses:Use(1)
-							owner.components.power:DoDelta(-0.5, false)
-						else 
-							owner:PushEvent("setnightvision", {set = false})
-							owner.components.playervision:SetCustomCCTable(nil)
-							deletetask(inst)
-						end
-						if HasGoggleVision then -- Player wears goggle in task
-							owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_EYEHURT"))
-							if owner.components.combat then
-								owner.components.combat:GetAttacked(inst, 10)
-							end
-							owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
-							deletetask(inst)
-						end
-					else
-						owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
-						owner:PushEvent("setnightvision", {set = true})
-						deletetask(inst)
-					end 
-				end)
-			end
+			if owner.components.playervision == nil or owner.components.playervision.gogglevision then return false end
+			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NEWSIGHT"))
+			owner.nightvision:set(true)
 			return true
 		end)
-
+		inst.components.spellcard:SetTaskFn(function(inst, owner)
+			local HasGoggleVision = owner.components.playervision.gogglevision
+			inst.components.finiteuses:Use(1)
+			owner.components.power:DoDelta(-0.5, false)
+			if HasGoggleVision then -- Player wears goggle in task
+				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_EYEHURT"))
+				owner.components.combat:GetAttacked(inst, 1)
+				owner.nightvision:set(false)
+				return inst.components.spellcard:ClearTask(owner)
+			end
+		end)
+		inst.components.spellcard:SetOnRemoveTask(function(inst, owner)
+			owner.nightvision:set(false)
+		end)
 		inst.components.finiteuses:SetOnFinished(function()
 			local owner = inst.components.inventoryitem.owner
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
-			owner:PushEvent("setnightvision", {set = true})
-			deletetask(inst)
+			owner.nightvision:set(false)
 			inst:Remove()
 		end)
 	end
@@ -342,7 +252,6 @@ function MakeCard(name)
 		inst.costpower:set(80)
 		inst:RemoveComponent("finiteuses")
 		inst.components.spellcard:SetSpellFn(function(inst, owner)
-			
 			if not (TheWorld.components.butterflyspawner and TheWorld.components.birdspawner) then
 				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NOSPAWN"))
 			else
@@ -378,77 +287,51 @@ function MakeCard(name)
 		inst.costpower:set(1)
 		inst.components.finiteuses:SetMaxUses(300)
 		inst.components.finiteuses:SetUses(300)
-		local function barrier(inst)
-			if inst.fx then 
-				return inst.fx
-			else
-				local fx = SpawnPrefab("barrierfieldfx")
-				local fx_hitanim = function()
+		local function barrier(inst, owner)
+			local fx = SpawnPrefab("barrierfield_fx")
+			local fx_hitanim = function()
 				fx.AnimState:PlayAnimation("hit")
 				fx.AnimState:PushAnimation("idle_loop")
-				end
-				fx.entity:SetParent(inst.components.inventoryitem.owner.entity)
-				fx.AnimState:SetScale(0.7,0.7,0.7)
-				fx.AnimState:SetMultColour(0.5,0,0.5,0.3)
-				fx.Transform:SetPosition(0, 0.2, 0)
-				inst.fx = fx
-				return fx
 			end
+			fx.entity:SetParent(owner.entity)
+			fx.AnimState:SetScale(0.7,0.7,0.7)
+			fx.AnimState:SetMultColour(0.5,0,0.5,0.3)
+			fx.Transform:SetPosition(0, 0.2, 0)
+			return fx
 		end
 		inst.components.spellcard:SetSpellFn(function(inst, owner)
-			if inst.barriertask then
-				owner:RemoveTag("SpellBait")
-				owner.components.upgrader:ApplyStatus()
-				inst.fx.kill_fx(inst.fx)
-				inst.fx = nil
-				inst.barriertask:Cancel()
-				inst.barriertask = nil
-			else
-				inst.fx = barrier(inst)
-				inst.barriertask = owner.DoPeriodicTask(owner, 1, function()
-					if inst.components.inventoryitem:IsHeld() and owner.components.power.current >= 1 then
-						owner.components.power:DoDelta(-1, false)
-						if not owner:HasTag("SpellBait") then
-							owner:AddTag("SpellBait")
-						end
-						owner.components.upgrader:ApplyStatus()
-						if owner:HasTag("realyoukai") then
-							owner:RemoveTag("realyoukai")
-						end
-						local x,y,z = owner.Transform:GetWorldPosition()
-						local ents = TheSim:FindEntities(x, y, z, 12)
-						for k,v in pairs(ents) do
-							if v.components.combat and v.components.combat.canattack and v.components.combat.target ~= owner and not v:HasTag("player") then
-								v.components.combat:SetTarget(owner)
-							end
-						end
-						inst.components.finiteuses:Use(1)
-					else 
-						if owner.components.power.current < 1 then
-							owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_LOWPOWER"))
-						else
-							owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
-						end
-						owner:RemoveTag("SpellBait")
-						owner.components.upgrader:ApplyStatus()
-						inst.fx.kill_fx(inst.fx)
-						inst.fx = nil
-						inst.barriertask:Cancel()
-						inst.barriertask = nil
-					end
-				end)
+			owner:AddTag("spellbait")
+			owner.components.upgrader:ApplyStatus()
+			owner.components.talker:Say(GetString(owner.prefab, "TAUNT"))
+			inst.fx = barrier(inst, owner)
+		end)
+		inst.components.spellcard:SetTaskFn(function(inst, owner)
+			owner.components.power:DoDelta(-1, false)
+			if owner:HasTag("realyoukai") then
+				owner:RemoveTag("realyoukai")
 			end
-			return true
+			local x,y,z = owner.Transform:GetWorldPosition()
+			local ents = TheSim:FindEntities(x, y, z, 12)
+			for k,v in pairs(ents) do
+				if v.components.combat and v.components.combat.canattack and v.components.combat.target ~= owner and not v:HasTag("player") then
+					v.components.combat:SetTarget(owner)
+				end
+			end
+			inst.components.finiteuses:Use(1)
+		end)
+		inst.components.spellcard:SetOnRemoveTask(function(inst, owner)
+			owner:RemoveTag("spellbait")
+			owner.components.upgrader:ApplyStatus()
+			inst.fx:kill_fx()
+			inst.fx = nil
 		end)
 		inst.components.finiteuses:SetOnFinished(function()
 			local owner = inst.components.inventoryitem.owner
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
-			owner:RemoveTag("SpellBait")
+			owner:RemoveTag("spellbait")
 			owner.components.upgrader:ApplyStatus()
-			inst.fx.kill_fx(inst.fx)
+			inst.fx:kill_fx()
 			inst.fx = nil
-			inst.barriertask:Cancel()
-			inst.barriertask = nil
 			inst:Remove()
 		end)
 	end

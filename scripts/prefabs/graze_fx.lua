@@ -19,8 +19,6 @@ local function fn()
 	inst.AnimState:PlayAnimation("idle")
 	inst.AnimState:SetLayer(math.random(2, 4)) -- this is real rendering hack
 
-	inst.persists = false -- handled in a special way
-
 	inst:AddTag("NOCLICK")
 	inst:AddTag("FX")
 	
@@ -34,6 +32,7 @@ local function fn()
 
 	inst.SoundEmitter:PlaySound("soundpack/spell/graze")
 
+	inst.persists = false -- handled in a special way
 	inst:DoTaskInTime(math.random(), inst.Remove)
 	
 	return inst

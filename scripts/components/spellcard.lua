@@ -1,7 +1,8 @@
 local Spellcard = Class(function(self, inst)
 	self.inst = inst
-	self.onfinish = nil
 	self.othercondition = nil
+	self.spell = nil
+	self.onfinish = nil
 	
 	self.duration = nil
 	self.costpower = nil
@@ -9,8 +10,11 @@ local Spellcard = Class(function(self, inst)
 	self.name = nil
 	self.level = nil
 	self.maxlevel = nil
+	self.task = nil
+	self.taskfn = nil
+	self.taskinterval = nil
+	self.onremovetask = nil
 	
-	self.isusableitem = true
 	self.isdangeritem = false
 	self.tick = 0
 	
@@ -21,12 +25,29 @@ function Spellcard:SetSpellFn(fn)
 	self.spell = fn
 end
 
-function Spellcard:SetOnFinish(fn)
-	self.onfinish = fn
-end
-
 function Spellcard:SetCondition(fn)
 	self.othercondition = fn
+end
+
+function Spellcard:SetOnFinish(fn)
+	self.onfinish = nil
+end
+
+function Spellcard:SetTaskFn(fn, interval)
+	self.taskfn = fn
+	self.taskinterval = interval
+end
+
+function Spellcard:SetOnRemoveTask(fn)
+	self.onremovetask = fn
+end
+
+function Spellcard:ClearTask(doer)
+	self.task:Cancel()
+	self.task = nil
+	if self.onremovetask ~= nil then
+		self.onremovetask(self.inst, doer)
+	end
 end
 
 function Spellcard:GetLevel(inst, index)
@@ -42,12 +63,29 @@ function Spellcard:GetLevel(inst, index)
 end
 
 function Spellcard:CastSpell(doer, target)
-	if self.spell then
-		self.spell(self.inst, doer, target)
-		
-		if self.onfinish then
-			self.onfinish(self.inst, doer)
-		end
+	local inst = self.inst
+
+	if self.task ~= nil then
+		return self:ClearTask(doer)
+	end
+
+	if self.spell ~= nil then
+		self.spell(inst, doer, target)
+	end
+
+	if self.taskfn ~= nil then
+		self.task = doer.DoPeriodicTask(doer, self.taskinterval or 1, function()
+			local islow = doer.components.power.current < self.costpower
+			if not inst.components.inventoryitem:IsHeld() or islow then
+				doer.components.talker:Say(GetString(doer.prefab, islow and "DESCRIBE_LOWPOWER" or "DESCRIBE_DONEEFFCT"))
+				return self:ClearTask(doer)
+			end
+			self.taskfn(inst, doer)
+		end)
+	end
+
+	if self.onfinish ~= nil then
+		self.onfinish(inst, doer)
 	end
 end
 
@@ -61,13 +99,7 @@ function Spellcard:AddDesc(script)
 end
 
 function Spellcard:CanCast(doer)
-	
-	if doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) == nil then
-		self:AddDesc(STRINGS.YUKARI_SHOULD_BRING_SOMETHING)
-		return false
-	end
-	
-	if self.costpower then
+	if self.costpower ~= nil then
 		if doer.components.power:GetCurrent() < self.costpower then
 			self:AddDesc(STRINGS.YUKARI_NEED_POWER)
 			return false

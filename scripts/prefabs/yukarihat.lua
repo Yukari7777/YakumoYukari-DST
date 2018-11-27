@@ -11,7 +11,6 @@ local function InitializeStatus(inst)
 end
 
 local function SetAbsorbPercent(inst, percent)
-	print("onset absorbpercent", inst, percent)
 	inst.components.armor.absorb_percent = percent
 end
 

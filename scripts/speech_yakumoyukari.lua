@@ -1661,6 +1661,12 @@ return {
 		"Ahh!!",
 	},
 
+	TAUNT = {
+		"I'll set you free, if you win.",
+		"Hey! You wanna go?",
+		"Get taunted, mortals!",
+	},
+
 	DESCRIBE_GENERIC = "I don't even know about this.",
 	DESCRIBE_TOODARK = "It's BLACK!",
 	DESCRIBE_SMOLDERING = "That thing is about to catch fire.",
