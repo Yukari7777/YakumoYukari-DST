@@ -28,6 +28,7 @@ local assets = {
 	Asset( "SOUND", "sound/sfx.fsb" ),
 	Asset( "SOUND", "sound/wilson.fsb" ),
 
+	Asset("IMAGE", "images/colour_cubes/beaver_vision_cc.tex"),
 	Asset( "ATLAS", "images/avatars/avatar_yakumoyukari.xml"),
 	Asset( "ATLAS", "images/avatars/avatar_ghost_yakumoyukari.xml"),
 }
@@ -36,6 +37,13 @@ local prefabs = { -- deps; should be a list of prefabs that it wants to have loa
 	"scheme",
 	"yukariumbre",
 	"yukarihat",
+}
+
+local NIGHTVISION_COLOURCUBES = {
+	day = "images/colour_cubes/beaver_vision_cc.tex",
+	dusk = "images/colour_cubes/beaver_vision_cc.tex",
+	night = "images/colour_cubes/beaver_vision_cc.tex",
+	full_moon = "images/colour_cubes/beaver_vision_cc.tex",
 }
 
 -- Custom starting items
@@ -249,6 +257,22 @@ local function Graze(inst)
 	DoPowerRestore(inst, math.random(0, 2))
 end
 
+local function SetNightVision(inst, data)
+	if TheWorld.ismastersim then
+		print("run in server")
+	else
+		print("run in client")
+	end
+	inst.components.playervision:ForceNightVision(data.set)
+	inst.components.playervision:SetCustomCCTable(data.set and NIGHTVISION_COLOURCUBES or nil)
+end
+
+local function SetNightVisable(inst)
+	if TheWorld.ismastersim or inst.HUD then
+		inst:ListenForEvent("setnightvision", SetNightVision)
+	end
+end
+
 local function DebugFunction(inst)
 	inst:DoPeriodicTask(1, function()
 		if inst.components.power and inst.infpower then
@@ -362,6 +386,8 @@ local function common_postinit(inst) -- things before SetPristine()
 
 	inst.maxpower = net_ushortint(inst.GUID, "maxpower")
 	inst.currentpower = net_ushortint(inst.GUID, "currentpower")
+	inst.nightvision = net_bool(inst.GUID, "player.isnightvision", "setnightvision")
+	inst.nightvision:set(false)
 
 	inst:AddTag("youkai")
 	inst:AddTag("yakumoga")
@@ -369,6 +395,8 @@ local function common_postinit(inst) -- things before SetPristine()
 
 	inst:AddComponent("keyhandler")
 	inst.components.keyhandler:AddActionListener("yakumoyukari", 98, "SayInfo")
+	
+	inst:DoTaskInTime(0, SetNightVisable)
 end
 
 local master_postinit = function(inst) -- after SetPristine()
@@ -397,6 +425,7 @@ local master_postinit = function(inst) -- after SetPristine()
 		inst:PushEvent("yukariloaded")
 	end
 	inst.powertable = powertable
+	inst.cctable = NIGHTVISION_COLOURCUBES
 	
 	inst:DoPeriodicTask(1, PeriodicFunction)
 	inst:ListenForEvent("hungerdelta", DoHungerUp )

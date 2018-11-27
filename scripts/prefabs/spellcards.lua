@@ -285,19 +285,15 @@ function MakeCard(name)
 		end
 
 		inst.components.spellcard:SetSpellFn(function(inst, owner)
-			local NIGHTVISION_COLOURCUBES = {
-				day = "images/colour_cubes/beaver_vision_cc.tex",
-				dusk = "images/colour_cubes/beaver_vision_cc.tex",
-				night = "images/colour_cubes/beaver_vision_cc.tex",
-				full_moon = "images/colour_cubes/beaver_vision_cc.tex",
-			}
-			local HasNightVision = owner.components.playervision and owner.components.playervision:HasNightVision()
-			local HasGoggleVision = owner.components.playervision and owner.components.playervision:HasGoggleVision()
+			local CCTABLE = inst.cctable
+			local HasNightVision = owner.components.playervision ~= nil and owner.components.playervision:HasNightVision()
+			local HasGoggleVision = owner.components.playervision ~= nil and owner.components.playervision:HasGoggleVision()
 
 			if inst.sighttask then
 				deletetask(inst)
-				owner.components.playervision:SetCustomCCTable(nil)
-				owner.components.playervision:ForceNightVision(false)
+				owner:PushEvent("setnightvision", {set = false})
+				-- owner.components.playervision:SetCustomCCTable(nil)
+				-- owner.components.playervision:ForceNightVision(false)
 			end
 
 			if inst.sighttask == nil and HasNightVision then return false else
@@ -306,13 +302,11 @@ function MakeCard(name)
 				inst.sighttask = owner.DoPeriodicTask(owner, 1, function()
 					if inst.components.inventoryitem:IsHeld() then 
 						if owner.components.power.current >= 1 then
-							owner.components.playervision:ForceNightVision(true)
-							owner.components.playervision:SetCustomCCTable(NIGHTVISION_COLOURCUBES)
+							owner:PushEvent("setnightvision", {set = true})
 							inst.components.finiteuses:Use(1)
 							owner.components.power:DoDelta(-0.5, false)
 						else 
-							owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_LOWPOWER"))
-							owner.components.playervision:ForceNightVision(false)
+							owner:PushEvent("setnightvision", {set = false})
 							owner.components.playervision:SetCustomCCTable(nil)
 							deletetask(inst)
 						end
@@ -326,8 +320,7 @@ function MakeCard(name)
 						end
 					else
 						owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
-						owner.components.playervision:ForceNightVision(false)
-						owner.components.playervision:SetCustomCCTable(nil)
+						owner:PushEvent("setnightvision", {set = true})
 						deletetask(inst)
 					end 
 				end)
@@ -338,8 +331,7 @@ function MakeCard(name)
 		inst.components.finiteuses:SetOnFinished(function()
 			local owner = inst.components.inventoryitem.owner
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
-			owner.components.playervision:ForceNightVision(false)
-			owner.components.playervision:SetCustomCCTable(nil)
+			owner:PushEvent("setnightvision", {set = true})
 			deletetask(inst)
 			inst:Remove()
 		end)
