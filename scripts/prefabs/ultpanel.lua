@@ -26,7 +26,7 @@ function MakeUltimate(name, index)
 			str[2] = "Now I have power of TheWorld."
 			str[3] = "The world is beginning to show with new sights."
 			str[4] = "Yes... this is my power I had."
-		if language == "chinese" then
+		if language == "ch" then
 			str[1] = "现 在 我 可 以 避 开 死 亡.."
 			str[2] = "现 在 我 有 了 世 界 之 力."
 			str[3] = "世 界 开 始 以 新 的 视 角 展 现."

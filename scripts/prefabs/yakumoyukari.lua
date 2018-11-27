@@ -109,9 +109,7 @@ local function onpreload(inst, data)
 end
 
 local function OnhitEvent(inst, data)
-	-- Life Leech
 	local CanAOE = math.random() < 0.4
-	
 	if inst.components.upgrader.IsVampire then
 		local target = data.target
 		local RegenAmount = inst.components.upgrader.IsAOE and 2 or 1
@@ -123,8 +121,7 @@ local function OnhitEvent(inst, data)
 			end
 		end
 	end
-	
-	-- AOE Hit
+
 	if inst.components.upgrader.IsAOE and CanAOE then
 		inst.components.combat:DoAreaAttack(data.target, 2, data.weapon, nil, data.stimuli, {"INLIMBO"})
 	end
@@ -164,7 +161,7 @@ end
 local function InvincibleRegen(inst)
 	if inst.components.health and inst.components.upgrader.emergency then
 		local delta = inst.components.upgrader.emergency
-		inst.components.health:DoDelta(delta, nil, nil, true) -- DoDelta(amount, overtime, cause, ignore_invincible)
+		inst.components.health:DoDelta(delta, nil, nil, true)
 	end
 end
 
@@ -178,7 +175,7 @@ function GoInvincible(inst)
 		inst.IsInvincible = true
 		inst.components.health:SetInvincible(true)
 		inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_INVINCIBILITY_ACTIVATE"))
-		inst:DoTaskInTime(10, function() -- Execute after 10 seconds.
+		inst:DoTaskInTime(10, function()
 			inst.IsInvincible = false
 			inst.invin_cool = 1440
 			inst.components.upgrader.emergency = 0
@@ -257,15 +254,31 @@ local function Graze(inst)
 	DoPowerRestore(inst, math.random(0, 2))
 end
 
+local function PushMessage(inst)
+	local string = inst.inspect:value()
+	local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
+	local inspect = GetModConfigData("inspect", modname) or 7
+
+	if inspect % 4 >= 2 then print(string) end
+	if inspect % 8 >= 4 then 
+		if inst.HUD ~= nil then
+			for v in string.gmatch(string, ".-%c") do
+				inst.HUD.controls.networkchatqueue:PushMessage("", v, {0.8, 0.8, 0.8, 1})
+			end
+		end
+	end
+end
+
 local function SetNightVision(inst)
 	local set = inst.nightvision:value()
 	inst.components.playervision:ForceNightVision(set)
 	inst.components.playervision:SetCustomCCTable(set and NIGHTVISION_COLOURCUBES or nil)
 end
 
-local function SetNightVisable(inst)
-	if TheWorld.ismastersim or inst.HUD then
+local function RegisterDirtyEvent(inst)
+	if TheWorld.ismastersim or inst.HUD ~= nil then
 		inst:ListenForEvent("setnightvisiondirty", SetNightVision)
+		inst:ListenForEvent("onskillinspectdirty", PushMessage)
 	end
 end
 
@@ -371,16 +384,14 @@ end
 local function MakeDapperOnEquipItem(inst)
 	inst.components.sanity.PreRecalc = inst.components.sanity.Recalc
 	function inst.components.sanity.Recalc(self, dt)
-		local item_dapperness = 0
+		local NumBeforeCalc = 0
 		for k, v in pairs(self.inst.components.inventory.equipslots) do
 			if v.components.equippable ~= nil then
-				item_dapperness = item_dapperness + v.components.equippable:GetDapperness(self.inst)
+				local itemdap = v.components.equippable:GetDapperness(self.inst)
+				NumBeforeCalc = NumBeforeCalc + itemdap < 0 and itemdap * self.inst.components.upgrader.absorbsanity or 0
 			end
 		end
-		if item_dapperness < 0 then
-			item_dapperness = item_dapperness * self.inst.components.upgrader.absorbsanity
-		end
-		self.dapperness = -item_dapperness
+		self.dapperness = -NumBeforeCalc
 		return inst.components.sanity:PreRecalc(dt)
 	end
 end
@@ -397,9 +408,10 @@ local function common_postinit(inst) -- things before SetPristine()
 	inst.grazecnt = 0
 	inst.info = 0
 
+	inst.inspect = net_string(inst.GUID, "onskillinspect", "onskillinspectdirty")
 	inst.maxpower = net_ushortint(inst.GUID, "maxpower")
 	inst.currentpower = net_ushortint(inst.GUID, "currentpower")
-	inst.nightvision = net_bool(inst.GUID, "player.isnightvision", "setnightvisiondirty")
+	inst.nightvision = net_bool(inst.GUID, "player.isnightvistion", "setnightvisiondirty")
 	inst.nightvision:set(false)
 
 	inst:AddTag("youkai")
@@ -409,7 +421,7 @@ local function common_postinit(inst) -- things before SetPristine()
 	inst:AddComponent("keyhandler")
 	inst.components.keyhandler:AddActionListener("yakumoyukari", 98, "SayInfo")
 	
-	inst:DoTaskInTime(0, SetNightVisable)
+	inst:DoTaskInTime(0, RegisterDirtyEvent)
 end
 
 local master_postinit = function(inst) -- after SetPristine()

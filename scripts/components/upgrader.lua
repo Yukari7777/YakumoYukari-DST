@@ -121,6 +121,7 @@ function Upgrader:UpdateAbilityStatus()
 	end
 	
 	if ability[1][5] then	
+		self.IsFight = false
 		self.InvincibleLearned = true
 		self.regenamount = 4
 		self.regencool = 15
@@ -173,28 +174,28 @@ function Upgrader:UpdateAbilityStatus()
 	end
 	
 	if ability[3][1] then	
-		self.inst.components.sanity.neg_aura_mult = 0.9
+		self.inst.components.sanity.neg_aura_mult = 0.8
 	end
 	
 	if ability[3][2] then
 		self.absorbsanity = 0.3
 		self.ResistDark = 0.2
 		self.sanitybonus = 25
-		self.inst.components.sanity.neg_aura_mult = 0.8
+		self.inst.components.sanity.neg_aura_mult = 0.6
 	end
 	
 	if ability[3][3] then
 		self.absorbsanity = 0.6
 		self.sanitybonus = 50
 		self.ResistDark = 0.3
-		self.inst.components.sanity.neg_aura_mult = 0.7
+		self.inst.components.sanity.neg_aura_mult = 0.4
 	end
 	
 	if ability[3][4] then
 		self.absorbsanity = 0.9
 		self.ResistDark = 0.5
 		self.sanitybonus = 75	
-		self.inst.components.sanity.neg_aura_mult = 0.6
+		self.inst.components.sanity.neg_aura_mult = 0.2
 	end
 	
 	if ability[3][5] then
@@ -204,8 +205,7 @@ function Upgrader:UpdateAbilityStatus()
 	
 	if ability[3][6] then
 		self.dodgechance = 0.4
-		self.IsFight = false
-		self.inst.components.sanity.neg_aura_mult = 0.5
+		self.inst.components.sanity.neg_aura_mult = 0.1
 	end	
 	
 	if ability[4][1] then
@@ -320,6 +320,10 @@ function Upgrader:UpdateSkillStatus()
 		skill.friendlylevel = "Friendly Level : "..friendlylevel
 	end
 
+	if self.absorbsanity ~= 0 then
+		skill.absorbsanity = "Reduces sanity penalty from armor by "..(self.absorbsanity * 100).."%"
+	end
+
 	if self.inst.components.sanity.neg_aura_mult ~= 1 then
 		skill.insanityresist = "Insanity Aura resist : "..((1 - self.inst.components.sanity.neg_aura_mult) * 100).."%"
 	end
@@ -370,7 +374,7 @@ function Upgrader:UpdateSkillStatus()
 	end
 
 	if self.IsFight and skill.isfight == nil then
-		skill.isfight = "Absorbs damage by 30%"
+		skill.isfight = "Absorbs incoming damage by 30%"
 	end
 
 	if self.Ability_45 and skill.longattack == nil then

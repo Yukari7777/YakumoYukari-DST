@@ -26,7 +26,7 @@ function MakeUltimateSW(name, index)
 			str[2] = "Everythings are DESTROYABLE."
 			str[3] = "This, is the power who my friend had..."
 			str[4] = "Yes... this is my power I had."
-		if language == "chinese" then
+		if language == "ch" then
 			str[1] = "我 改 变 了 我 自 己 的 命 运..."
 			str[2] = "万 物 皆 可 毁 灭."
 			str[3] = "这.. 是 我 伙 伴 的 力 量..."

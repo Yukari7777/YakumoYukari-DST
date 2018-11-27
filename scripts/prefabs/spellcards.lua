@@ -220,7 +220,7 @@ function MakeCard(name)
 		inst.components.finiteuses:SetMaxUses(1500)
 		inst.components.finiteuses:SetUses(1500)
 		inst.components.spellcard:SetSpellFn(function(inst, owner)
-			if owner.components.playervision == nil or owner.components.playervision.gogglevision then return false end
+			if owner.components.playervision == nil then return false end
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NEWSIGHT"))
 			owner.nightvision:set(true)
 			return true

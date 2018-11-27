@@ -18,7 +18,27 @@ server_filter_tags = {
 	"character",
 }
 
+local inspectflag = {}
+for i = 1, 7 do inspectflag[i] = { description = "", data = i } end
+inspectflag[1].description = "character"
+inspectflag[2].description = "console"
+inspectflag[3].description = "console, character"
+inspectflag[4].description = "chat"
+inspectflag[5].description = "chat, character"
+inspectflag[6].description = "chat, console"
+inspectflag[7].description = "everywhere"
+
 configuration_options = {
+	{
+		name = "language",
+		label = "Language",
+		options = {
+			{ description = "english", data = "en" },
+			{ description = "chinese", data = "ch" },
+		},
+		default = "en",
+	},
+
 	{
 		name = "difficulty",
 		label = "Play Style",
@@ -30,5 +50,14 @@ configuration_options = {
 		},
 		default = "default",
 	},
+
+	{
+		name = "inspect",
+		label = "Print skill info in",
+		hover = "Set where to show the skill info should display in.",
+		options = inspectflag,
+		default = 1,
+	},
+
 
 }

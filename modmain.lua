@@ -73,7 +73,7 @@ STRINGS.CHARACTER_NAMES.yakumoyukari = "Yakumo Yukari"
 STRINGS.CHARACTER_DESCRIPTIONS.yakumoyukari = "has own ability 'youkai power'.\nbecomes dreadful when she obtains the power from the world."
 STRINGS.CHARACTER_QUOTES.yakumoyukari = "\"I have taken the first napkin.\""
 STRINGS.CHARACTERS.YAKUMOYUKARI = require "speech_yakumoyukari"
-if Language == "chinese" then
+if Language == "ch" then
 	STRINGS.CHARACTER_TITLES.yakumoyukari = "境界的妖怪"
 	STRINGS.CHARACTER_DESCRIPTIONS.yakumoyukari = "拥 有 自 己 的 能 力 '妖 力'.\n 当 她 从 自 己 的 世 界 中 获 得 ' 力 量 ' 之 后 将 变 得 极 其 可 怕."
 	STRINGS.CHARACTER_QUOTES.yakumoyukari = "\"我 将 会 掌 控 这 个 世 界！.\""
@@ -268,6 +268,7 @@ function SayInfo(inst)
 	local PO = 0
 	local str = ""
 	local skilltable = {}
+	local inspect = GetModConfigData("inspect")
 	inst.info = inst.info >= (inst.components.upgrader.skilltextpage or 3) and 0 or inst.info
 	
 	if inst.info == 0 then
@@ -276,7 +277,7 @@ function SayInfo(inst)
 		SA = inst.components.upgrader.sanity_level
 		PO = inst.components.upgrader.power_level
 
-		str = STRINGS.NAMES.HEALTHPANEL.." : "..HP.."\n"..STRINGS.NAMES.HUNGERPANEL.." : "..HN.."\n"..STRINGS.NAMES.SANITYPANEL.." : "..SA.."\n"..STRINGS.NAMES.POWERPANEL.." : "..PO
+		str = STRINGS.NAMES.HEALTHPANEL.." : "..HP.."\n"..STRINGS.NAMES.HUNGERPANEL.." : "..HN.."\n"..STRINGS.NAMES.SANITYPANEL.." : "..SA.."\n"..STRINGS.NAMES.POWERPANEL.." : "..PO.."\n"
 	elseif inst.info == 1 then
 		for i = 1, inst.components.upgrader.skillsort, 1 do
 			for j = 1, inst.components.upgrader.skilllevel, 1 do
@@ -290,7 +291,7 @@ function SayInfo(inst)
 			end
 		end
 
-		str = STRINGS.HEALTH.." "..STRINGS.ABILITY.." : lev."..HP.."\n"..STRINGS.HUNGER.." "..STRINGS.ABILITY.." : lev."..HN.."\n"..STRINGS.SANITY.." "..STRINGS.ABILITY.." : lev."..SA.."\n"..STRINGS.POWER.." "..STRINGS.ABILITY.." : lev."..PO
+		str = STRINGS.HEALTH.." "..STRINGS.ABILITY.." : lev."..HP.."\n"..STRINGS.HUNGER.." "..STRINGS.ABILITY.." : lev."..HN.."\n"..STRINGS.SANITY.." "..STRINGS.ABILITY.." : lev."..SA.."\n"..STRINGS.POWER.." "..STRINGS.ABILITY.." : lev."..PO.."\n"
 	else
 		local skillindex = 0
 		inst.components.upgrader:UpdateSkillStatus()
@@ -301,16 +302,17 @@ function SayInfo(inst)
 		end
 		inst.components.upgrader.skilltextpage = (skillindex ~= 0 and 2 + math.ceil(skillindex / 3) or 3)
 
-		if str == "" then
+		for k = 1, 3 do
+			str = str..(skilltable[(inst.info-2) * 3 + k] or "").."\n"
+		end
+
+		if str == "\n\n\n" then
 			str = STRINGS.YUKARI_NOSKILL
-		else
-			for k = 1, 3 do
-				str = str..(skilltable[(inst.info-2) * 3 + k] or "").."\n"
-			end
 		end
 	end
 
-	inst.components.talker:Say(str, 5)
+	if inspect % 2 == 1 then inst.components.talker:Say(str) end
+	if inspect > 1 then inst.inspect:set(str) end
 	inst.info = inst.info + 1
 end
 

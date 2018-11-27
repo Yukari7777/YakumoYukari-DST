@@ -549,7 +549,7 @@ local function tunnelfn(inst, doer, actions, right)
 end
 AddComponentAction("SCENE", "scheme", tunnelfn)
 
-if Language == "chinese" then
+if Language == "ch" then
 UTELEPORT.str = "传 送"
 SPAWNG.str = "生 成"
 CASTTOHO.str = "施 法"

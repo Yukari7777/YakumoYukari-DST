@@ -104,7 +104,7 @@ STRINGS.ACTIVATED = "activated"
 STRINGS.READY = "ready"
 STRINGS.SECONDS = "秒"
 
-if Language == "chinese" then
+if Language == "ch" then
 
 STRINGS.NAMES.YUKARIUMBRE = "紫 的 阳 伞"
 STRINGS.CHARACTERS.YAKUMOYUKARI.DESCRIBE.YUKARIUMBRE = "可 以 制 造 叫 做 '隙 间'的 东 西"
