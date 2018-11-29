@@ -257,9 +257,10 @@ end
 local function PushMessage(inst)
 	local string = inst.inspect:value()
 	local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
-	local inspect = GetModConfigData("inspect", modname) or 7
+	local inspect = GetModConfigData("inspect", modname) or 2
+	
 
-	if inspect % 4 >= 2 then print(string) end
+	if inspect % 4 >= 2 then if inst.HUD ~= nil then print(string) end end
 	if inspect % 8 >= 4 then 
 		if inst.HUD ~= nil then
 			for v in string.gmatch(string, ".-%c") do
