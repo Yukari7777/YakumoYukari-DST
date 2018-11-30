@@ -52,7 +52,7 @@ configuration_options = {
 	},
 
 	{
-		name = "inspect",
+		name = "skill",
 		label = "Print skill info in",
 		hover = "Set where to show the skill info should display in.",
 		options = inspectflag,

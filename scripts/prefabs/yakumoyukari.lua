@@ -256,7 +256,7 @@ end
 
 local function PushMessage(inst)
 	local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
-	local inspect = GetModConfigData("inspect", modname) or 2
+	local inspect = GetModConfigData("skill", modname) or 2
 	local ClientString = inst.inspect:value()
 
 	if inst.HUD ~= nil then
