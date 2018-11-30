@@ -255,15 +255,14 @@ local function Graze(inst)
 end
 
 local function PushMessage(inst)
-	local string = inst.inspect:value()
 	local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
 	local inspect = GetModConfigData("inspect", modname) or 2
-	
+	local ClientString = inst.inspect:value()
 
-	if inspect % 4 >= 2 then if inst.HUD ~= nil then print(string) end end
-	if inspect % 8 >= 4 then 
-		if inst.HUD ~= nil then
-			for v in string.gmatch(string, ".-%c") do
+	if inst.HUD ~= nil then
+		if inspect % 4 >= 2 then print(ClientString) end
+		if inspect % 8 >= 4 then 
+			for v in string.gmatch(ClientString, ".-%c") do
 				inst.HUD.controls.networkchatqueue:PushMessage("", v, {0.8, 0.8, 0.8, 1})
 			end
 		end
@@ -281,6 +280,13 @@ local function RegisterDirtyEvent(inst)
 		inst:ListenForEvent("setnightvisiondirty", SetNightVision)
 		inst:ListenForEvent("onskillinspectdirty", PushMessage)
 	end
+end
+
+local function RegisterKeyEvent(inst)
+	TheInput:AddKeyDownHandler(_G["KEY_V"], function() 
+		print("recieved data")
+		SendModRPCToServer(MOD_RPC["yakumoyukari"]["sayinfo"]) 
+	end) 
 end
 
 local function DebugFunction(inst)
@@ -420,10 +426,8 @@ local function common_postinit(inst) -- things before SetPristine()
 	inst:AddTag("yakumoga")
 	inst:AddTag("yakumoyukari")
 
-	inst:AddComponent("keyhandler")
-	inst.components.keyhandler:AddActionListener("yakumoyukari", 98, "SayInfo")
-	
 	inst:DoTaskInTime(0, RegisterDirtyEvent)
+	inst:DoTaskInTime(0, RegisterKeyEvent)
 end
 
 local master_postinit = function(inst) -- after SetPristine()

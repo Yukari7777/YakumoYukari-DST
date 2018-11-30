@@ -261,14 +261,13 @@ end
 
 ---------- print current upgrade & ability
 function SayInfo(inst)
-	local TheInput = TheInput
 	local HP = 0
 	local HN = 0
 	local SA = 0
 	local PO = 0
 	local str = ""
 	local skilltable = {}
-	local inspect = GetModConfigData("inspect")
+	local inspect = GetModConfigData("inspect") or 1
 	inst.info = inst.info >= (inst.components.upgrader.skilltextpage or 3) and 0 or inst.info
 	
 	if inst.info == 0 then
@@ -307,16 +306,16 @@ function SayInfo(inst)
 		end
 
 		if str == "\n\n\n" then
-			str = STRINGS.YUKARI_NOSKILL
+			str = STRINGS.YUKARI_NOSKILL.."\n"
 		end
 	end
-
-	if inspect % 2 == 1 then inst.components.talker:Say(str) end
-	if inspect > 1 then inst.inspect:set(str) end
 	inst.info = inst.info + 1
+	if inspect > 1 then inst.inspect:set(str) end
+	if inspect % 2 == 1 then inst.components.talker:Say(str) end
+	
 end
 
-AddModRPCHandler("yakumoyukari", "SayInfo", SayInfo)
+AddModRPCHandler("yakumoyukari", "sayinfo", SayInfo)
 
 -------------------------------
 modimport "scripts/power_init.lua"
