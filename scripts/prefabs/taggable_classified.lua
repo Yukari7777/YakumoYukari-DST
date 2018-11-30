@@ -24,7 +24,6 @@ end
 
 local function fn()
     local inst = CreateEntity()
-	print("classified spawned")
 
     if TheWorld.ismastersim then
         inst.entity:AddTransform() --So we can follow parent's sleep state

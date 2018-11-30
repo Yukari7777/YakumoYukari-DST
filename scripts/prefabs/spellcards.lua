@@ -222,7 +222,7 @@ function MakeCard(name)
 		inst.components.spellcard:SetSpellFn(function(inst, owner)
 			if owner.components.playervision == nil then return false end
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NEWSIGHT"))
-			owner.nightvision:set(true)
+			owner.yukari_classified.nightvision:set(true)
 			return true
 		end)
 		inst.components.spellcard:SetTaskFn(function(inst, owner)
@@ -232,17 +232,17 @@ function MakeCard(name)
 			if HasGoggleVision then -- Player wears goggle in task
 				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_EYEHURT"))
 				owner.components.combat:GetAttacked(inst, 1)
-				owner.nightvision:set(false)
+				owner.yukari_classified.nightvision:set(false)
 				return inst.components.spellcard:ClearTask(owner)
 			end
 		end)
 		inst.components.spellcard:SetOnRemoveTask(function(inst, owner)
-			owner.nightvision:set(false)
+			owner.yukari_classified.nightvision:set(false)
 		end)
 		inst.components.finiteuses:SetOnFinished(function()
 			local owner = inst.components.inventoryitem.owner
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
-			owner.nightvision:set(false)
+			owner.yukari_classified.nightvision:set(false)
 			inst:Remove()
 		end)
 	end

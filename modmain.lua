@@ -1,10 +1,12 @@
 PrefabFiles = {
-	"tunnel",
+	"yukari_classified",
+	"taggable_classified",
 	"yakumoyukari",
 	"yakumoyukari_none",
 	"yukariumbre",
 	"yukarihat",
 	"upgradepanel",
+	"tunnel",
 	"ultpanel",
 	"ultpanelsw",
 	"spellcards",
@@ -12,7 +14,6 @@ PrefabFiles = {
 	"graze_fx",
 	"puff_fx",
 	"scheme",
-	"taggable_classified",
 }
 
 Assets = {
@@ -310,7 +311,7 @@ function SayInfo(inst)
 		end
 	end
 	inst.info = inst.info + 1
-	if inspect > 1 then inst.inspect:set(str) end
+	if inspect > 1 then inst.yukari_classified.inspect:set(str) end
 	if inspect % 2 == 1 then inst.components.talker:Say(str) end
 	
 end

@@ -39,12 +39,50 @@ local prefabs = { -- deps; should be a list of prefabs that it wants to have loa
 	"yukarihat",
 }
 
-local NIGHTVISION_COLOURCUBES = {
-	day = "images/colour_cubes/beaver_vision_cc.tex",
-	dusk = "images/colour_cubes/beaver_vision_cc.tex",
-	night = "images/colour_cubes/beaver_vision_cc.tex",
-	full_moon = "images/colour_cubes/beaver_vision_cc.tex",
-}
+local function YukariOnSetOwner(inst)
+	if TheWorld.ismastersim then
+        inst.yukari_classified.Network:SetClassifiedTarget(inst)
+    end
+end
+
+local function AttachClassified(inst, classified)
+	inst.yukari_classified = classified
+    inst.ondetachyukariclassified = function() inst:DetachYukariClassified() end
+    inst:ListenForEvent("onremove", inst.ondetachyukariclassified, classified)
+end
+
+local function DetachClassified(inst)
+	inst.yukari_classified = nil
+    inst.ondetachyukariclassified = nil
+end
+
+local function OverrideOnRemoveEntity(inst)
+	inst.OnRemoveYukari = inst.OnRemoveEntity
+	function inst.OnRemoveEntity(inst)
+		if inst.jointask ~= nil then
+			inst.jointask:Cancel()
+		end
+
+		if inst.yukari_classified ~= nil then
+			if TheWorld.ismastersim then
+				inst.yukari_classified:Remove()
+				inst.yukari_classified = nil
+			else
+				inst:RemoveEventCallback("onremove", inst.ondetachyukariclassified, inst.yukari_classified)
+				inst:DetachYukariClassified()
+			end
+		end
+		return inst:OnRemoveYukari()
+	end
+end
+
+local function RegisterKeyEvent(inst)
+	TheInput:AddKeyDownHandler(_G["KEY_V"], function() 
+		if not inst.HUD:IsConsoleScreenOpen() then
+			SendModRPCToServer(MOD_RPC["yakumoyukari"]["sayinfo"]) 
+		end
+	end) 
+end
 
 -- Custom starting items
 local function GetStartInv()
@@ -254,41 +292,6 @@ local function Graze(inst)
 	DoPowerRestore(inst, math.random(0, 2))
 end
 
-local function PushMessage(inst)
-	local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
-	local inspect = GetModConfigData("skill", modname) or 2
-	local ClientString = inst.inspect:value()
-
-	if inst.HUD ~= nil then
-		if inspect % 4 >= 2 then print(ClientString) end
-		if inspect % 8 >= 4 then 
-			for v in string.gmatch(ClientString, ".-%c") do
-				inst.HUD.controls.networkchatqueue:PushMessage("", v, {0.8, 0.8, 0.8, 1})
-			end
-		end
-	end
-end
-
-local function SetNightVision(inst)
-	local set = inst.nightvision:value()
-	inst.components.playervision:ForceNightVision(set)
-	inst.components.playervision:SetCustomCCTable(set and NIGHTVISION_COLOURCUBES or nil)
-end
-
-local function RegisterDirtyEvent(inst)
-	if TheWorld.ismastersim or inst.HUD ~= nil then
-		inst:ListenForEvent("setnightvisiondirty", SetNightVision)
-		inst:ListenForEvent("onskillinspectdirty", PushMessage)
-	end
-end
-
-local function RegisterKeyEvent(inst)
-	TheInput:AddKeyDownHandler(_G["KEY_V"], function() 
-		print("recieved data")
-		SendModRPCToServer(MOD_RPC["yakumoyukari"]["sayinfo"]) 
-	end) 
-end
-
 local function DebugFunction(inst)
 	inst:DoPeriodicTask(1, function()
 		if inst.components.power and inst.infpower then
@@ -416,21 +419,26 @@ local function common_postinit(inst) -- things before SetPristine()
 	inst.grazecnt = 0
 	inst.info = 0
 
-	inst.inspect = net_string(inst.GUID, "onskillinspect", "onskillinspectdirty")
 	inst.maxpower = net_ushortint(inst.GUID, "maxpower")
 	inst.currentpower = net_ushortint(inst.GUID, "currentpower")
-	inst.nightvision = net_bool(inst.GUID, "player.isnightvistion", "setnightvisiondirty")
-	inst.nightvision:set(false)
 
 	inst:AddTag("youkai")
 	inst:AddTag("yakumoga")
 	inst:AddTag("yakumoyukari")
 
-	inst:DoTaskInTime(0, RegisterDirtyEvent)
 	inst:DoTaskInTime(0, RegisterKeyEvent)
+
+	inst:ListenForEvent("setowner", YukariOnSetOwner)
+
+	OverrideOnRemoveEntity(inst)
+	inst.AttachYukariClassified = AttachClassified
+	inst.DetachYukariClassified = DetachClassified
 end
 
 local master_postinit = function(inst) -- after SetPristine()
+	inst.yukari_classified = SpawnPrefab("yukari_classified")
+    inst.yukari_classified.entity:SetParent(inst.entity)
+
 	inst:AddComponent("upgrader")
 	inst:AddComponent("power")
 
@@ -457,7 +465,6 @@ local master_postinit = function(inst) -- after SetPristine()
 		inst:PushEvent("yukariloaded")
 	end
 	inst.powertable = powertable
-	inst.cctable = NIGHTVISION_COLOURCUBES
 	
 	inst:DoPeriodicTask(1, PeriodicFunction)
 	inst:ListenForEvent("hungerdelta", DoHungerUp )
