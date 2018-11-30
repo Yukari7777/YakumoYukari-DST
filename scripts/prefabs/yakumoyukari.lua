@@ -345,7 +345,7 @@ end
 
 local function MakeToolEfficient(item)
 	item.components.tool.NewEffectiveness = item.components.tool.GetEffectiveness
-	function item.components.tool.GetEffectiveness(self, action)
+	function item.components.tool:GetEffectiveness(action)
 		local owner = item.components.inventoryitem ~= nil and item.components.inventoryitem.owner
 		if owner ~= nil and owner.components.upgrader ~= nil and owner.components.upgrader.IsEfficient and action ~= ACTIONS.HAMMER then
 			return self.actions[action] * 1.5 or 0
@@ -399,6 +399,7 @@ end
 
 local function common_postinit(inst) -- things before SetPristine()
 	inst.MiniMapEntity:SetIcon( "yakumoyukari.tex" )
+	inst.Transform:SetScale(1.2,1.2,1.2)
 
 	inst.IsInvincible = false
 	inst.IsGrazing = false
@@ -428,7 +429,7 @@ end
 local master_postinit = function(inst) -- after SetPristine()
 	inst:AddComponent("upgrader")
 	inst:AddComponent("power")
-	
+
 	inst.soundsname = "willow"
 	inst.starting_inventory = start_inv -- starting_inventory passed as a parameter is deprecated
 	
