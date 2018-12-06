@@ -408,7 +408,7 @@ end
 
 local function common_postinit(inst) -- things before SetPristine()
 	inst.MiniMapEntity:SetIcon( "yakumoyukari.tex" )
-	inst.Transform:SetScale(1.2,1.2,1.2)
+	--inst.Transform:SetScale(1.2,1.2,1.2)
 
 	inst.IsInvincible = false
 	inst.IsGrazing = false
