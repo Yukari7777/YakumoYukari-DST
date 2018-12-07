@@ -141,8 +141,6 @@ local function DoUpgrade(inst, owner)
 			end
 		end
 	end
-
-	
 end
 
 local function OnFinish(inst, owner)
@@ -168,7 +166,6 @@ local function GetDesc(inst, viewer)
 end
 
 local function fn()  
-
 	local inst = CreateEntity() 
 	
 	inst.entity:AddTransform()

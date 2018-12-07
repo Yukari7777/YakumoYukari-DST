@@ -30,7 +30,7 @@ function Spellcard:SetCondition(fn)
 end
 
 function Spellcard:SetOnFinish(fn)
-	self.onfinish = nil
+	self.onfinish = fn
 end
 
 function Spellcard:SetTaskFn(fn, interval)

@@ -368,14 +368,32 @@ local function OnEquipHat(inst, data)
 	inst.components.upgrader:UpdateHatAbilityStatus(data.inst)
 end
 
+local ShouldApplyStatusBecauseOfTheseItems = {
+	"armordragonfly", "armorobsidian"
+}
+
 local function OnEquip(inst, data) 
 	if inst.components.upgrader ~= nil and inst.components.upgrader.IsEfficient and data.eslot == EQUIPSLOTS.HANDS and data.item ~= nil and data.item.components.tool ~= nil then
 		MakeToolEfficient(data.item)
 	end
+	
+	local ShouldApply = false
+	for k, v in pairs(inst.components.inventory.equipslots) do
+		if ShouldApply then break end
+		for k2, v2 in pairs(ShouldApplyStatusBecauseOfTheseItems) do
+			if v.prefab == v2 then
+				ShouldApply = true
+			end
+		end
+	end
 
-	inst.components.upgrader.fireimmuned = inst.components.inventory ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == ("armordragonfly" or "armorobsidian")	
-	-- I don't like how Klei sets the fire_damage_scale.
-	inst.components.upgrader:ApplyStatus()
+	if ShouldApply then
+		-- I don't like how Klei sets the fire_damage_scale.
+		inst.components.upgrader.fireimmuned = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == "armordragonfly"
+
+		inst.components.upgrader:ApplyStatus()
+	end
+	
 end
 
 
@@ -465,6 +483,7 @@ local master_postinit = function(inst) -- after SetPristine()
 		inst:PushEvent("yukariloaded")
 	end
 	inst.powertable = powertable
+	inst.applyupgradelist = ShouldApplyStatusBecauseOfTheseItems
 	
 	inst:DoPeriodicTask(1, PeriodicFunction)
 	inst:ListenForEvent("hungerdelta", DoHungerUp )
