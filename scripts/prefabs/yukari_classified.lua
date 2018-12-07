@@ -45,9 +45,9 @@ local function RegisterNetListeners(inst)
 	if TheWorld.ismastersim then
 		inst._parent = inst.entity:GetParent()
 	else
-		inst:ListenForEvent("setnightvisiondirty", SetNightVision)
 		inst:ListenForEvent("onskillinspectdirty", PushMessage)
 	end
+	inst:ListenForEvent("setnightvisiondirty", SetNightVision)
 end
 
 local function fn()
