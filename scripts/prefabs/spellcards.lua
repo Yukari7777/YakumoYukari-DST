@@ -241,6 +241,9 @@ function MakeCard(name)
 		end)
 		inst.components.finiteuses:SetOnFinished(function()
 			local owner = inst.components.inventoryitem.owner
+			if owner.components.talker == nil then --item is in backpack
+				owner = owner.components.inventoryitem.owner
+			end
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
 			owner.yukari_classified.nightvision:set(false)
 			inst:Remove()
