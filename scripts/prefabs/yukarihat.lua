@@ -5,6 +5,26 @@ local assets =
 	Asset("ATLAS", "images/inventoryimages/yukarihat.xml"),    
 }
 
+local prefabs = {
+	"mindcontroller",
+}
+
+local function NegateStranger(inst, owner)
+	if owner.prefab ~= "yakumoyukari" then
+		if owner:HasTag("player") then
+			owner.components.sanity:SetInducedInsanity(inst, true)
+			owner.components.debuffable:AddDebuff("mindcontroller", "mindcontroller")
+			owner.components.debuffable:GetDebuff("mindcontroller")._level:set(100)
+			owner.SoundEmitter:PlaySound("dontstarve/creatures/together/stalker/mindcontrol_LP", "yukarihatmc")
+			owner:DoTaskInTime(4, function()
+				owner.SoundEmitter:KillSound("yukarihatmc")
+				owner.components.sanity:SetInducedInsanity(inst, false)
+				owner.components.inventory:DropItem(inst, true, true)
+			end)
+		end
+	end
+end
+
 local function InitializeStatus(inst)
 	inst.components.waterproofer:SetEffectiveness(0)
 	inst.components.armor.absorb_percent = 0
@@ -23,6 +43,7 @@ local function fn()
         owner.AnimState:Hide("HAIR_NOHAT")
         owner.AnimState:Hide("HAIR") 
 		owner:PushEvent("hatequipped", {isequipped = true, inst = inst})
+		NegateStranger(inst, owner)
     end
 
     local function onunequiphat(inst, owner)
@@ -31,6 +52,7 @@ local function fn()
         owner.AnimState:Show("HAIR_NOHAT")
         owner.AnimState:Show("HAIR") 
 		owner:PushEvent("hatequipped", {isequipped = false, inst = inst})
+
 		InitializeStatus(inst)
     end
 
@@ -60,7 +82,7 @@ local function fn()
 	inst.entity:SetPristine()
 	
 	
-	inst:AddComponent("inspectable")        
+	inst:AddComponent("inspectable")
 	
 	inst:AddComponent("inventoryitem")   
 	inst.components.inventoryitem.atlasname = "images/inventoryimages/yukarihat.xml"  
@@ -81,4 +103,4 @@ local function fn()
 	return inst
 end
 	
-return Prefab("common/inventory/yukarihat", fn, assets)
+return Prefab("common/inventory/yukarihat", fn, assets, prefabs)

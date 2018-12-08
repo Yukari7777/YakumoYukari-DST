@@ -1,6 +1,6 @@
 name = "Yakumo Yukari"
 author = "Yakumo Yukari"
-version = "0.10.2"
+version = "0.10.3"
 description = "Yakumo Yukari comes from unknown world to manipulate Don't Starve Together world!\n\nVersion : "..version.."\nPress [B] to show status."
 forumthread = ""
 api_version = 6
@@ -53,8 +53,8 @@ configuration_options = {
 
 	{
 		name = "skill",
-		label = "Print skill info in",
-		hover = "Set where to show the skill info should display in.",
+		label = "Print status info in",
+		hover = "Set where to show the status info should display in.",
 		options = inspectflag,
 		default = 1,
 	},

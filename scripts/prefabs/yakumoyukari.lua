@@ -365,11 +365,10 @@ end
 
 local function OnEquipHat(inst, data)
 	inst.components.upgrader.hatequipped = data.isequipped
-	inst.components.upgrader:UpdateHatAbilityStatus(data.inst)
 end
 
 local ShouldApplyStatusBecauseOfTheseItems = {
-	"armordragonfly", "armorobsidian"
+	"armordragonfly", "armorobsidian", "yukarihat"
 }
 
 local function OnEquip(inst, data) 
@@ -378,19 +377,20 @@ local function OnEquip(inst, data)
 	end
 	
 	local ShouldApply = false
-	for k, v in pairs(inst.components.inventory.equipslots) do
-		if ShouldApply then break end
-		for k2, v2 in pairs(ShouldApplyStatusBecauseOfTheseItems) do
-			if v.prefab == v2 then
-				ShouldApply = true
-			end
+	for k, v in pairs(ShouldApplyStatusBecauseOfTheseItems) do
+		if data.item.prefab == v then
+			ShouldApply = true
+			break
 		end
 	end
 
 	if ShouldApply then
 		-- I don't like how Klei sets the fire_damage_scale.
-		inst.components.upgrader.fireimmuned = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == "armordragonfly"
+		inst.components.upgrader.fireimmuned = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == "armordragonfly"
 
+		if data.item.prefab == "yukarihat" then
+			inst.components.upgrader:UpdateHatAbilityStatus(data.item)
+		end
 		inst.components.upgrader:ApplyStatus()
 	end
 	
@@ -419,7 +419,9 @@ local function MakeDapperOnEquipItem(inst)
 				NumBeforeCalc = NumBeforeCalc + itemdap < 0 and itemdap * self.inst.components.upgrader.absorbsanity or 0
 			end
 		end
-		self.dapperness = -NumBeforeCalc
+		if NumBeforeCalc ~= 0 then
+			self.dapperness = -NumBeforeCalc
+		end
 		return inst.components.sanity:PreRecalc(dt)
 	end
 end
@@ -455,7 +457,7 @@ end
 
 local master_postinit = function(inst) -- after SetPristine()
 	inst.yukari_classified = SpawnPrefab("yukari_classified")
-    inst.yukari_classified.entity:SetParent(inst.entity)
+    inst:AddChild(inst.yukari_classified)
 
 	inst:AddComponent("upgrader")
 	inst:AddComponent("power")
