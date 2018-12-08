@@ -78,9 +78,9 @@ end
 
 local function RegisterKeyEvent(inst)
 	TheInput:AddKeyDownHandler(_G["KEY_V"], function() 
-		if not inst.HUD:IsConsoleScreenOpen() then
+		--if not inst.HUD:IsConsoleScreenOpen() then
 			SendModRPCToServer(MOD_RPC["yakumoyukari"]["sayinfo"]) 
-		end
+		--end
 	end) 
 end
 

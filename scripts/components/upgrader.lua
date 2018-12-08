@@ -304,7 +304,7 @@ function Upgrader:UpdateSkillStatus()
 	end
 
 	if self.bonusspeed ~= 0 and self.hatbonusspeed ~= 0 then
-		skill.speed = "Bonus Speed : "..self.bonusspeed + (self.hatequipped and self.hatbonusspeed)
+		skill.speed = "Bonus Speed : "..self.bonusspeed + (self.hatequipped and self.hatbonusspeed or 0)
 	end	
 
 	if self.PowerGainMultiplier ~= 1 then
