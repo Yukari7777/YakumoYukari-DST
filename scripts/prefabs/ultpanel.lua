@@ -2,15 +2,14 @@ function MakeUltimate(name, index)
 
 	local fname = name.."ult"
 	
-	local assets=
+	local assets =
 	{   
 		Asset("ANIM", "anim/spell.zip"),   
 		Asset("ATLAS", "images/inventoryimages/"..fname..".xml"),    
 		Asset("IMAGE", "images/inventoryimages/"..fname..".tex"),
 	}
 
-	local function DoUpgrade(inst)
-		local caster = inst.components.inventoryitem.owner
+	local function DoUpgrade(inst, caster)
 		local spellcard = inst.components.spellcard
 		local index = spellcard.index
 		local name = spellcard.name
@@ -71,6 +70,7 @@ function MakeUltimate(name, index)
 		inst.AnimState:PlayAnimation("idle")   
 
 		inst:AddTag("ultpanel")
+		inst:AddTag("heavyaction")
 		
 		if not TheWorld.ismastersim then
 			return inst

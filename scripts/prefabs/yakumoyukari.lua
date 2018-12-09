@@ -76,11 +76,15 @@ local function OverrideOnRemoveEntity(inst)
 	end
 end
 
+local function KeyCheckCommon(inst)
+	return inst == ThePlayer and TheFrontEnd:GetActiveScreen() ~= nil and TheFrontEnd:GetActiveScreen().name == "HUD"
+end
+
 local function RegisterKeyEvent(inst)
 	TheInput:AddKeyDownHandler(_G["KEY_V"], function() 
-		--if not inst.HUD:IsConsoleScreenOpen() then
+		if KeyCheckCommon(inst) then
 			SendModRPCToServer(MOD_RPC["yakumoyukari"]["sayinfo"]) 
-		--end
+		end
 	end) 
 end
 
@@ -197,7 +201,7 @@ local function HealthRegen(inst)
 end
 
 local function InvincibleRegen(inst)
-	if inst.components.health and inst.components.upgrader.emergency then
+	if inst.components.health and inst.components.upgrader.emergency and inst.IsInvincible then
 		local delta = inst.components.upgrader.emergency
 		inst.components.health:DoDelta(delta, nil, nil, true)
 	end
@@ -205,18 +209,16 @@ end
 
 function GoInvincible(inst)
 	if  inst.components.health 
-	and inst.components.health.currenthealth <= 50 
+	and inst.components.health.currenthealth <= 30 
 	and inst.components.upgrader.InvincibleLearned
 	and inst.components.upgrader.CanbeInvincibled then
 		inst.components.upgrader.CanbeInvincibled = false
-		inst.components.upgrader.emergency = 4
+		inst.invin_cool = 1440
 		inst.IsInvincible = true
 		inst.components.health:SetInvincible(true)
 		inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_INVINCIBILITY_ACTIVATE"))
 		inst:DoTaskInTime(10, function()
 			inst.IsInvincible = false
-			inst.invin_cool = 1440
-			inst.components.upgrader.emergency = 0
 			inst.components.health:SetInvincible(false)
 			inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_INVINCIBILITY_DONE"))
 		end)
@@ -298,7 +300,7 @@ local function DebugFunction(inst)
 			inst.components.power.max = 300
 			inst.components.power.current = 300
 		end
-		inst.components.hunger.current = 150
+		inst.components.hunger.current = 250
 		--inst.components.hunger:Pause(true)
 		--inst.components.health:SetInvincible(true)
 	end)
@@ -314,7 +316,7 @@ local powertable = {
 	P25 = {"baconeggs"},
 	P20 = {"honeyham", "tallbirdegg", "trunk_summer", "turkeydinner", "monsterlasagna"},
 	P15 = {"tallbirdegg_cooked", "trunk_cooked", "honeynuggets", "hotchili"},
-	P10 = {"meat", "plantmeat", "shark_fin", "fish_raw", "fish_med", "perogies", "guacamole", "monstermeat"},
+	P10 = {"meat", "plantmeat", "shark_fin", "fish", "fish_med", "perogies", "guacamole", "monstermeat"},
 	P8 = {"meat_dried", "plantmeat_cooked", "fish_med_cooked"},
 	P5 = {"smallmeat", "eel", "kabobs", "tropical_fish", "batwing", "froglegs", "bird_egg", "fish_raw_small", "meatballs", "frogglebunwich", "unagi", "drumstick" , "doydoyegg"},
 	P4 = {"monstermeat_dried", "cookedsmallmeat","froglegs_cooked","batwing_cooked", "fish_raw_small_cooked", "cookedmonstermeat", "smallmeat_dried", "eel_cooked", "doydoyegg_cooked", "drumstick_cooked", "bird_egg_cooked"}
@@ -416,12 +418,10 @@ local function MakeDapperOnEquipItem(inst)
 		for k, v in pairs(self.inst.components.inventory.equipslots) do
 			if v.components.equippable ~= nil then
 				local itemdap = v.components.equippable:GetDapperness(self.inst)
-				NumBeforeCalc = NumBeforeCalc + itemdap < 0 and itemdap * self.inst.components.upgrader.absorbsanity or 0
+				NumBeforeCalc = itemdap < 0 and NumBeforeCalc + itemdap * self.inst.components.upgrader.absorbsanity or NumBeforeCalc
 			end
 		end
-		if NumBeforeCalc ~= 0 then
-			self.dapperness = -NumBeforeCalc
-		end
+		self.dapperness = NumBeforeCalc ~= 0 and -NumBeforeCalc or 0
 		return inst.components.sanity:PreRecalc(dt)
 	end
 end

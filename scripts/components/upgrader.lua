@@ -16,6 +16,7 @@ local Upgrader = Class(function(self, inst)
 	
 	self.powerupvalue = 0
 	self.regenamount = 0
+	self.emergency = 0
 	self.regencool = 0
 	self.curecool = 0
 	self.hatdodgechance = 0
@@ -26,8 +27,6 @@ local Upgrader = Class(function(self, inst)
 	self.PowerGainMultiplier = 1
 	self.dodgechance = 0.2
 	self.skilltextpage = 3
-
-	self.emergency = nil
 	
 	self.hatequipped = false
 	self.fireimmuned = false
@@ -45,6 +44,7 @@ local Upgrader = Class(function(self, inst)
 	self.SpikeEater = false
 	self.RotEater = false
 	self.Ability_45 = false
+	self.harvester = false
 	
 	self.ability = {}
 	self.skill = {}
@@ -96,11 +96,14 @@ function Upgrader:UpdateAbilityStatus()
 	local ability = self.ability
 	
 	if ability[1][1] then
+		self.InvincibleLearned = true
+		self.emergency = 3
 		self.healthbonus = 10
 	end
 	
 	if ability[1][2] then
 		self.healthbonus = 30
+		self.emergency = 5
 		self.regenamount = 1
 		self.regencool = 60
 	end
@@ -108,12 +111,14 @@ function Upgrader:UpdateAbilityStatus()
 	if ability[1][3] then
 		self.healthbonus = 50
 		self.regenamount = 2
+		self.emergency = 8
 		self.regencool = 45
 		self.curecool = 180
 	end
 	
 	if ability[1][4] then
 		self.nohealthpenalty = true
+		self.emergency = 15
 		self.healthbonus = 95
 		self.regenamount = 2
 		self.regencool = 30
@@ -122,7 +127,7 @@ function Upgrader:UpdateAbilityStatus()
 	
 	if ability[1][5] then	
 		self.IsFight = false
-		self.InvincibleLearned = true
+		self.emergency = 30
 		self.regenamount = 4
 		self.regencool = 15
 		self.curecool = 60
@@ -224,12 +229,14 @@ function Upgrader:UpdateAbilityStatus()
 	if ability[4][3] then
 		self.inst:AddTag("fastbuilder")
 		self.inst:AddTag("realyoukai")
+		self.inst:AddTag("beefalo")
 		self.powerbonus = 50
 		self.bonusspeed = 2
 		self.PowerGainMultiplier = 2.5
 	end
 	
 	if ability[4][4] then
+		self.IsEfficient = true
 		self.inst.components.locomotor:SetTriggersCreep(false)
 		self.inst:AddTag("spiderwhisperer")
 		self.powerbonus = 75
@@ -242,8 +249,8 @@ function Upgrader:UpdateAbilityStatus()
 	end
 	
 	if ability[4][6] then
+		self.inst:AddTag("fastharvester")
 		self.bonusspeed = 3
-		self.IsEfficient = true
 	end
 end
 
@@ -307,6 +314,10 @@ function Upgrader:UpdateSkillStatus()
 		skill.speed = "Bonus Speed : "..self.bonusspeed + (self.hatequipped and self.hatbonusspeed or 0)
 	end	
 
+	if self.hatdodgechance ~= 0 then
+		skill.graze = "Graze(Evasion) chance : "..((self.dodgechance + (self.hatequipped and self.hatdodgechance or 0)) * 100).."%"
+	end
+
 	if self.PowerGainMultiplier ~= 1 then
 		skill.powermult = "Gain more power by "..((self.PowerGainMultiplier - 1) * 100).."%"
 	end
@@ -365,6 +376,14 @@ function Upgrader:UpdateSkillStatus()
 		skill.crafter = "Crafts faster"
 	end
 
+	if self.inst:HasTag("fastharvester") and skill.harvester == nil then
+		skill.crafter = "Harvests faster"
+	end
+
+	if self.inst:HasTag("woodcutter") and skill.woodie == nil then
+		skill.woodie = "Chops faster"
+	end
+
 	if self.IsAOE and skill.AOE == nil then
 		skill.AOE = "40% chance to do area-of-effect with the damage amount of 60% in range 5"
 	end
@@ -386,7 +405,7 @@ function Upgrader:UpdateSkillStatus()
 	end
 
 	if self.IsEfficient and skill.efficient == nil then
-		skill.efficient = "Uses tool more durably"
+		skill.efficient = "Uses tool more effectively"
 	end
 
 	if self.SpikeEater and skill.spikeeater == nil then

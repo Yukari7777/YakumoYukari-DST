@@ -170,7 +170,6 @@ local function action_umbre(inst, doer, pos, actions, right)
 		end
 	end
 end
-
 AddComponentAction("POINT", "makegate", action_umbre)
 
 local ERASEG = AddAction("ERASEG", "Delete Scheme Tunnel", function(act)
@@ -387,8 +386,8 @@ AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.CASTTOHO, "cas
 
 local function spell_inv(inst, doer, actions, right)
     if doer:HasTag("yakumoyukari") then
-		if doer.replica.power and inst.costpower and doer.replica.power:GetCurrent() >= inst.costpower:value()
-		or inst.canspell and inst.canspell:value() 
+		if doer.replica.power ~= nil and inst.costpower ~= nil and doer.replica.power:GetCurrent() >= inst.costpower:value()
+		or inst.canspell ~= nil and inst.canspell:value() 
 		or inst:HasTag("ultpanel") then
 			if inst:HasTag("heavyaction") then 
 				table.insert(actions, ACTIONS.CASTTOHOH)
@@ -549,9 +548,9 @@ local function tunnelfn(inst, doer, actions, right)
 end
 AddComponentAction("SCENE", "scheme", tunnelfn)
 
-if Language == "ch" then
-UTELEPORT.str = "传 送"
-SPAWNG.str = "生 成"
-CASTTOHO.str = "施 法"
-CASTTOHOH.str = "施 法"
+local function SetFastHarvester(inst) 
+	return inst:HasTag("quagmire_fasthands") or inst:HasTag("fastharvester") and "domediumaction" or "dolongaction"
 end
+
+AddStategraphActionHandler("wilson", ActionHandler(ACTIONS.HARVEST, SetFastHarvester))
+AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.HARVEST, SetFastHarvester))

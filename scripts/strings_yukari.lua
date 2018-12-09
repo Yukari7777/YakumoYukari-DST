@@ -1,4 +1,5 @@
 local STRINGS = GLOBAL.STRINGS
+local ACTIONS = GLOBAL.ACTIONS
 local Language = GetModConfigData("language")
 
 STRINGS.NAMES.YUKARIUMBRE = "Yukari parasol"
@@ -102,7 +103,7 @@ STRINGS.ABILITY = "ability"
 STRINGS.INVINCIBILITY = "Invincibility"
 STRINGS.ACTIVATED = "activated"
 STRINGS.READY = "ready"
-STRINGS.SECONDS = "秒"
+STRINGS.SECONDS = "s"
 
 if Language == "ch" then
 
@@ -204,5 +205,10 @@ STRINGS.INVINCIBILITY = "Invincibility"
 STRINGS.ACTIVATED = "activated"
 STRINGS.READY = "ready"
 STRINGS.SECONDS = "seconds"
+
+ACTIONS.UTELEPORT.str = "눈 箇"
+ACTIONS.SPAWNG.str = " 냥"
+ACTIONS.CASTTOHO.str = "嘉 랬"
+ACTIONS.CASTTOHOH.str = "嘉 랬"
 
 end
