@@ -1,6 +1,20 @@
 return {
 	ACTIONFAIL =
 	{
+		REPAIR =
+        {
+            WRONGPIECE = "That is clearly the incorrect piece.",
+        },
+        BUILD =
+        {
+            MOUNTED = "In this elevated position, I can't reach the ground.",
+            HASPET = "One domestic creature is enough for me.",
+        },
+        READ =
+        {
+            GENERIC = "Other matters await.",
+            NOBIRDS = "The birds are not keen on this weather."
+        },
 		SHAVE =
 		{
 			AWAKEBEEFALO = "I don't want to annoy him.",
@@ -12,71 +26,260 @@ return {
 			GENERIC = "Not enough stores left.",
 			NOTALLOWED = "This is not for here.",
 		},
+		CONSTRUCT =
+        {
+            INUSE = "Someone's already using this.",
+            NOTALLOWED = "That was erroneous.",
+            EMPTY = "I need something to build with first.",
+            MISMATCH = "Those are the wrong plans.",
+        },
+        WRITE =
+        {
+            GENERIC = "I'd rather write in my own books.",
+            INUSE = "I have to wait",
+        },
+        RUMMAGE =
+        {   
+            GENERIC = "I've other things on my mind currently.",
+            INUSE = "Be sure to sort by color and weight, dear.",   
+        },
+        DRAW =
+        {
+            NOIMAGE = "An example of what I should diagram would be helpful.",
+        },
+		CHANGEIN =
+        {
+            GENERIC = "I think I look pretty smart already.",
+            BURNING = "No more changes for me. It's gone up in flames.",
+            INUSE = "If I could use that after you, dear.",
+        },
+        COOK =
+        {
+            GENERIC = "Perhaps later. Not all old ladies enjoy cooking, you know.",
+            INUSE = "Mmm, smells lovely, dear.",
+            TOOFAR = "It is not within my reach.",
+        },
+        MOUNT =
+        {
+            INUSE = "I must be patient. I can ride this beefalo later.",
+            TARGETINCOMBAT = "It's fighting.",
+        },
+        SADDLE =
+        {
+            TARGETINCOMBAT = "It's fighting.",
+        },
+        ATTUNE =
+        {
+            NOHEALTH = "I'm feeling too ill for that.",
+        },
+        GIVE =
+        {
+            GENERIC = "? where are you?",
+            DEAD = "Oh, it's dead.",
+            SLEEPING = "It appears to be sleeping.",
+            BUSY = "Seems busy.",
+            ABIGAILHEART = "The spirit is already bound.",
+            GHOSTHEART = "I'll not be meddling in that business.",
+            NOTGEM = "Don't be silly.",
+            WRONGGEM = "This gemstone's properties are incorrect for my purposes.",
+            NOTSTAFF = "This is not the staff I seek.",
+            MUSHROOMFARM_NEEDSSHROOM = "Goodness no, it needs a fresh mushroom.",
+            MUSHROOMFARM_NEEDSLOG = "It needs a log, imbued with magical properties.",
+            SLOTFULL = "You don't have any inventory slots left.",
+            FOODFULL = "I'll be around when you're ready for seconds, dear.",
+            NOTDISH = "Oh sure you don't eat this.",
+            DUPLICATE = "You've already taken note of this recipe.",
+            NOTSCULPTABLE = "No one ever sculpt like that.",
+            CANTSHADOWREVIVE = "Conditions are not right.",
+            WRONGSHADOWFORM = "The skeletal anatomy is incorrect.",
+            NOMOON = "It needs a lunar influence.",
+        },
+        GIVETOPLAYER = 
+        {
+            FULL = "You don't have any inventory slots left.",
+            DEAD = "Oh, it's dead.",
+            SLEEPING = "They've entered REM sleep.",
+            BUSY = "They're busy.",
+        },
+        GIVEALLTOPLAYER = 
+        {
+            FULL = "They're already heavily burdened.",
+            DEAD = "Oh, it's dead.",
+            SLEEPING = "They've entered REM sleep.",
+            BUSY = "They're busy.",
+        },
+        TEACH =
+        {
+            KNOWN = "Please. That knowledge is child's play.",
+            CANTLEARN = "A piece of knowledge I cannot grasp... Intriguing!",
+            WRONGWORLD = "This map is for some other location.",
+        },
+        WRAPBUNDLE =
+        {
+            EMPTY = "What am I doing, it's empty.",
+        },
+        PICKUP =
+        {
+            RESTRICTION = "That's not my area of expertise.",
+            INUSE = "? Where is it?",
+        },
+        REPLATE =
+        {
+            MISMATCH = "That's not the proper dinnerware for this food.", 
+            SAMEDISH = "It's already on the proper dinnerware.", 
+        },
 		REPAIRBOAT = {
 			GENERIC = "I think it's no problem.",
 		},
 	},
 	ACTIONFAIL_GENERIC = "I can't do that.",
 	ANNOUNCE_ADVENTUREFAIL = "Something is disturbing that I go to another dimension. I'll have to try again.",
-	ANNOUNCE_BEES = "Very systematic creature always. where I was, and here too.",
-	ANNOUNCE_BOOMERANG = "Ouch! Is this my physical limit?",
+	ANNOUNCE_BEES = "Bee careful!",
+	ANNOUNCE_BOOMERANG = {
+		"Ouch! Is that your physical limit?",
+		"Please press the Space Bar before it hit me!",
+	},
 	ANNOUNCE_CHARLIE = "Where? where is it?!",
 	ANNOUNCE_CHARLIE_ATTACK = "IT FORCES ME OUT OF THIS WORLD!!",
-	ANNOUNCE_COLD = "It's Too Cold!",
+	ANNOUNCE_COLD = {
+		"It's too cold!",
+		"Damn you Chirno!",
+		"Yuyuko..I'm cold.."
+	},
 	ANNOUNCE_HOT = "I can't resist anymore!",
-	ANNOUNCE_CRAFTING_FAIL = "I don't have all of the ingredients.",
-	ANNOUNCE_DEERCLOPS = "I feel something huge is coming!",
-	ANNOUNCE_DUSK = "I'm getting sleepy..",
+	ANNOUNCE_CRAFTING_FAIL = "I can't make it.",
+	ANNOUNCE_DEERCLOPS = {
+		"We better to leave the base!",
+		"I feel something huge is coming!",
+	},
+	ANNOUNCE_DUSK = {
+		"I'm getting sleepy.",
+		"The sun's going down.",
+		"Getting dark here.",
+	},
 	ANNOUNCE_EAT =
 	{
-		GENERIC = "This world's foods are unique.",
+		GENERIC = "What is...",
 		PAINFUL = "That was a painful food...",
 		SPOILED = "It passed its expiration date.",
 		STALE = "That was not actually food.",
 		INVALID = "I can eat humans but this is not!",
 	},
+	ANNOUNCE_ENCUMBERED =
+    {
+        "This...is...heavy...",
+        "......",
+        "Why did I come here?",
+        "This is really heavy.",
+        "I'm more spry than I look!",
+        "This is not what I supposed to do...",
+        "Ran! .....help!",
+        "How.. invigorating!",
+    },
+	ANNOUNCE_ATRIUM_DESTABILIZING = 
+    {
+        "Well.. It's time to RUN!",
+        "It's dangerous to be here.",
+        "Oops.",
+    },
 	ANNOUNCE_ENTER_DARK = "It's BLACK!",
-	ANNOUNCE_ENTER_LIGHT = "Now I can see a color.",
+	ANNOUNCE_ENTER_LIGHT = "Now I can SEE a color.",
 	ANNOUNCE_FREEDOM = "Finally, I can rest in my home!",
 	ANNOUNCE_HIGHRESEARCH = "Leaning is.. unlimited",
 	ANNOUNCE_HOUNDS = "Hounds are coming!",
 	ANNOUNCE_SHARX = "Jaws!",
-	ANNOUNCE_HUNGRY = "Time to eat some food.",
-	ANNOUNCE_HUNT_BEAST_NEARBY = "I smelled beast nearby.",
+	ANNOUNCE_HUNGRY = {
+		"I'm really hungry.",
+		"Time to eat some food.",
+		"Ran! I'm hungry!",
+		"Need to eat something.",
+		"(rumble)",
+	},
+	ANNOUNCE_HUNT_BEAST_NEARBY = "I smelled a beast nearby.",
 	ANNOUNCE_HUNT_LOST_TRAIL = "The trail is away.",
 	ANNOUNCE_HUNT_LOST_TRAIL_SPRING = "The wet ground won't hold a footprint.",
 	ANNOUNCE_INV_FULL = "I can't carry anymore",
-	ANNOUNCE_KNOCKEDOUT = "Ough, my head!",
+	ANNOUNCE_KNOCKEDOUT = {
+		"Ouch, my head!",
+		"Hey! Can't you control better?",
+		"Ah! You let me hit that thing?",
+	},
 	ANNOUNCE_LOWRESEARCH = "I didn't learn very much from that.",
-	ANNOUNCE_MOSQUITOS = "The cause of communicable diseases.",
-	ANNOUNCE_NODANGERSLEEP = "They might notice me. I can't sleep now.",
-	ANNOUNCE_NODAYSLEEP = "Well, I'm not sleepy.",
+	ANNOUNCE_MOSQUITOS = "I hate that noise!",
+	ANNOUNCE_NODANGERSLEEP = "They might have noticed me. I can't sleep now.",
+	ANNOUNCE_NODAYSLEEP = "I can be more constructive right now?",
 	ANNOUNCE_NODAYSLEEP_CAVE = "Well, I'm not sleepy.",
-	ANNOUNCE_NOHUNGERSLEEP = "I didn't want to sleep while I'm starving.",
-	ANNOUNCE_NOSLEEPONFIRE = "Sleeping is not the way ignite these fire.",
-	ANNOUNCE_NODANGERSIESTA = "They should notice me. I can't sleep now.",
-	ANNOUNCE_NONIGHTSIESTA = "Night is for sleeping, not taking siestas.",
+	ANNOUNCE_NOHUNGERSLEEP = "I'm too hungry to sleep.",
+	ANNOUNCE_NOSLEEPONFIRE = "I don't think it's good to sleep",
+	ANNOUNCE_NODANGERSIESTA = "They might notice me. I can't sleep right now.",
+	ANNOUNCE_NONIGHTSIESTA = "The night is for sleeping. not for Siesta.",
 	ANNOUNCE_NONIGHTSIESTA_CAVE = "I don't think I could really relax down here.",
-	ANNOUNCE_NOHUNGERSIESTA = "I'm too hungry for a siesta!",
+	ANNOUNCE_NOHUNGERSIESTA = "I'm too hungry to sleep.",
 	ANNOUNCE_NO_TRAP = "Well, that was easy.",
 	ANNOUNCE_PECKED = "Ouch! you pecked me?!",
-	ANNOUNCE_QUAKE = "I'm gonna watch my head.",
+	ANNOUNCE_QUAKE = {
+		"I'm gonna watch my head.",
+		"Don't let me hit.",
+		"You better not to let me hit.",
+		"How dare I can be hit by those rocks?",
+		"I believe you. Player. You.",
+		"I believe you.",
+	},
 	ANNOUNCE_RESEARCH = "Never stop learning!",
-	ANNOUNCE_SHELTER = "auh, I want some rest down here.",
-	ANNOUNCE_THORNS = "Ow! My hands are spiky!",
+	ANNOUNCE_SHELTER = {
+		"Shade is much better.",
+		"+60 Insulation under the shade",
+		"I can stay here to avoid UV rays"
+	},
+	ANNOUNCE_THORNS = "Ow! My hands!",
 	ANNOUNCE_BURNT = "AW! LIGHT OFF! That was crazy!",
 	ANNOUNCE_TORCH_OUT = "My torch is burnt!",
 	ANNOUNCE_TRAP_WENT_OFF = "Oops,",
-	ANNOUNCE_UNIMPLEMENTED = "OW! I don't think it's ready yet.",
-	ANNOUNCE_WORMHOLE = "What a creepy gate! Never again.",
+	ANNOUNCE_UNIMPLEMENTED = "I don't think it's ready yet.",
+	ANNOUNCE_WORMHOLE = "What a creepy gate! Mine was better!",
+	ANNOUNCE_TOWNPORTALTELEPORT = "That's one way to travel.",
 	ANNOUNCE_CANFIX = "\nI can fix this.",
 	ANNOUNCE_ACCOMPLISHMENT = "Do I acheive or something?",
 	ANNOUNCE_ACCOMPLISHMENT_DONE = "Well, It's done.",	
 	ANNOUNCE_INSUFFICIENTFERTILIZER = "This plant is going to be withered.  Gonna need some fertilizer.",
 	ANNOUNCE_TOOL_SLIP = "Aw! That was dangerous!",
-	ANNOUNCE_LIGHTNING_DAMAGE_AVOIDED = "woah, Is this a fully-shockproof?",
+	ANNOUNCE_LIGHTNING_DAMAGE_AVOIDED = "What! Is this a fully-shockproof?",
+	ANNOUNCE_TOADESCAPING = "It will need to burrow soon to rehydrate its skin.",
+    ANNOUNCE_TOADESCAPED = "It has burrowed away.",
 
-	ANNOUNCE_DAMP = "oh, It wet!.",
+	ANNOUNCE_DIG_DISEASE_WARNING = "Caught it just in time. The roots were nearly rotten.",
+    ANNOUNCE_PICK_DISEASE_WARNING = "This plant is exhibiting concerning signs.",
+    ANNOUNCE_MOUNT_LOWHEALTH = "My mount has low health.",
+    ANNOUNCE_ANTLION_SINKHOLE = 
+    {
+        "The ground will soon give way.",
+        "Not the work of tectonic plates.",
+        "A six on the Richter scale.",
+    },
+    ANNOUNCE_ANTLION_TRIBUTE = "......",
+    ANNOUNCE_SACREDCHEST_YES = "That did the trick.",
+    ANNOUNCE_SACREDCHEST_NO = "Shoot. I thought I had it.",
+    ANNOUNCE_NODANGERAFK = "That trick won't work I think.",
+    ANNOUNCE_NODANGERGIFT = "This is not supposed to do.",
+    ANNOUNCE_NOMOUNTEDGIFT = "I do believe I should dismount first.",
+    ANNOUNCE_NOWARDROBEONFIRE = "As you can plainly see, it is ablaze.",
+    ANNOUNCE_WORMS = "Something nasty is crawling through here!",
+
+    ANNOUNCE_KLAUS_ENRAGE = "Oh, you now enraged?",
+    ANNOUNCE_KLAUS_UNCHAINED = "Whatever enchantment restrained it has been undone.",
+    ANNOUNCE_KLAUS_CALLFORHELP = "Careful! It has summoned its minion.",
+
+    --hallowed nights
+    ANNOUNCE_SPOOKED = {
+		"I hate this.",
+		"What is this?",
+	},
+    ANNOUNCE_BRAVERY_POTION = "It feel like a drug!",
+
+	ANNOUNCE_DAMP = {
+		"Oh, I'm wet!.",
+		"I should use my umbrealla."
+	},
 	ANNOUNCE_WET = "My whole clothes are wet!",
 	ANNOUNCE_WETTER = "I'm so drenched!",
 	ANNOUNCE_SOAKED = "My body is now heavy as heck!",
@@ -99,7 +302,7 @@ return {
 	ANNOUNCE_BOAT_DAMAGED = "Look at that boat matter, man.",
 	ANNOUNCE_BOAT_SINKING = "Oops, This is not good.",
 	ANNOUNCE_BOAT_SINKING_IMMINENT = "It gonna be broken!",
-	ANNOUNCE_WAVE_BOOST = "Yohyee! Surfing time!",
+	ANNOUNCE_WAVE_BOOST = "Surfing time!",
 
 	ANNOUNCE_WHALE_HUNT_BEAST_NEARBY = "I smell salty-freshy beast..!",
 	ANNOUNCE_WHALE_HUNT_LOST_TRAIL = "I can't find trail anymore.",
@@ -109,10 +312,10 @@ return {
 	BATTLECRY =
 	{
 		GENERIC = "I'll let you a death!",
-		PIG = "I'm butcher now!",
+		PIG = "I'll let you a death!",
 		PREY = "I will erase you!",
 		SPIDER = "I'll let your guts out!",
-		SPIDER_WARRIOR = "Hey! You wanna go?",
+		SPIDER_WARRIOR = "I'll let your guts out!",
 	},
 	COMBAT_QUIT =
 	{
@@ -120,18 +323,18 @@ return {
 		PIG = "That pos is what I supposed to!",
 		PREY = "You were weaker then me.",
 		SPIDER = "Still Creepy!",
-		SPIDER_WARRIOR = "How Weak were you!",
+		SPIDER_WARRIOR = "How weak were you!",
 	},
-	DESCRIBE =
+	DESCRIBE = ----------------------------------------------------------------------------- 1209
 	{
         GLOMMER = "Hey! can you see UV rays?",
         GLOMMERFLOWER = 
         {
-        	GENERIC = "Rafflesia! But, seems it smells nothing.",
-        	DEAD = "I'm weird what if it smells like a heck.",
+        	GENERIC = "Rafflesia!",
+        	DEAD = "That's weird it doesn't smell at all.",
         },
         GLOMMERWINGS = "Did It floated with this wings?",
-        GLOMMERFUEL = "This is more like yuck!",
+        GLOMMERFUEL = "Is this the..",
         BELL = "Maybe I should not set this on my main door?",
         STATUEGLOMMER = 
         {	
@@ -357,7 +560,7 @@ return {
 		BEDROLL_STRAW = "is little tough.",
 		BEE =
 		{
-			GENERIC = "Bee careful!",
+			GENERIC = "Very systematic creature always. where I was, and here too.",
 			HELD = "Bee calm!",
 		},
 		BEEBOX =
@@ -638,9 +841,9 @@ return {
 		FISHTACOS = "Fishy Taco.",
 		FISH_COOKED = "It's now a food.",
 		FLINT = "This might be useful to shape tools.",
-		FLOWER = "Liriope, Lavender, Hyssop, Campanula.. Beautiful.. beautiful.",
-		FLOWERHAT = "Embarrassing!",
-		FLOWER_EVIL = "Looks Beautiful, but it drains soul.",
+		FLOWER = "All flowers are pretty and gorgeous.",
+		FLOWERHAT = "But this is embarrassing!",
+		FLOWER_EVIL = "Looks Beautiful, but it drains spirit.",
 		FOLIAGE = "So purple. I like it.",
 		FOOTBALLHAT = "A bit stuffy, but tight.",
 		FROG =
@@ -1641,6 +1844,7 @@ return {
 	},
 
 	NECRO = {
+		"美しく残酷にこの大地から往ね！",
 		"You were nothing but a piece of paper...",
 		"Go rest in the void..",
 		"You were just nothing..",
