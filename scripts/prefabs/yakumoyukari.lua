@@ -423,7 +423,6 @@ local function MakeDapperOnEquipItem(inst)
 			end
 		end
 		self.dapperness = NumBeforeCalc ~= 0 and -NumBeforeCalc or 0
-		print(self.dapperness)
 		return inst.components.sanity:PreRecalc(dt)
 	end
 end
