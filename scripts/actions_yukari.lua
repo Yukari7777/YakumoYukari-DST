@@ -515,7 +515,9 @@ ACTIONS.JUMPIN.fn = function(act)
 	if act.doer ~= nil and
         act.doer.sg ~= nil and
         act.doer.sg.currentstate.name == "jumpin_pre" then
-        if act.target ~= nil and act.target.components.teleporter ~= nil and act.target.components.teleporter:IsActive() then
+        if act.target ~= nil and 
+		act.target.components.teleporter ~= nil and 
+		act.target.components.teleporter:IsActive() then
             act.doer.sg:GoToState("jumpin", { teleporter = act.target })
             return true
 		elseif act.target ~= nil and act.target.components.scheme ~= nil and act.target.components.scheme:IsConnected() then
@@ -548,8 +550,8 @@ local function tunnelfn(inst, doer, actions, right)
 end
 AddComponentAction("SCENE", "scheme", tunnelfn)
 
-local function SetFastHarvester(inst) 
-	return inst:HasTag("quagmire_fasthands") or inst:HasTag("fastharvester") and "domediumaction" or "dolongaction"
+local function SetFastHarvester(inst, action) 
+	return inst:HasTag("quagmire_fasthands") or inst.fastharvester and "domediumaction" or "dolongaction"
 end
 
 AddStategraphActionHandler("wilson", ActionHandler(ACTIONS.HARVEST, SetFastHarvester))

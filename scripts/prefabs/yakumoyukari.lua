@@ -152,6 +152,7 @@ end
 
 local function OnhitEvent(inst, data)
 	local CanAOE = math.random() < 0.4
+
 	if inst.components.upgrader.IsVampire then
 		local target = data.target
 		local RegenAmount = inst.components.upgrader.IsAOE and 2 or 1
@@ -422,6 +423,7 @@ local function MakeDapperOnEquipItem(inst)
 			end
 		end
 		self.dapperness = NumBeforeCalc ~= 0 and -NumBeforeCalc or 0
+		print(self.dapperness)
 		return inst.components.sanity:PreRecalc(dt)
 	end
 end
@@ -443,7 +445,6 @@ local function common_postinit(inst) -- things before SetPristine()
 	inst.currentpower = net_ushortint(inst.GUID, "currentpower")
 
 	inst:AddTag("youkai")
-	inst:AddTag("yakumoga")
 	inst:AddTag("yakumoyukari")
 
 	inst:DoTaskInTime(0, RegisterKeyEvent)
@@ -480,9 +481,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.OnSave = onsave
 	inst.OnPreLoad = onpreload
 	inst.OnLoad = function(inst)
-		inst.valid = true
 		inst.components.upgrader:ApplyStatus()
-		inst:PushEvent("yukariloaded")
 	end
 	inst.powertable = powertable
 	inst.applyupgradelist = ShouldApplyStatusBecauseOfTheseItems
@@ -497,6 +496,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:ListenForEvent("unequip", OnEquip )
 	inst:ListenForEvent("graze", Graze )
 	inst:ListenForEvent("debugmode", DebugFunction, inst)
+
 end
 
 return MakePlayerCharacter("yakumoyukari", prefabs, assets, common_postinit, master_postinit)

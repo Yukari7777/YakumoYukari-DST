@@ -229,7 +229,6 @@ function Upgrader:UpdateAbilityStatus()
 	if ability[4][3] then
 		self.inst:AddTag("fastbuilder")
 		self.inst:AddTag("realyoukai")
-		self.inst:AddTag("beefalo")
 		self.powerbonus = 50
 		self.bonusspeed = 2
 		self.PowerGainMultiplier = 2.5
@@ -249,7 +248,8 @@ function Upgrader:UpdateAbilityStatus()
 	end
 	
 	if ability[4][6] then
-		self.inst:AddTag("fastharvester")
+		self.inst.yukari_classified.fastharvester:set(true)
+		self.fastharvester = true
 		self.bonusspeed = 3
 	end
 end
@@ -376,13 +376,13 @@ function Upgrader:UpdateSkillStatus()
 		skill.crafter = "Crafts faster"
 	end
 
-	if self.inst:HasTag("fastharvester") and skill.harvester == nil then
+	if self.instfastharvester and skill.harvester == nil then
 		skill.crafter = "Harvests faster"
 	end
-
-	if self.inst:HasTag("woodcutter") and skill.woodie == nil then
-		skill.woodie = "Chops faster"
-	end
+--
+--	if self.inst:HasTag("woodcutter") and skill.woodie == nil then
+--		skill.woodie = "Chops faster"
+--	end
 
 	if self.IsAOE and skill.AOE == nil then
 		skill.AOE = "40% chance to do area-of-effect with the damage amount of 60% in range 5"

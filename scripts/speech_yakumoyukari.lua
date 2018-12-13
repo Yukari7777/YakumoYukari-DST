@@ -83,7 +83,7 @@ return {
             NOTGEM = "Don't be silly.",
             WRONGGEM = "This gemstone's properties are incorrect for my purposes.",
             NOTSTAFF = "This is not the staff I seek.",
-            MUSHROOMFARM_NEEDSSHROOM = "Goodness no, it needs a fresh mushroom.",
+            MUSHROOMFARM_NEEDSSHROOM = "It needs a fresh mushroom.",
             MUSHROOMFARM_NEEDSLOG = "It needs a log, imbued with magical properties.",
             SLOTFULL = "You don't have any inventory slots left.",
             FOODFULL = "I'll be around when you're ready for seconds, dear.",
@@ -228,7 +228,7 @@ return {
 	ANNOUNCE_RESEARCH = "Never stop learning!",
 	ANNOUNCE_SHELTER = {
 		"Shade is much better.",
-		"+60 Insulation under the shade",
+		"+180 Insulation under the shade",
 		"I can stay here to avoid UV rays"
 	},
 	ANNOUNCE_THORNS = "Ow! My hands!",
@@ -676,7 +676,7 @@ return {
 		CARROT_SEEDS = "Seed of Daucus carota.",
 		WATERMELON_SEEDS = "Seed of Citrullus lanatus.",
 		CAVE_FERN = "One of Pteridophyta.",
-		CHARCOAL = "The Man's Mind.",
+		CHARCOAL = "Wickedness.",
         CHESSJUNK1 = "Clockwork junk.",
         CHESSJUNK2 = "Clockwork junk.",
         CHESSJUNK3 = "Clockwork junk.",
@@ -712,7 +712,7 @@ return {
 		DEADLYFEAST = "For suicide",
 		DEERCLOPS = "A giant one-eyed creture",
 		DEERCLOPS_EYEBALL = "Hope this doesn't read my mind.",
-		EYEBRELLAHAT =	"So Creepy.",
+		EYEBRELLAHAT =	"The eyeball is really tough!",
 		DEPLETED_GRASS =
 		{
 			GENERIC = "Needs to be fertilized.",
@@ -1881,9 +1881,13 @@ return {
 	DESCRIBE_CLOAKING = "They don't know where I am.",
 	DESCRIBE_DECLOAKING = "I'm not invisible anymore!",
 	DESCRIBE_CANNOTRESIST = "I can't resist more if I do this.",
-	DESCRIBE_NOREINFORCE = "I'm no longer reinforced!",
+	DESCRIBE_NOREINFORCE = "I'm not reinforced anymore!",
 	DESCRIBE_EYEHURT = "Ouch! My eyes!",
-	DESCRIBE_NEWSIGHT = "Let's see this.",
+	DESCRIBE_NEWSIGHT = {
+		"No one can hide from my sight.",
+		"Knowing everything on the present.",
+		"You shall not hit me, the darkness.",
+	},
 	DESCRIBE_DONEEFFCT = "The effect is over.",
 	DESCRIBE_NOSPAWN = "I can't spawn.",
 	DESCRIBE_TOOMANYBUTTER = "I think It's enough..?",

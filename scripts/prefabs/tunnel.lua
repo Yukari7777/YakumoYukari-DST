@@ -43,7 +43,7 @@ local function GetDesc(inst, viewer)
 end
 
 local function onaccept(inst, giver, item)
-	if inst.components.scheme.pointer == nil then return false end -- It will just disappeared.
+	if inst.components.scheme.pointer == nil then return false end
     inst.components.inventory:DropItem(item)
     inst.components.scheme:Activate(item)
 end
