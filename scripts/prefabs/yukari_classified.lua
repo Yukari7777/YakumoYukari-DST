@@ -5,8 +5,9 @@ local function SetDirty(netvar, val)
 end
 
 local function OnEntityReplicated(inst)
-	print("yukari_classified GUID = ", inst.GUID)
     inst._parent = inst.entity:GetParent()
+	print("yukari_classified GUID = ", inst.GUID, inst._parent)
+	print(inst._parent)
     if inst._parent == nil then
         print("Unable to initialize classified data for player Yukari")
     else
@@ -19,14 +20,26 @@ local function PushMessage(inst)
 	local inspect = GetModConfigData("skill", modname) or 2
 	local ClientString = inst.inspect:value()
 
-	--if inst._parent.HUD ~= nil then
+	if inst._parent.HUD ~= nil then
 		if inspect % 4 >= 2 then print(ClientString) end
 		if inspect % 8 >= 4 then 
 			for v in string.gmatch(ClientString, ".-%c") do
 				inst._parent.HUD.controls.networkchatqueue:PushMessage("", v, {0.8, 0.8, 0.8, 1})
 			end
 		end
-	--end
+	end
+end
+
+local function KeyCheckCommon(inst)
+	return inst == ThePlayer and TheFrontEnd:GetActiveScreen() ~= nil and TheFrontEnd:GetActiveScreen().name == "HUD"
+end
+
+local function RegisterKeyEvent(classified)
+	TheInput:AddKeyDownHandler(_G["KEY_V"], function() 
+		if KeyCheckCommon(classified._parent) then
+			SendModRPCToServer(MOD_RPC["yakumoyukari"]["sayinfo"]) 
+		end
+	end) 
 end
 
 local NIGHTVISION_COLOURCUBES = {
@@ -51,6 +64,7 @@ local function RegisterNetListeners(inst)
 	if TheWorld.ismastersim then
 		inst._parent = inst.entity:GetParent()
 	else
+		RegisterKeyEvent(inst)
 		inst:ListenForEvent("onskillinspectdirty", PushMessage)
 	end
 	inst:ListenForEvent("setnightvisiondirty", SetNightVision)

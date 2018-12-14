@@ -76,19 +76,6 @@ local function OverrideOnRemoveEntity(inst)
 	end
 end
 
-local function KeyCheckCommon(inst)
-	return inst == ThePlayer and TheFrontEnd:GetActiveScreen() ~= nil and TheFrontEnd:GetActiveScreen().name == "HUD"
-end
-
-local function RegisterKeyEvent(inst)
-	TheInput:AddKeyDownHandler(_G["KEY_V"], function() 
-		print("!", inst, inst.GUID, inst.yukari_classified.GUID)
-		if KeyCheckCommon(inst) then
-			SendModRPCToServer(MOD_RPC["yakumoyukari"]["sayinfo"]) 
-		end
-	end) 
-end
-
 -- Custom starting items
 local function GetStartInv()
 	local difficulty = GetModConfigData("difficulty", "YakumoYukari")
@@ -447,7 +434,7 @@ local function common_postinit(inst) -- things before SetPristine()
 	inst:AddTag("youkai")
 	inst:AddTag("yakumoyukari")
 
-	inst:DoTaskInTime(0, RegisterKeyEvent)
+	--inst:DoTaskInTime(0, RegisterKeyEvent)
 
 	inst:ListenForEvent("setowner", YukariOnSetOwner)
 
