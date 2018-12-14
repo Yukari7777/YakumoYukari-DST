@@ -82,6 +82,7 @@ end
 
 local function RegisterKeyEvent(inst)
 	TheInput:AddKeyDownHandler(_G["KEY_V"], function() 
+		print("!", inst, inst.GUID, inst.yukari_classified.GUID)
 		if KeyCheckCommon(inst) then
 			SendModRPCToServer(MOD_RPC["yakumoyukari"]["sayinfo"]) 
 		end
@@ -362,7 +363,7 @@ local function MakeToolEfficient(item)
 		if owner ~= nil and owner.components.upgrader ~= nil and owner.components.upgrader.IsEfficient and action ~= ACTIONS.HAMMER then
 			return self.actions[action] * 1.5 or 0
 		end
-		return item.components.tool:NewEffectiveness(action)
+		return self.actions[action] or 0
 	end
 end
 

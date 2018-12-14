@@ -5,6 +5,7 @@ local function SetDirty(netvar, val)
 end
 
 local function OnEntityReplicated(inst)
+	print("yukari_classified GUID = ", inst.GUID)
     inst._parent = inst.entity:GetParent()
     if inst._parent == nil then
         print("Unable to initialize classified data for player Yukari")
@@ -18,14 +19,14 @@ local function PushMessage(inst)
 	local inspect = GetModConfigData("skill", modname) or 2
 	local ClientString = inst.inspect:value()
 
-	if inst._parent.HUD ~= nil then
+	--if inst._parent.HUD ~= nil then
 		if inspect % 4 >= 2 then print(ClientString) end
 		if inspect % 8 >= 4 then 
 			for v in string.gmatch(ClientString, ".-%c") do
 				inst._parent.HUD.controls.networkchatqueue:PushMessage("", v, {0.8, 0.8, 0.8, 1})
 			end
 		end
-	end
+	--end
 end
 
 local NIGHTVISION_COLOURCUBES = {

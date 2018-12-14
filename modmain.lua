@@ -263,6 +263,7 @@ end
 
 ---------- print current upgrade & ability
 function SayInfo(inst)
+	print(1, inst, inst.GUID, inst.yukari_classified.GUID)
 	local HP = 0
 	local HN = 0
 	local SA = 0
@@ -271,7 +272,7 @@ function SayInfo(inst)
 	local skilltable = {}
 	local inspect = GetModConfigData("skill") or 1
 	inst.info = inst.info >= (inst.components.upgrader.skilltextpage or 3) and 0 or inst.info
-	
+
 	if inst.info == 0 then
 		HP = inst.components.upgrader.health_level
 		HN = inst.components.upgrader.hunger_level
