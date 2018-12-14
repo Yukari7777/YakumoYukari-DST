@@ -6,8 +6,6 @@ end
 
 local function OnEntityReplicated(inst)
     inst._parent = inst.entity:GetParent()
-	print("yukari_classified GUID = ", inst.GUID, inst._parent)
-	print(inst._parent)
     if inst._parent == nil then
         print("Unable to initialize classified data for player Yukari")
     else
