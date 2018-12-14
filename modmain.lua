@@ -263,7 +263,6 @@ end
 
 ---------- print current upgrade & ability
 function SayInfo(inst)
-	print(1, inst, inst.GUID, inst.yukari_classified.GUID)
 	local HP = 0
 	local HN = 0
 	local SA = 0

@@ -32,6 +32,7 @@ configuration_options = {
 	{
 		name = "language",
 		label = "Language",
+		hover = "Set language",
 		options = {
 			{ description = "english", data = "en" },
 			{ description = "chinese", data = "ch" },
@@ -42,6 +43,7 @@ configuration_options = {
 	{
 		name = "difficulty",
 		label = "Play Style",
+		hover = "Set difficulty.",
 		options =
 		{
 			{ description = "PVP", data = "easy" },
