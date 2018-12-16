@@ -15,7 +15,7 @@ end
 
 local function PushMessage(inst)
 	local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
-	local inspect = GetModConfigData("skill", modname) or 2
+	local inspect = GetModConfigData("skill", modname) or GetModConfigData("skill", "workshop-1432504104") or 2 --Added just... for me
 	local ClientString = inst.inspect:value()
 
 	if inst._parent.HUD ~= nil then
@@ -35,7 +35,7 @@ end
 local function RegisterKeyEvent(classified)
 	TheInput:AddKeyDownHandler(_G["KEY_V"], function() 
 		if KeyCheckCommon(classified._parent) then
-			SendModRPCToServer(MOD_RPC["yakumoyukari"]["sayinfo"]) 
+			SendModRPCToServer(MOD_RPC["yakumoyukari"]["sayinfo"], classified._parent) 
 		end
 	end) 
 end
@@ -63,8 +63,8 @@ local function RegisterNetListeners(inst)
 		inst._parent = inst.entity:GetParent()
 	else
 		RegisterKeyEvent(inst)
-		inst:ListenForEvent("onskillinspectdirty", PushMessage)
 	end
+	inst:ListenForEvent("onskillinspectdirty", PushMessage)
 	inst:ListenForEvent("setnightvisiondirty", SetNightVision)
 	inst:ListenForEvent("isfastharvesterdirty", SetHarvester)
 end

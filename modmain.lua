@@ -269,7 +269,7 @@ function SayInfo(inst)
 	local PO = 0
 	local str = ""
 	local skilltable = {}
-	local inspect = GetModConfigData("skill") or 1
+	local inspect = GetModConfigData("skill") or GetModConfigData("skill", "workshop-1432504104") or 1
 	inst.info = inst.info >= (inst.components.upgrader.skilltextpage or 3) and 0 or inst.info
 
 	if inst.info == 0 then
