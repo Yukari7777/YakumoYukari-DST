@@ -1017,8 +1017,8 @@ return {
 		MOOSE = "What the....",
 		MOOSEEGG = "Many living things are inside of it.",
 		MOSSLING = "They have a great appetite.",
-		FEATHERFAN = "Most efficient fan!",
-		TROPICALFAN = "Most efficient fan!",
+		FEATHERFAN = "The most efficient fan!",
+		TROPICALFAN = "The most efficient fan!",
 		GOOSE_FEATHER = "I don't think it's for warmers.",
 		STAFF_TORNADO = "Don't use this near my den.",
 		MOSQUITO =
