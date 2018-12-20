@@ -1,21 +1,21 @@
 name = "Yakumo Yukari"
 author = "Yakumo Yukari"
-version = "0.10.12"
+version = "0.10.13"
 description = "Yakumo Yukari comes from unknown world to manipulate Don't Starve Together world!\n\nVersion : "..version.."\nPress [V] to show status."
 forumthread = ""
 api_version = 6
 api_version_dst = 10
-
 dst_compatible = true
 dont_starve_compatible = false
 reign_of_giants_compatible = false
 all_clients_require_mod = true 
-
 icon_atlas = "modicon.xml"
 icon = "modicon.tex"
 
 server_filter_tags = {
 	"character",
+	"yakumoyukari",
+	"touhou",
 }
 
 local inspectflag = {}

@@ -98,7 +98,7 @@ local function DoUpgrade(inst, owner)
 	if not GetCanpell(owner) then
 		inst.components.spellcard:SetCondition(false)
 		inst.canspell:set(false)
-		owner.components.talker:Say(STRINGS.YUKARI_MORE_INGREDIENT)
+		owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_INGREDIENTS"))
 		return false
 	end
 	

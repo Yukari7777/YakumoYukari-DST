@@ -89,10 +89,7 @@ STRINGS.RECIPE_DESC.SPELLCARD_MATTER = "Repairs all physical items"
 STRINGS.CHARACTERS.YAKUMOYUKARI.DESCRIBE.SPELLCARD_MATTER = "Repairs all of physical items in my inventory. \nPower Cost : 150"
 
 STRINGS.YUKARI_UPGRADE_FINISHED = "Upgrade Finished" 
-STRINGS.YUKARI_SHOULD_BRING_SOMETHING = "I should bring something on my hands."
 STRINGS.YUKARI_CURRENT_LEVEL = "Current Level"
-STRINGS.YUKARI_NEED_POWER = "I don't have enough power."
-STRINGS.YUKARI_MORE_INGREDIENT = "I don't have enough Ingredients."
 STRINGS.YUKARI_NOSKILL = "I don't have any skills."
 
 STRINGS.HEALTH = "Health"
@@ -190,11 +187,8 @@ STRINGS.RECIPE_DESC.SPELLCARD_MATTER = "修 复 战 斗 装 备"
 STRINGS.CHARACTERS.YAKUMOYUKARI.DESCRIBE.SPELLCARD_MATTER = "修 复 身 上 所 有 的 战 具. 消 耗 : 150"
 	
 STRINGS.YUKARI_UPGRADE_FINISHED = "升 级 完 成"
-STRINGS.YUKARI_SHOULD_BRING_SOMETHING = "我 手 里 必 须 拿 点 东 西."
 STRINGS.YUKARI_CURRENT_LEVEL = "目 前 的 等 级"
-STRINGS.YUKARI_NOSKILL = "I have no skills."
-STRINGS.YUKARI_NEED_POWER = "I don't have enough power."
-STRINGS.YUKARI_MORE_INGREDIENT = "I don't have enough Ingredients."
+STRINGS.YUKARI_NOSKILL = "I don't have any skills."
 
 STRINGS.HEALTH = "生 命"
 STRINGS.HUNGER = "饥 饿"

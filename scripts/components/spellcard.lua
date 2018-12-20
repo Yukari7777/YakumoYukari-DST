@@ -89,20 +89,10 @@ function Spellcard:CastSpell(doer, target)
 	end
 end
 
-function Spellcard:AddDesc(script)
-	if self.inst.components.inspectable ~= nil then 
-		local desc = self.inst.components.inspectable:GetDescription(self.inst.components.inventoryitem.owner)
-		if not string.find(desc, script) then
-			self.inst.components.inspectable:SetDescription( desc.."\n"..script )
-		end
-	end
-end
-
 function Spellcard:CanCast(doer)
 	if self.costpower ~= nil then
 		if doer.components.power:GetCurrent() < self.costpower then
-			self:AddDesc(STRINGS.YUKARI_NEED_POWER)
-			return false
+			return doer.components.talker:Say(GetString(doer.prefab, "DESCRIBE_LOWPOWER"))
 		end
 	end
 

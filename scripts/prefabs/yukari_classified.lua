@@ -53,9 +53,13 @@ local function SetNightVision(inst)
 	inst._parent.components.playervision:SetCustomCCTable(var and NIGHTVISION_COLOURCUBES or nil)
 end
 
-local function SetHarvester(inst)
-	local var = inst.fastharvester:value()
-	inst._parent.fastharvester = var
+local function SetFastActionLevel(inst)
+	local level = inst.fastaction:value()
+	print(level, type(level), level > 0, level > 1)
+	inst._parent.fastpicker = level > 0
+	inst._parent.fastcrafter = level > 1
+	-- inst._parent.fastcutter = level > 2 Added Tag Instead
+	inst._parent.fastharvester = level > 3
 end
 
 local function RegisterNetListeners(inst)
@@ -66,7 +70,7 @@ local function RegisterNetListeners(inst)
 	end
 	inst:ListenForEvent("onskillinspectdirty", PushMessage)
 	inst:ListenForEvent("setnightvisiondirty", SetNightVision)
-	inst:ListenForEvent("isfastharvesterdirty", SetHarvester)
+	inst:ListenForEvent("setfastactiondirty", SetFastActionLevel)
 end
 
 local function fn()
@@ -82,7 +86,7 @@ local function fn()
 	inst.nightvision = net_bool(inst.GUID, "isnightvistion", "setnightvisiondirty")
 	inst.nightvision:set(false)
 
-	inst.fastharvester = net_bool(inst.GUID, "isfastharvester", "isfastharvesterdirty")
+	inst.fastaction = net_tinybyte(inst.GUID, "setfastaction", "setfastactiondirty")
 
 	--Delay net listeners until after initial values are deserialized
     inst:DoTaskInTime(0, RegisterNetListeners)

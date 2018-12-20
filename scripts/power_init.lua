@@ -1,5 +1,4 @@
 local require = GLOBAL.require
-local TUNING = GLOBAL.TUNING
 local KnownModIndex = GLOBAL.KnownModIndex
 
 AddReplicableComponent("power")
@@ -33,9 +32,7 @@ local function StatusDisplaysInit(class)
 			class.stomach:SetPosition(-40,17,0)
 		end
 			
-		class.inst:ListenForEvent("powerdelta", function(inst, data) 
-			class.power:SetPercent(data.newpercent, class.owner.replica.power:Max())
-		end, class.owner)
+		class.inst:ListenForEvent("powerdelta", function(inst, data) class.power:SetPercent(data.newpercent, class.owner.replica.power:Max()) end, class.owner)
 	end
 	
 end

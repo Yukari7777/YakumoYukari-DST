@@ -336,7 +336,10 @@ local function MakeSaneOnMeatEat(inst)
 			if food.prefab == "humanmeat" or food.prefab == "humanmeat_cooked" or food.prefab == "humanmeat_dried" then
 				food.components.edible.sanityvalue = TUNING.SANITY_LARGE
 				food.components.edible.healthvalue = TUNING.HEALING_MED
-				inst.components.talker:Say(GetString(inst.prefab, "ONEATHUMAN"))
+				inst:PushEvent("makefriend")
+				inst:DoTaskInTime(math.random() * 0.5, function()
+					inst.components.talker:Say(GetString(inst.prefab, "ONEATHUMAN"))
+				end)
 			end
 		end
 		return inst.components.eater:eatmeat(food)
@@ -358,7 +361,7 @@ local function OnEquipHat(inst, data)
 	inst.components.upgrader.hatequipped = data.isequipped
 end
 
-local ShouldApplyStatusBecauseOfTheseItems = {
+local ShouldApplyStatus = {
 	"armordragonfly", "armorobsidian", "yukarihat"
 }
 
@@ -368,7 +371,7 @@ local function OnEquip(inst, data)
 	end
 	
 	local ShouldApply = false
-	for k, v in pairs(ShouldApplyStatusBecauseOfTheseItems) do
+	for k, v in pairs(ShouldApplyStatus) do
 		if data.item.prefab == v then
 			ShouldApply = true
 			break
@@ -432,9 +435,6 @@ local function common_postinit(inst) -- things before SetPristine()
 	inst.currentpower = net_ushortint(inst.GUID, "currentpower")
 
 	inst:AddTag("youkai")
-	inst:AddTag("yakumoyukari")
-
-	--inst:DoTaskInTime(0, RegisterKeyEvent)
 
 	inst:ListenForEvent("setowner", YukariOnSetOwner)
 
@@ -471,7 +471,7 @@ local master_postinit = function(inst) -- after SetPristine()
 		inst.components.upgrader:ApplyStatus()
 	end
 	inst.powertable = powertable
-	inst.applyupgradelist = ShouldApplyStatusBecauseOfTheseItems
+	inst.applyupgradelist = ShouldApplyStatus
 	
 	inst:DoPeriodicTask(1, PeriodicFunction)
 	inst:ListenForEvent("hungerdelta", DoHungerUp )

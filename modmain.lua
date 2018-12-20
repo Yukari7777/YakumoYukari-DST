@@ -6,7 +6,6 @@ PrefabFiles = {
 	"yukariumbre",
 	"yukarihat",
 	"upgradepanel",
-	"tunnel",
 	"ultpanel",
 	"ultpanelsw",
 	"spellcards",
@@ -65,7 +64,6 @@ local TheInput = GLOBAL.TheInput
 local EQUIPSLOTS = GLOBAL.EQUIPSLOTS
 local FindEntity = GLOBAL.FindEntity
 local SpringCombatMod = GLOBAL.SpringCombatMod
-local IsYukari = ThePlayer and ThePlayer.prefab == "yakumoyukari"
 local Language = GetModConfigData("language")
 
 ----- Basic settings for Yukari -----
@@ -80,23 +78,11 @@ if Language == "ch" then
 	STRINGS.CHARACTER_QUOTES.yakumoyukari = "\"我 将 会 掌 控 这 个 世 界！.\""
 	STRINGS.CHARACTERS.YAKUMOYUKARI = require "speech_yakumoyukari_ch"
 end
-AddModCharacter("yakumoyukari", "FEMALE")
 AddMinimapAtlas("images/map_icons/yakumoyukari.xml")
 AddMinimapAtlas("images/map_icons/yukarihat.xml")
 AddMinimapAtlas("images/map_icons/yukariumbre.xml")
 AddMinimapAtlas("images/map_icons/minimap_tunnel.xml")
 AddMinimapAtlas("images/map_icons/scheme.xml")
-
------- Function ------
-AddReplicableComponent("taggable")
-
-SetTaggableText = function(player, target, text)
-    local taggable = target.components.taggable
-    if taggable ~= nil then
-        taggable:Write(player, text)
-    end
-end
-AddModRPCHandler("scheme", "write", SetTaggableText)
 
 ---------------- OVERRIDE -----------------
 
@@ -316,15 +302,9 @@ function SayInfo(inst)
 	if inspect % 2 == 1 then inst.components.talker:Say(str) end
 	
 end
-
 AddModRPCHandler("yakumoyukari", "sayinfo", SayInfo)
 
 -------------------------------
-modimport "scripts/power_init.lua"
-modimport "scripts/tunings_yukari.lua"
-modimport "scripts/strings_yukari.lua"
-modimport "scripts/actions_yukari.lua"
-modimport "scripts/recipes_yukari.lua"
 AddPrefabPostInit("bunnyman", BunnymanNormalRetargetFn)
 AddPrefabPostInit("pigman", PigmanNormalRetargetFn)
 AddPrefabPostInit("bat", BatRetargetFn)
@@ -333,3 +313,10 @@ AddPrefabPostInit("killerbee", KillerbeeRetargetFn)
 AddPrefabPostInit("frog", FrogRetargetFn)
 AddPrefabPostInit("spider", SpiderRetargetFn)
 AddPrefabPostInit("spider_warrior", WarriorRetargetFn)
+modimport "scripts/power_init.lua"
+modimport "scripts/tunings_yukari.lua"
+modimport "scripts/strings_yukari.lua"
+modimport "scripts/actions_yukari.lua" -- actions must be loaded before stategraph loads
+modimport "scripts/stategraph_yukari.lua"
+modimport "scripts/recipes_yukari.lua"
+AddModCharacter("yakumoyukari", "FEMALE")

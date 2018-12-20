@@ -25,6 +25,7 @@ local Upgrader = Class(function(self, inst)
 	self.absorbsanity = 0 
 
 	self.PowerGainMultiplier = 1
+	self.fastactionlevel = 0
 	self.dodgechance = 0.2
 	self.skilltextpage = 3
 	
@@ -44,7 +45,10 @@ local Upgrader = Class(function(self, inst)
 	self.SpikeEater = false
 	self.RotEater = false
 	self.Ability_45 = false
-	self.harvester = false
+	self.fastpicker = false
+	self.fastcrafter = false
+	self.fastcutter = false
+	self.fastharvester = false
 	
 	self.ability = {}
 	self.skill = {}
@@ -220,38 +224,46 @@ function Upgrader:UpdateAbilityStatus()
 	
 	if ability[4][2] then
 		self.inst:RemoveTag("youkai")
-		self.inst:AddTag("fastpicker")
+		self.fastactionlevel = 1
+		self.fastpicker = true
 		self.powerbonus = 25
 		self.bonusspeed = 1
 		self.PowerGainMultiplier = 2
 	end
 	
 	if ability[4][3] then
-		self.inst:AddTag("fastbuilder")
 		self.inst:AddTag("realyoukai")
+		self.fastactionlevel = 2
+		self.fastcrafter = true
 		self.powerbonus = 50
 		self.bonusspeed = 2
 		self.PowerGainMultiplier = 2.5
 	end
 	
 	if ability[4][4] then
+		self.inst:AddTag("spiderwhisperer")
+		self.inst:RemoveTag("scarytoprey")
 		self.IsEfficient = true
 		self.inst.components.locomotor:SetTriggersCreep(false)
-		self.inst:AddTag("spiderwhisperer")
-		self.powerbonus = 75
 		self.PowerGainMultiplier = 3
+		self.powerbonus = 75
 	end
 	
 	if ability[4][5] then
+		self.fastactionlevel = 3
+		self.inst:AddTag("woodcutter")
+		self.fastcutter = true
 		self.Ability_45 = true
         self.inst.components.combat:SetRange(3.2)
 	end
 	
 	if ability[4][6] then
-		self.inst.yukari_classified.fastharvester:set(true)
+		self.fastactionlevel = 4
 		self.fastharvester = true
 		self.bonusspeed = 3
 	end
+
+	self.inst.yukari_classified.fastaction:set(self.fastactionlevel)
 end
 
 function Upgrader:UpdateHatAbilityStatus(hat)	
@@ -260,26 +272,26 @@ function Upgrader:UpdateHatAbilityStatus(hat)
 		
 		if skill[2] then
 			self.hatdodgechance = 0.1
-			self.hatabsorption = 0.6
+			self.hatabsorption = 0.3
 		end
 		
 		if skill[3] then
 			hat.components.waterproofer:SetEffectiveness(1)
 			self.WaterProofer = true
 			self.hatdodgechance = 0.2
-			self.hatabsorption = 0.8
+			self.hatabsorption = 0.6
 		end
 		
 		if skill[4] then
 			self.FireResist = true
 			self.hatbonusspeed = 1
 			self.hatdodgechance = 0.3
-			self.hatabsorption = 0.9
+			self.hatabsorption = 0.8
 		end
 		
 		if skill[5] then
 			self.hatdodgechance = 0.4
-			self.hatabsorption = 0.95
+			self.hatabsorption = 0.9
 			self.GodTeleport = true
 		end
 		
@@ -368,21 +380,21 @@ function Upgrader:UpdateSkillStatus()
 		skill.nohealthpenalty = "No health penalty after reviving"
 	end
 
-	if self.inst:HasTag("fastpicker") and skill.picker == nil then
+	if self.fastpicker and skill.picker == nil then
 		skill.picker = "Picks faster"
 	end
 
-	if self.inst:HasTag("fastbuilder") and skill.crafter == nil then
+	if self.fastcrafter and skill.crafter == nil then
 		skill.crafter = "Crafts faster"
 	end
 
-	if self.instfastharvester and skill.harvester == nil then
-		skill.crafter = "Harvests faster"
+	if self.fastharvester and skill.harvester == nil then
+		skill.harvester = "Harvests faster"
 	end
---
---	if self.inst:HasTag("woodcutter") and skill.woodie == nil then
---		skill.woodie = "Chops faster"
---	end
+
+	if self.fastcutter and skill.woodie == nil then
+		skill.woodie = "Chops faster"
+	end
 
 	if self.IsAOE and skill.AOE == nil then
 		skill.AOE = "40% chance to do area-of-effect with the damage amount of 60% in range 5"

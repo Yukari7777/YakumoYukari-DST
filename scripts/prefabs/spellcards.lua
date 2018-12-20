@@ -221,7 +221,7 @@ function MakeCard(name)
 		inst.components.finiteuses:SetUses(1500)
 		inst.components.spellcard:SetSpellFn(function(inst, owner)
 			if owner.components.playervision == nil then return false end
-			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NEWSIGHT"))
+			owner.components.talker:Say(GetString(owner.prefab, "NEWSIGHT"))
 			owner.yukari_classified.nightvision:set(true)
 			return true
 		end)
