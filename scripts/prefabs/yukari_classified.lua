@@ -83,10 +83,17 @@ local function fn()
 
 	inst.inspect = net_string(inst.GUID, "onskillinspect", "onskillinspectdirty")
 
+	inst.inspell = net_bool(inst.GUID, "oninspell", "oninspelldirty")
+	inst.inspell:set(false)
+
+	inst.inspellbait = net_bool(inst.GUID, "oninspellbait", "oninspellbaitdirty")
+	inst.inspellbait:set(false)
+	
 	inst.nightvision = net_bool(inst.GUID, "isnightvistion", "setnightvisiondirty")
 	inst.nightvision:set(false)
 
 	inst.fastaction = net_tinybyte(inst.GUID, "setfastaction", "setfastactiondirty")
+	
 
 	--Delay net listeners until after initial values are deserialized
     inst:DoTaskInTime(0, RegisterNetListeners)

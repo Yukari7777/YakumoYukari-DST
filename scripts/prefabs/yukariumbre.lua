@@ -67,6 +67,7 @@ local function unfoldit(inst)
 		owner.DynamicShadow:SetSize(1.3, 0.6)
 		inst.components.weapon:SetDamage(TUNING.YDEFAULT.YUKARI_UMBRE_DAMAGE)
 		inst.components.waterproofer:SetEffectiveness(0)
+		inst.components.equippable.walkspeedmult = TUNING.CANE_SPEED_MULT
 		inst:RemoveTag("umbrella")
 		
 		inst.isunfolded:set(false)
@@ -78,6 +79,7 @@ local function unfoldit(inst)
 		owner.DynamicShadow:SetSize(2.2, 1.4)
 		inst.components.weapon:SetDamage(TUNING.YDEFAULT.YUKARI_UMBRE_DAMAGE_SMALL)
 		inst.components.waterproofer:SetEffectiveness(1)
+		inst.components.equippable.walkspeedmult = 1
 		inst:AddTag("umbrella")
 		
 		inst.isunfolded:set(true)

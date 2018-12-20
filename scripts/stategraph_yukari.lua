@@ -15,7 +15,7 @@ local function SetFastPickerServer(inst, action)
         and action.target.components.pickable ~= nil
         and (   (action.target.components.pickable.jostlepick and "dojostleaction") or
                 (action.target.components.pickable.quickpick and "doshortaction") or
-				(inst.fastpicker and "doshortaction") or
+				(inst.yukari_classified ~= nil and inst.yukari_classified.fastaction:value() > 0 and "doshortaction") or
                 (inst:HasTag("fastpicker") and "doshortaction") or
                 (inst:HasTag("quagmire_fasthands") and "domediumaction") or
                 "dolongaction"  )
@@ -24,7 +24,7 @@ end
 local function SetFastPickerClient(inst, action)
 	return (action.target:HasTag("jostlepick") and "dojostleaction")
         or (action.target:HasTag("quickpick") and "doshortaction")
-		or (inst.fastpicker and "doshortaction")
+		or (inst.yukari_classified ~= nil and inst.yukari_classified.fastaction:value() > 0 and "doshortaction")
         or (inst:HasTag("fastpicker") and "doshortaction")
         or (inst:HasTag("quagmire_fasthands") and "domediumaction")
         or "dolongaction"
@@ -35,7 +35,7 @@ AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.PICK, SetFastP
 local function SetFastBuilder(inst, action)
 	local rec = GLOBAL.GetValidRecipe(action.recipe)
     return (rec ~= nil and rec.tab.shop and "give")
-        or (inst:HasTag("fastbuilder") and "domediumaction")
+        or (inst.yukari_classified ~= nil and inst.yukari_classified.fastaction:value() > 1 and "domediumaction")
         or (inst.fastcrafter and "domediumaction")
         or "dolongaction"
 end
@@ -43,7 +43,7 @@ AddStategraphActionHandler("wilson", ActionHandler(ACTIONS.BUILD, SetFastBuilder
 AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.BUILD, SetFastBuilder))
 
 local function SetFastHarvester(inst, action) 
-	return inst:HasTag("quagmire_fasthands") or inst.fastharvester and "domediumaction" or "dolongaction"
+	return inst:HasTag("quagmire_fasthands") or (inst.yukari_classified ~= nil and inst.yukari_classified.fastaction:value() > 3) and "domediumaction" or "dolongaction"
 end
 AddStategraphActionHandler("wilson", ActionHandler(ACTIONS.HARVEST, SetFastHarvester))
 AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.HARVEST, SetFastHarvester))

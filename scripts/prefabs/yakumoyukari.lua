@@ -159,12 +159,6 @@ local function OnhitEvent(inst, data)
 	
 end
 
-local function TelePortDelay(inst)
-	inst:DoTaskInTime(0.5, function()
-		inst.istelevalid = true 
-	end)
-end
-
 local function DoPowerRestore(inst, amount)
 	local delta = amount * inst.components.upgrader.PowerGainMultiplier
 	inst.components.power:DoDelta(delta, false)
@@ -173,7 +167,7 @@ local function DoPowerRestore(inst, amount)
 end
 	
 function DoHungerUp(inst, data)
-	if inst:HasTag("inspell") then 
+	if inst.yukari_classified ~= nil and inst.yukari_classified.inspell:value() then
 		return
 	end
 
@@ -394,7 +388,7 @@ end
 local function MakeGrazeable(inst)
 	inst.components.inventory.NewTakeDamage = inst.components.inventory.ApplyDamage
 	function inst.components.inventory:ApplyDamage(damage, attacker, weapon, ...)
-		local totaldodge = inst.components.upgrader.dodgechance + inst.components.upgrader.hatdodgechance
+		local totaldodge = (inst.components.upgrader.dodgechance + inst.components.upgrader.hatdodgechance) * (inst.sg:HasStateTag("idle") and 1 or 2) -- double when is moving
 		if inst.IsGrazing or math.random() < totaldodge then
 			inst:PushEvent("graze")
 			return 0
@@ -435,6 +429,7 @@ local function common_postinit(inst) -- things before SetPristine()
 	inst.currentpower = net_ushortint(inst.GUID, "currentpower")
 
 	inst:AddTag("youkai")
+	inst:AddTag("yukaricraft")
 
 	inst:ListenForEvent("setowner", YukariOnSetOwner)
 
@@ -477,7 +472,6 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:ListenForEvent("hungerdelta", DoHungerUp )
 	inst:ListenForEvent("healthdelta", GoInvincible )
 	inst:ListenForEvent("onattackother", OnhitEvent )
-	inst:ListenForEvent("teleported", TelePortDelay, inst )
 	inst:ListenForEvent("hatequipped", OnEquipHat )
 	inst:ListenForEvent("equip", OnEquip )
 	inst:ListenForEvent("unequip", OnEquip )

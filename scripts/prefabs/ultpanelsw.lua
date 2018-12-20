@@ -22,7 +22,7 @@ function MakeUltimateSW(name, index)
 		
 		local str = {}
 			str[1] = "I changed my destiny myself..."
-			str[2] = "Everythings are DESTROYABLE."
+			str[2] = "Everythings are... DESTROYABLE."
 			str[3] = "This, is the power who my friend had..."
 			str[4] = "Yes... this is my power I had."
 		if language == "ch" then

@@ -58,7 +58,6 @@ function MakeCard(name)
 		inst.components.spellcard:SetSpellFn(function(inst, owner)
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_CLOAKING"))
 			owner.AnimState:SetMultColour(0.3,0.3,0.3,.3)
-			owner:AddTag("notarget")
 		end)
 		inst.components.spellcard:SetTaskFn(function(inst, owner)
 			local x,y,z = owner.Transform:GetWorldPosition()
@@ -226,10 +225,10 @@ function MakeCard(name)
 			return true
 		end)
 		inst.components.spellcard:SetTaskFn(function(inst, owner)
-			local HasGoggleVision = owner.components.playervision.gogglevision
-			inst.components.finiteuses:Use(1)
+			local IsWearGoggle = owner.components.inventory.equipslots ~= nil and owner.components.inventory.equipslots["head"] ~= nil and owner.components.inventory.equipslots["head"].prefab == "molehat"
 			owner.components.power:DoDelta(-0.5, false)
-			if HasGoggleVision then -- Player wears goggle in task
+			inst.components.finiteuses:Use(1)
+			if IsWearGoggle then
 				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_EYEHURT"))
 				owner.components.combat:GetAttacked(inst, 1)
 				owner.yukari_classified.nightvision:set(false)
@@ -303,7 +302,9 @@ function MakeCard(name)
 			return fx
 		end
 		inst.components.spellcard:SetSpellFn(function(inst, owner)
-			owner:AddTag("spellbait")
+			if owner.yukari_classified ~= nil then
+				owner.yukari_classified.inspellbait:set(true)
+			end
 			owner.components.upgrader:ApplyStatus()
 			owner.components.talker:Say(GetString(owner.prefab, "TAUNT"))
 			inst.fx = barrier(inst, owner)
@@ -323,7 +324,9 @@ function MakeCard(name)
 			inst.components.finiteuses:Use(1)
 		end)
 		inst.components.spellcard:SetOnRemoveTask(function(inst, owner)
-			owner:RemoveTag("spellbait")
+			if owner.yukari_classified ~= nil then
+				owner.yukari_classified.inspellbait:set(false)
+			end
 			owner.components.upgrader:ApplyStatus()
 			inst.fx:kill_fx()
 			inst.fx = nil
@@ -331,7 +334,9 @@ function MakeCard(name)
 		inst.components.finiteuses:SetOnFinished(function()
 			local owner = inst.components.inventoryitem.owner
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
-			owner:RemoveTag("spellbait")
+			if owner.yukari_classified ~= nil then
+				owner.yukari_classified.inspellbait:set(false)
+			end
 			owner.components.upgrader:ApplyStatus()
 			inst.fx:kill_fx()
 			inst.fx = nil
@@ -347,31 +352,36 @@ function MakeCard(name)
 			local x,y,z = owner.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x, y, z, 60)
 			for k,v in pairs(ents) do
-				if v.components.timer then 
+				if v.components.timer ~= nil then 
 					v.components.timer:SetTimeLeft("grow", 0) 
 				end
 
-				if v.components.witherable then
+				if v.components.witherable ~= nil then
+					v.components.witherable:OnRemoveFromEntity()
 					v.components.witherable.withered = false
 					v:RemoveTag("withered")
 					v:RemoveTag("witherable")
 				end
 
-				if v.components.diseaseable then
+				if v.components.diseaseable ~= nil then
 					v.components.diseaseable:OnRemoveFromEntity()
 					v:RemoveComponent("diseaseable")
 				end
 
-				if v.components.pickable then
+				if v.components.pickable ~= nil then
 					v.components.pickable.cycles_left = nil
+					v.components.pickable.protected_cycles = nil
 					v.components.pickable.transplanted = false
-					if v.rain then
+					v.components.pickable:Regen()
+					if v.rain ~= nil then
 						v.rain = 0
 					end
-					v.components.pickable:Regen()
+					v:RemoveTag("pickable")
+					v:RemoveTag("barren")
+					v:RemoveTag("quickpick")
 				end
 				
-				if v.components.hackable then
+				if v.components.hackable ~= nil then
 					v:RemoveTag("withered")
 					v:RemoveTag("witherable")
 					v.components.hackable.withered = false
@@ -379,20 +389,20 @@ function MakeCard(name)
 					v.components.hackable:Regen()
 				end
 
-				if v.components.crop then
-					v.components.crop:DoGrow(TUNING.TOTAL_DAY_TIME * 5)
+				if v.components.crop ~= nil then
+					v.components.crop:DoGrow(2400)
 				end
 				
-				if v:HasTag("tree") and v.components.growable and not v:HasTag("stump") then
+				if v:HasTag("tree") and v.components.growable ~= nil and not v:HasTag("stump") then
 					v.components.growable:DoGrowth()
 					v.components.growable:SetStage(3)
 				end
 				
-				if v.components.grower then
+				if v.components.grower ~= nil then
 					v.components.grower.cycles_left = 6
 				end
 				
-				if v.components.burnable then
+				if v.components.burnable ~= nil then
 					v.components.burnable:Extinguish()
 				end
 			end
@@ -500,10 +510,10 @@ function MakeCard(name)
 				{"purplegem", math.random(2), "rare", nil, "sw"},
 			}
 			local LootTable_b = {
-				{"ash", math.random(2), "bad", function() if owner.components.health then owner.components.health:DoDelta(-2, nil, nil, true) end end},
-				{"spoiled_food", math.random(2), "bad", function() if owner.components.hunger then owner.components.hunger:DoDelta(-3, nil, true) end end},
-				{"rottenegg", math.random(2), "bad", function() if owner.components.hunger then owner.components.hunger:DoDelta(-3, nil, true) end end},
-				{"charcoal", math.random(2), "bad", function() if owner.components.sanity then owner.components.sanity:DoDelta(-2) end end},
+				{"ash", math.random(2), "bad", function() if owner.components.health then owner.components.health:DoDelta(-10, nil, nil, true) end end},
+				{"spoiled_food", math.random(2), "bad", function() if owner.components.hunger then owner.components.hunger:DoDelta(-30, nil, true) end end},
+				{"rottenegg", math.random(2), "bad", function() if owner.components.hunger then owner.components.hunger:DoDelta(-30, nil, true) end end},
+				{"charcoal", math.random(2), "bad", function() if owner.components.sanity then owner.components.sanity:DoDelta(-20) end end},
 				{"killerbee", math.random(2), "bad"},
 				{"mosquito", 1, "bad", nil, "rog"},
 				{"frog", 1, "bad", nil, "rog"},
@@ -515,7 +525,7 @@ function MakeCard(name)
 				{"spider", math.random(2), "bad", nil, "sw"},
 			}
 			local LootTable_h = {
-				{"ash", math.random(3), "bad", function() if owner.components.health then owner.components.health:DoDelta(-3, nil, nil, true) end end},
+				{"ash", math.random(3), "bad", function() if owner.components.health then owner.components.health:DoDelta(-10, nil, nil, true) end end},
 				{"spoiled_food", math.random(3), "suck", function() if owner.components.hunger then owner.components.hunger:DoDelta(-50, nil, true) end end},
 				{"rottenegg", math.random(3), "suck", function() if owner.components.hunger then owner.components.hunger:DoDelta(-50, nil, true) end end},
 				{"charcoal", math.random(3), "suck", function() if owner.components.sanity then owner.components.sanity:DoDelta(-50) end end},	
@@ -547,22 +557,29 @@ function MakeCard(name)
 				local naughtiness = owner.naughtiness or 0
 				local key, amount, grade, pt, list, loot, speech, color
 				local SpawnDelay = LeftSpawnCount > 1 and 0.7 or 1.2
+				local thechance = math.random()
+				if owner.components.playercontroller ~= nil then
+					owner.components.playercontroller:Enable(false)
+				end
 				owner:DoTaskInTime(SpawnDelay, function()
+					if owner.components.playercontroller ~= nil then
+						owner.components.playercontroller:Enable(false)
+					end
 					if LeftSpawnCount > 1 then 
 						if naughtiness < 150 then
-							if math.random() < 0.66 then -- 66%, common stuff
+							if thechance < 0.66 then -- 66%, common stuff
 								list = LootTable_c
-							elseif math.random() < 0.66 then -- 21%, good stuff
+							elseif thechance < 0.66 then -- 21%, good stuff
 								list = LootTable_g
-							elseif math.random() < 0.66 then -- 7%, rare stuff
+							elseif thechance < 0.66 then -- 7%, rare stuff
 								list = LootTable_r
 							else							-- 6%, bad stuff
 								list = LootTable_b
 							end
 						elseif naughtiness < 300 then
-							if math.random() < 0.33 then -- 33%, common stuff
+							if thechance < 0.33 then -- 33%, common stuff
 								list = LootTable_c
-							elseif math.random() < 0.1 then -- 6%, good stuff
+							elseif thechance < 0.1 then -- 6%, good stuff
 								list = LootTable_g
 							else							-- 60%, bad stuff
 								list = LootTable_b
@@ -575,7 +592,7 @@ function MakeCard(name)
 						if naughtiness < 200 then
 							list = LootTable_b 
 						else
-							Speech = GetString(owner.prefab, "LAMENT_H")
+							speech = GetString(owner.prefab, "LAMENT_H")
 							list = LootTable_h
 						end
 					end
@@ -595,6 +612,9 @@ function MakeCard(name)
 								prefab.components.lootdropper:SetLoot({})
 								prefab.components.lootdropper:SetChanceLootTable('nodrop')
 							end
+							if prefab.components.health ~= nil then
+								prefab.persists = false -- This won't be saved.
+							end
 							if loot[key][4] then
 								loot[key][4](prefab, owner)
 							end
@@ -611,13 +631,15 @@ function MakeCard(name)
 					if LeftSpawnCount > 1 then 
 						LeftSpawnCount = LeftSpawnCount - 1
 						DoSpawn()
+						if owner.components.playercontroller ~= nil then
+							owner.components.playercontroller:Enable(false)
+						end
 					else
 						local x,y,z = owner.Transform:GetWorldPosition()
 						local ents = TheSim:FindEntities(x, y, z, 30)
 						owner.components.health:SetInvincible(false)
-						owner:RemoveTag("notarget")
 						for k,v in pairs(ents) do
-							if v.components.combat and v:HasTag("spawned") then
+							if v.components.combat ~= nil and v:HasTag("spawned") then
 								v.components.combat:SetTarget(owner)
 							end
 						end
@@ -628,16 +650,20 @@ function MakeCard(name)
 						owner:DoTaskInTime(0.8, function(owner) owner.components.talker:Say(speech) end)
 						LeftSpawnCount = 0
 						inst.Activated = false
-						owner:RemoveTag("inspell")
+						if owner.yukari_classified ~= nil then
+							owner.yukari_classified.inspell:set(false)
+						end
 					end
 				end)
 			end
 
-			if inst.Activated or owner:HasTag("inspell")then
-				return false --owner.components.talker:Say(GetString(owner.prefab, "ACTIONFAIL_GENERIC"))
+			if inst.Activated or owner.yukari_classified ~= nil and owner.yukari_classified.inspell:value() then
+				return false
 			else
 				inst.Activated = true
-				owner:AddTag("inspell")
+				if owner.yukari_classified ~= nil then
+					owner.yukari_classified.inspell:set(true)
+				end
 				local x,y,z = owner.Transform:GetWorldPosition()
 				local ents = TheSim:FindEntities(x, y, z, 100)
 				if owner.components.playercontroller ~= nil then
@@ -649,7 +675,6 @@ function MakeCard(name)
 						v.components.combat.target = nil
 					end
 				end
-				owner:AddTag("notarget")
 				LeftSpawnCount = math.random(3, 7)
 				if owner.components.power then
 					owner.components.power:DoDelta(-20, false)

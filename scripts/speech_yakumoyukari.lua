@@ -308,21 +308,15 @@ return {
 	ANNOUNCE_WHALE_HUNT_LOST_TRAIL = "I can't find trail anymore.",
 	ANNOUNCE_WHALE_HUNT_LOST_TRAIL_SPRING = "My eyes can't follow the trail.",
 	
-	
 	BATTLECRY =
 	{
 		GENERIC = "I'll let you a death!",
-		PIG = "I'll let you a death!",
-		PREY = "I will erase you!",
 		SPIDER = "I'll let your guts out!",
 		SPIDER_WARRIOR = "I'll let your guts out!",
 	},
 	COMBAT_QUIT =
 	{
-		GENERIC = "Now you murdered by me.",
-		PIG = "That pos is what I supposed to!",
-		PREY = "You were weaker then me.",
-		SPIDER = "Still Creepy!",
+		GENERIC = "Now you have murdered by me.",
 		SPIDER_WARRIOR = "How weak were you!",
 	},
 	DESCRIBE = ----------------------------------------------------------------------------- 1209
@@ -1314,7 +1308,7 @@ return {
 		TENTACLE_PILLAR_ARM = "It spawned from the magic energy.",
 		TENTACLE_GARDEN = "A giant pole.",
 		TOPHAT = "How much can I stack up to?",
-		TORCH = "Can't I attach it?",
+		TORCH = "Can't I attach it on wall?",
 		TRANSISTOR = "It's a transistor!",
 		TRAP = "Capture the fools!",
 		TRAP_TEETH = "Deadly teeth",
@@ -1385,7 +1379,7 @@ return {
 			EMPTY = "It's a building lot.",
 			GENERIC = "I think.. stones are inside of the walls.",
 		},
-		WALRUS_TUSK = "What is this use of?",
+		WALRUS_TUSK = "Quite durable",
 		WARG = "It's a big dog. But It will tire us unless being killed.",
 		WASPHIVE = "Bee's colony",
 		WATERMELON = "It's a.. Suika!",
@@ -1665,7 +1659,7 @@ return {
 		},
 		PALMLEAF = "What a large leaf, might be useful.",
 		CHIMINEA = "Windproof pit",
-		DOUBLE_UMBRELLAHAT = "What is this use of?",
+		DOUBLE_UMBRELLAHAT = "I didn't know that the eye is that tough.",
 		CRAB = {
 			GENERIC = "Holy Crab!",
 			HIDDEN = "Ah, Crab!",

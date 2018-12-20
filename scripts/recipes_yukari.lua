@@ -1,7 +1,7 @@
 local TECH = GLOBAL.TECH
 local difficulty = GetModConfigData("difficulty")
 
-local TOUHOU = AddRecipeTab("TOUHOU", 777, "images/inventoryimages/touhoutab.xml", "touhoutab.tex", "yakumoyukari")
+local TOUHOU = AddRecipeTab("TOUHOU", 777, "images/inventoryimages/touhoutab.xml", "touhoutab.tex", "yukaricraft")
 
 local HealthIngredient = { Ingredient("healingsalve", 2), Ingredient("log", 3) }
 local HungerIngredient = { Ingredient("bonestew", 1), Ingredient("meatballs", 2) }
@@ -13,6 +13,8 @@ if difficulty == "easy" then
 	SanityIngredient = { Ingredient("petals", 3), Ingredient("nightmarefuel", 1) }
 	PowerIngredient = { Ingredient("purplegem", 1), Ingredient("livinglog", 2) }
 end
+local SchemetoolIngredient = Ingredient( "schemetool", 6 ) 
+SchemetoolIngredient.atlas = "images/inventoryimages/schemetool.xml"
 
 AddRecipe("healthpanel", HealthIngredient, TOUHOU, TECH.SCIENCE_TWO, nil, nil, nil, nil, nil, "images/inventoryimages/healthpanel.xml", "healthpanel.tex" )
 AddRecipe("hungerpanel", HungerIngredient, TOUHOU, TECH.SCIENCE_ONE, nil, nil, nil, nil, nil, "images/inventoryimages/hungerpanel.xml", "hungerpanel.tex")
@@ -29,7 +31,11 @@ AddRecipe("spellcard_mesh", {Ingredient("nightmarefuel", 5), Ingredient("nitre",
 AddRecipe("spellcard_curse", {Ingredient("nightmarefuel", 5), Ingredient("livinglog", 2)}, TOUHOU, TECH.MAGIC_TWO, nil, nil, nil, nil, nil, "images/inventoryimages/spellcard_curse.xml", "spellcard_curse.tex")
 AddRecipe("spellcard_laplace", {Ingredient("nightmarefuel", 5), Ingredient("purplegem", 2)}, TOUHOU, TECH.MAGIC_TWO, nil, nil, nil, nil, nil, "images/inventoryimages/spellcard_laplace.xml", "spellcard_laplace.tex")
 AddRecipe("spellcard_necro", {Ingredient("thulecite", 40), Ingredient("purplegem", 20), Ingredient("greengem", 4)}, TOUHOU, TECH.ANCIENT_FOUR, nil, nil, nil, nil, nil, "images/inventoryimages/spellcard_necro.xml", "spellcard_necro.tex")
-AddRecipe("healthult", {Ingredient("dragon_scales", 2), Ingredient("trunk_winter", 2), Ingredient("ice", 60)}, TOUHOU, TECH.ANCIENT_FOUR, nil, nil, true, nil, nil, "images/inventoryimages/healthult.xml", "healthult.tex")
-AddRecipe("hungerult", {Ingredient("bearger_fur", 2), Ingredient("armormarble", 2), Ingredient("bonestew", 10)}, TOUHOU, TECH.ANCIENT_FOUR, nil, nil, true, nil, nil, "images/inventoryimages/hungerult.xml", "hungerult.tex")
+AddRecipe("healthult", {Ingredient("dragon_scales", 2), Ingredient("trunk_winter", 6), Ingredient("armormarble", 6)}, TOUHOU, TECH.ANCIENT_FOUR, nil, nil, true, nil, nil, "images/inventoryimages/healthult.xml", "healthult.tex")
+AddRecipe("hungerult", {Ingredient("bearger_fur", 2), Ingredient("ice", 60), Ingredient("bonestew", 20)}, TOUHOU, TECH.ANCIENT_FOUR, nil, nil, true, nil, nil, "images/inventoryimages/hungerult.xml", "hungerult.tex")
 AddRecipe("sanityult", {Ingredient("deerclops_eyeball", 2), Ingredient("orangegem", 10), Ingredient("yellowgem", 10), Ingredient("greengem", 10)}, TOUHOU, TECH.ANCIENT_FOUR, nil, nil, true, nil, nil, "images/inventoryimages/sanityult.xml", "sanityult.tex")
-AddRecipe("powerult", {Ingredient("minotaurhorn", 2), Ingredient("goose_feather", 20), Ingredient("transistor", 10), Ingredient("gears", 10)}, TOUHOU, TECH.ANCIENT_FOUR, nil, nil, true, nil, nil, "images/inventoryimages/powerult.xml", "powerult.tex")
+AddRecipe("powerult", {Ingredient("minotaurhorn", 2), Ingredient("goose_feather", 30), Ingredient("transistor", 20), Ingredient("gears", 20)}, TOUHOU, TECH.ANCIENT_FOUR, nil, nil, true, nil, nil, "images/inventoryimages/powerult.xml", "powerult.tex")
+AddRecipe("healthultsw", {Ingredient("jellybean", 30), Ingredient("amulet", 10), Ingredient("reviver", 10)}, TOUHOU, TECH.ANCIENT_FOUR, nil, nil, true, nil, nil, "images/inventoryimages/healthultsw.xml", "healthultsw.tex")
+AddRecipe("hungerultsw", {Ingredient("spoiled_food", 1000), Ingredient("batbat", 6), Ingredient("staff_tornado", 6)}, TOUHOU, TECH.ANCIENT_FOUR, nil, nil, true, nil, nil, "images/inventoryimages/hungerultsw.xml", "hungerultsw.tex")
+AddRecipe("sanityultsw", {Ingredient("shadowheart", 4), Ingredient("thurible", 4), Ingredient("armorskeleton", 4), Ingredient("skeletonhat", 4)}, TOUHOU, TECH.ANCIENT_FOUR, nil, nil, true, nil, nil, "images/inventoryimages/sanityultsw.xml", "sanityultsw.tex")
+AddRecipe("powerultsw", {Ingredient("townportaltalisman", 20), Ingredient("sleepbomb", 8), SchemetoolIngredient }, TOUHOU, TECH.ANCIENT_FOUR, nil, nil, true, nil, nil, "images/inventoryimages/powerultsw.xml", "powerultsw.tex")
