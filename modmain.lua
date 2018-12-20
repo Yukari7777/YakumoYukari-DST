@@ -1,6 +1,5 @@
 PrefabFiles = {
 	"yukari_classified",
-	"taggable_classified",
 	"yakumoyukari",
 	"yakumoyukari_none",
 	"yukariumbre",
