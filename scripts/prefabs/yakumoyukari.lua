@@ -1,42 +1,17 @@
 local MakePlayerCharacter = require "prefabs/player_common"
 
 local assets = {
-	Asset( "ANIM", "anim/player_basic.zip" ),
-	Asset( "ANIM", "anim/player_idles_shiver.zip" ),
-	Asset( "ANIM", "anim/player_actions.zip" ),
-	Asset( "ANIM", "anim/player_actions_axe.zip" ),
-	Asset( "ANIM", "anim/player_actions_pickaxe.zip" ),
-	Asset( "ANIM", "anim/player_actions_shovel.zip" ),
-	Asset( "ANIM", "anim/player_actions_blowdart.zip" ),
-	Asset( "ANIM", "anim/player_actions_eat.zip" ),
-	Asset( "ANIM", "anim/player_actions_item.zip" ),
-	Asset( "ANIM", "anim/player_actions_uniqueitem.zip" ),
-	Asset( "ANIM", "anim/player_actions_bugnet.zip" ),
-	Asset( "ANIM", "anim/player_actions_fishing.zip" ),
-	Asset( "ANIM", "anim/player_actions_boomerang.zip" ),
-	Asset( "ANIM", "anim/player_bush_hat.zip" ),
-	Asset( "ANIM", "anim/player_attacks.zip" ),
-	Asset( "ANIM", "anim/player_idles.zip" ),
-	Asset( "ANIM", "anim/player_rebirth.zip" ),
-	Asset( "ANIM", "anim/player_jump.zip" ),
-	Asset( "ANIM", "anim/player_amulet_resurrect.zip" ),
-	Asset( "ANIM", "anim/player_teleport.zip" ),
-	Asset( "ANIM", "anim/wilson_fx.zip" ),
-	Asset( "ANIM", "anim/player_one_man_band.zip" ),
-	Asset( "ANIM", "anim/shadow_hands.zip" ),
-	Asset( "ANIM", "anim/beard.zip" ),
-	Asset( "SOUND", "sound/sfx.fsb" ),
-	Asset( "SOUND", "sound/wilson.fsb" ),
+	Asset("SCRIPT", "scripts/prefabs/player_common.lua"),
+	Asset("SOUND", "sound/willow.fsb"),
 
 	Asset("IMAGE", "images/colour_cubes/beaver_vision_cc.tex"),
-	Asset( "ATLAS", "images/avatars/avatar_yakumoyukari.xml"),
-	Asset( "ATLAS", "images/avatars/avatar_ghost_yakumoyukari.xml"),
+
+	Asset("ANIM", "anim/ghost_yakumoyukari_build.zip"),
 }
 
 local prefabs = { -- deps; should be a list of prefabs that it wants to have loaded in order to be able to create prefab.
-	"scheme",
-	"yukariumbre",
-	"yukarihat",
+	"yukari_classified",
+	"yakumoyukari_none",
 }
 
 local function YukariOnSetOwner(inst)
@@ -154,45 +129,20 @@ local function OnhitEvent(inst, data)
 	end
 
 	if inst.components.upgrader.IsAOE and CanAOE then
-		inst.components.combat:DoAreaAttack(data.target, 2, data.weapon, nil, data.stimuli, {"INLIMBO"})
+		inst.components.combat:DoAreaAttack(data.target, 3, data.weapon, nil, data.stimuli, {"INLIMBO"})
 	end
 	
 end
 
 local function DoPowerRestore(inst, amount)
 	local delta = amount * inst.components.upgrader.PowerGainMultiplier
-	inst.components.power:DoDelta(delta, false)
+	inst.components.power:DoDelta(delta)
 	--inst.HUD.controls.status.power:PulseGreen() 
 	--inst.HUD.controls.status.power:ScaleTo(1.3,1,.7)
 end
 	
-function DoHungerUp(inst, data)
-	if inst.yukari_classified ~= nil and inst.yukari_classified.inspell:value() then
-		return
-	end
-
-	if inst.components.hunger then
-		inst.components.combat.damagemultiplier = TUNING.YDEFAULT.DAMAGE_MULTIPLIER + math.max(inst.components.hunger:GetPercent() - (1 - inst.components.upgrader.powerupvalue * 0.2), 0)
-	end
-end
-
-local function HealthRegen(inst)
-	if inst.components.health then
-		local delta = inst.components.upgrader.regenamount
-		inst.components.health:DoDelta(delta)
-	end
-end
-
-local function InvincibleRegen(inst)
-	if inst.components.health and inst.components.upgrader.emergency and inst.IsInvincible then
-		local delta = inst.components.upgrader.emergency
-		inst.components.health:DoDelta(delta, nil, nil, true)
-	end
-end
-
-function GoInvincible(inst)
-	if  inst.components.health 
-	and inst.components.health.currenthealth <= 30 
+function OnHealthDelta(inst)
+	if  inst.components.health.currenthealth <= 30 
 	and inst.components.upgrader.InvincibleLearned
 	and inst.components.upgrader.CanbeInvincibled then
 		inst.components.upgrader.CanbeInvincibled = false
@@ -208,12 +158,50 @@ function GoInvincible(inst)
 	end
 end
 
+function OnHungerDelta(inst, data)
+	if inst.yukari_classified ~= nil and inst.yukari_classified.inspell:value() then
+		return
+	end
+
+	if inst.components.hunger then
+		inst.components.combat.damagemultiplier = TUNING.YDEFAULT.DAMAGE_MULTIPLIER + math.max(data.newpercent - (1 - inst.components.upgrader.powerupvalue * 0.2), 0)
+	end
+end
+
+local function OnSanityDelta(inst, data)
+	if inst.components.upgrader.NightVision and (TheWorld.state.phase == "night" or TheWorld:HasTag("cave")) then
+		local sanitypercent = data.newpercent
+		local powerpercent = inst.components.power ~= nil and inst.components.power:GetPercent() or 0
+
+		if sanitypercent > 0.91 then
+			inst.Light:SetRadius(1 + powerpercent * 3);inst.Light:SetFalloff(.9 - powerpercent * 0.25);inst.Light:SetIntensity(0.3);inst.Light:SetColour((127 + powerpercent * 128)/255,0,(127 + powerpercent * 128)/255);inst.Light:Enable(true)
+		elseif sanitypercent > 0.9 then -- decrease its radius really fast
+			local gappercent = (sanitypercent - 0.9) * 100
+			inst.Light:SetRadius((1 + powerpercent * 3) * gappercent);inst.Light:SetFalloff((.9 - powerpercent * 0.25) * gappercent);inst.Light:SetIntensity(0.3);inst.Light:SetColour((127 + powerpercent * 128) * gappercent/255,0,(127 + powerpercent * 128)/255 * gappercent);inst.Light:Enable(true)
+		else
+			inst.Light:SetRadius(0);inst.Light:SetFalloff(0);inst.Light:SetIntensity(0);inst.Light:SetColour(0,0,0);inst.Light:Enable(false)
+		end
+	end
+end
+
+local function HealthRegen(inst)
+	if inst.components.health ~= nil then
+		inst.components.health:DoDelta(inst.components.upgrader.regenamount)
+	end
+end
+
+local function InvincibleRegen(inst)
+	if inst.components.health ~= nil and inst.IsInvincible then
+		inst.components.health:DoDelta(inst.components.upgrader.emergency, nil, nil, true)
+	end
+end
+
 local function Cooldown(inst)
 	if inst.components.upgrader.ability[1][2] then
 		if inst.regen_cool > 0 then
 			inst.regen_cool = inst.regen_cool - 1
 		elseif inst.regen_cool == 0 
-		and inst.components.health 
+		and inst.components.health ~= nil 
 		and inst.components.health:IsHurt() 
 		and inst.components.hunger:GetPercent() > 0.5 then
 			HealthRegen(inst)
@@ -233,22 +221,7 @@ local function Cooldown(inst)
 end
 
 local function PeriodicFunction(inst)
-	local Light = inst.light ~= nil or inst.entity:AddLight()
 	inst.components.sanity.night_drain_mult = 1 - inst.components.upgrader.ResistDark - (inst.components.upgrader.hatequipped and 0.2 or 0)
-	
-	if inst.components.upgrader.NightVision then
-		if TheWorld.state.phase == "night" or TheWorld:HasTag("cave") then
-			if inst.components.sanity and inst.components.sanity:GetPercent() >= 0.8 and inst.components.sanity:GetPercent() < 0.98 then
-				inst.Light:SetRadius(1);inst.Light:SetFalloff(.9);inst.Light:SetIntensity(0.3);inst.Light:SetColour(128/255,0,217/255);inst.Light:Enable(true)
-			elseif inst.components.sanity and inst.components.sanity:GetPercent() >= 0.98 then
-				inst.Light:SetRadius(3);inst.Light:SetFalloff(.5);inst.Light:SetIntensity(0.3);inst.Light:SetColour(128/255,0,217/255);inst.Light:Enable(true)
-			else
-				Light:SetRadius(0);Light:SetFalloff(0);Light:SetIntensity(0);Light:SetColour(0,0,0);Light:Enable(false)
-			end
-		else
-			Light:SetRadius(0);Light:SetFalloff(0);Light:SetIntensity(0);Light:SetColour(0,0,0);Light:Enable(false)
-		end
-	end
 	
 	if inst.components.health and inst.IsInvincible then
 		InvincibleRegen(inst)
@@ -413,8 +386,8 @@ local function MakeDapperOnEquipItem(inst)
 end
 
 local function common_postinit(inst) -- things before SetPristine()
+	inst.entity:AddLight()
 	inst.MiniMapEntity:SetIcon( "yakumoyukari.tex" )
-	--inst.Transform:SetScale(1.2,1.2,1.2)
 
 	inst.IsInvincible = false
 	inst.IsGrazing = false
@@ -429,7 +402,7 @@ local function common_postinit(inst) -- things before SetPristine()
 	inst.currentpower = net_ushortint(inst.GUID, "currentpower")
 
 	inst:AddTag("youkai")
-	inst:AddTag("yukaricraft")
+	inst:AddTag("yakumoyukari")
 
 	inst:ListenForEvent("setowner", YukariOnSetOwner)
 
@@ -469,8 +442,9 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.applyupgradelist = ShouldApplyStatus
 	
 	inst:DoPeriodicTask(1, PeriodicFunction)
-	inst:ListenForEvent("hungerdelta", DoHungerUp )
-	inst:ListenForEvent("healthdelta", GoInvincible )
+	inst:ListenForEvent("healthdelta", OnHealthDelta )
+	inst:ListenForEvent("hungerdelta", OnHungerDelta )
+	inst:ListenForEvent("sanitydelta", OnSanityDelta )
 	inst:ListenForEvent("onattackother", OnhitEvent )
 	inst:ListenForEvent("hatequipped", OnEquipHat )
 	inst:ListenForEvent("equip", OnEquip )

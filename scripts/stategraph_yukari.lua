@@ -42,6 +42,12 @@ end
 AddStategraphActionHandler("wilson", ActionHandler(ACTIONS.BUILD, SetFastBuilder))
 AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.BUILD, SetFastBuilder))
 
+local function SetFastResetter(inst, action)
+	return (inst.yukari_classified ~= nil and inst.yukari_classified.fastaction:value() > 2) and "doshortaction" or "dolongaction"
+end
+AddStategraphActionHandler("wilson", ActionHandler(ACTIONS.RESETMINE, SetFastResetter))
+AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.RESETMINE, SetFastResetter))
+
 local function SetFastHarvester(inst, action) 
 	return inst:HasTag("quagmire_fasthands") or (inst.yukari_classified ~= nil and inst.yukari_classified.fastaction:value() > 3) and "domediumaction" or "dolongaction"
 end

@@ -41,7 +41,7 @@ return {
         RUMMAGE =
         {   
             GENERIC = "I've other things on my mind currently.",
-            INUSE = "Be sure to sort by color and weight, dear.",   
+            INUSE = "Be sure to sort by color and weight.",   
         },
         DRAW =
         {
@@ -51,12 +51,12 @@ return {
         {
             GENERIC = "I think I look pretty smart already.",
             BURNING = "No more changes for me. It's gone up in flames.",
-            INUSE = "If I could use that after you, dear.",
+            INUSE = "If I could use that after you.",
         },
         COOK =
         {
             GENERIC = "Perhaps later. Not all old ladies enjoy cooking, you know.",
-            INUSE = "Mmm, smells lovely, dear.",
+            INUSE = "Mmm, smells lovely.",
             TOOFAR = "It is not within my reach.",
         },
         MOUNT =
@@ -86,7 +86,7 @@ return {
             MUSHROOMFARM_NEEDSSHROOM = "It needs a fresh mushroom.",
             MUSHROOMFARM_NEEDSLOG = "It needs a log, imbued with magical properties.",
             SLOTFULL = "You don't have any inventory slots left.",
-            FOODFULL = "I'll be around when you're ready for seconds, dear.",
+            FOODFULL = "I'll be around when you're ready for seconds.",
             NOTDISH = "Oh sure you don't eat this.",
             DUPLICATE = "You've already taken note of this recipe.",
             NOTSCULPTABLE = "No one ever sculpt like that.",
@@ -183,7 +183,7 @@ return {
         "Oops.",
     },
 	ANNOUNCE_ENTER_DARK = "It's BLACK!",
-	ANNOUNCE_ENTER_LIGHT = "Now I can SEE a color.",
+	ANNOUNCE_ENTER_LIGHT = "Now I can see a color.",
 	ANNOUNCE_FREEDOM = "Finally, I can rest in my home!",
 	ANNOUNCE_HIGHRESEARCH = "Leaning is.. unlimited",
 	ANNOUNCE_HOUNDS = "Hounds are coming!",
@@ -457,7 +457,7 @@ return {
 		BAT="A nocturnal, mammal animal.",
 		BATBAT = "Why don't its ingredients include their tooth?",
 		BATWING="So stachelig. I hate it.",
-		BATWING_COOKED="Better than raw.",
+		BATWING_COOKED="Better than the raw.",
 		BEDROLL_FURRY="Looks cozy.",
 		BUNNYMAN="Are they hate me..?",
 		FLOWER_CAVE="That's not a LED.",
@@ -590,11 +590,11 @@ return {
 		BIGFOOT = "Look at that brain on top!",
 		BIRDCAGE =
 		{
-			GENERIC = "I have to put the bird in.",
+			GENERIC = "I have to put a bird in.",
 			OCCUPIED = "It knows that can't escape.",
 			SLEEPING = "It's sleeping.",
 		},
-		BIRDTRAP = "Will they come here?",
+		BIRDTRAP = "Will they come and get trapped in here?",
 		BIRD_EGG = "It's smaller than I expected.",
 		BIRD_EGG_COOKED = "Looks delicious.",
 		BISHOP = "Seems they're waiting something.",
@@ -1694,7 +1694,7 @@ return {
         REDBARREL = "You obviously wanna break this. YOU.",
         PORTAL_SHIPWRECKED = "It's completely broken.",
 
-		MARSH_PLANT_TROPICAL = "Please, I don't want to leave a commant such like this!! - from Mod Developer",
+		MARSH_PLANT_TROPICAL = "",
 
 		TELEPORTATO_SW_POTATO = "It's a ingredient for something.",
 		PIKE_SKULL = "Ouch.",
@@ -1852,14 +1852,13 @@ return {
 	DESCRIBE_HATUPGRADE = "Hat Upgraded",
 	DESCRIBE_NOHANDED = "I should bring something on my hand.",
 	DESCRIBE_DONEUPGRADE = "\nUpgrade Finished",
-	DESCRIBE_INVINCIBILITY_ACTIVATE = "Invincibility Activated",
+	DESCRIBE_INVINCIBILITY_ACTIVATE = "INVINCIBILITY Activated",
 	DESCRIBE_INVINCIBILITY_DONE = "I'm no longer invincible.",
 	DESCRIBE_UPGRADE_FREE = "\nFree to Upgrade",
 	DESCRIBE_UPGRADE_HEALTH = "My heart is mighter.",
 	DESCRIBE_UPGRADE_HUNGER = "My Stomach is tougher",
 	DESCRIBE_UPGRADE_SANITY = "Things are getting.. fresh!",
 	DESCRIBE_UPGRADE_POWER = "I can feel my inner power is getting grown.",
-	DESCRIBE_LOWPOWER = "I don't have enough power.",
 	DESCRIBE_INGREDIENTS = "I don't have enough Ingredients.",
 
 	ONEATHUMAN = {
@@ -1901,4 +1900,6 @@ return {
 		"Knowing everything on the present.",
 		"You shall not hit me, the darkness.",
 	},
+
+	NODANGERSCHEME = "I can't concentrate right now!",
 }

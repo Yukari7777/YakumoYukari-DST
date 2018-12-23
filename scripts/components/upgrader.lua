@@ -28,6 +28,7 @@ local Upgrader = Class(function(self, inst)
 	self.fastactionlevel = 0
 	self.dodgechance = 0.1
 	self.skilltextpage = 3
+	self.schemecost = 30
 	
 	self.hatequipped = false
 	self.fireimmuned = false
@@ -45,10 +46,12 @@ local Upgrader = Class(function(self, inst)
 	self.SpikeEater = false
 	self.RotEater = false
 	self.Ability_45 = false
+	self.NightVision = false
 	self.fastpicker = false
 	self.fastcrafter = false
 	self.fastcutter = false
 	self.fastharvester = false
+	self.fastresetter = false
 	
 	self.ability = {}
 	self.skill = {}
@@ -188,7 +191,7 @@ function Upgrader:UpdateAbilityStatus()
 	
 	if ability[3][2] then
 		self.absorbsanity = 0.3
-		self.ResistDark = 0.2
+		self.ResistDark = 0.05
 		self.sanitybonus = 25
 		self.inst.components.sanity.neg_aura_mult = 0.8
 	end
@@ -196,25 +199,25 @@ function Upgrader:UpdateAbilityStatus()
 	if ability[3][3] then
 		self.absorbsanity = 0.6
 		self.sanitybonus = 50
-		self.ResistDark = 0.3
-		self.inst.components.sanity.neg_aura_mult = 0.6
+		self.ResistDark = 0.13
+		self.inst.components.sanity.neg_aura_mult = 0.7
 	end
 	
 	if ability[3][4] then
 		self.absorbsanity = 0.9
-		self.ResistDark = 0.5
+		self.ResistDark = 0.2
 		self.sanitybonus = 75	
-		self.inst.components.sanity.neg_aura_mult = 0.4
+		self.inst.components.sanity.neg_aura_mult = 0.66
 	end
 	
 	if ability[3][5] then
-		self.ResistDark = 0.8
+		self.ResistDark = 0.46
 		self.NightVision = true
 	end	
 	
 	if ability[3][6] then
 		self.dodgechance = 0.4
-		self.inst.components.sanity.neg_aura_mult = 0.2
+		self.inst.components.sanity.neg_aura_mult = 0.33
 	end	
 	
 	if ability[4][1] then
@@ -228,7 +231,7 @@ function Upgrader:UpdateAbilityStatus()
 		self.fastpicker = true
 		self.powerbonus = 25
 		self.bonusspeed = 1
-		self.PowerGainMultiplier = 2
+		self.PowerGainMultiplier = 1.75
 	end
 	
 	if ability[4][3] then
@@ -237,7 +240,7 @@ function Upgrader:UpdateAbilityStatus()
 		self.fastcrafter = true
 		self.powerbonus = 50
 		self.bonusspeed = 2
-		self.PowerGainMultiplier = 2.5
+		self.PowerGainMultiplier = 2.25
 	end
 	
 	if ability[4][4] then
@@ -250,7 +253,6 @@ function Upgrader:UpdateAbilityStatus()
 	end
 	
 	if ability[4][5] then
-		self.fastactionlevel = 3
 		self.inst:AddTag("woodcutter")
 		self.fastcutter = true
 		self.Ability_45 = true
@@ -258,8 +260,9 @@ function Upgrader:UpdateAbilityStatus()
 	end
 	
 	if ability[4][6] then
-		self.fastactionlevel = 4
+		self.fastactionlevel = 3
 		self.fastharvester = true
+		self.fastresetter = true
 		self.bonusspeed = 3
 	end
 
@@ -279,19 +282,21 @@ function Upgrader:UpdateHatAbilityStatus(hat)
 			hat.components.waterproofer:SetEffectiveness(1)
 			self.WaterProofer = true
 			self.hatdodgechance = 0.1
-			self.hatabsorption = 0.6
+			self.hatabsorption = 0.5
 		end
 		
 		if skill[4] then
 			self.FireResist = true
+			self.schemecost = 20
 			self.hatbonusspeed = 1
 			self.hatdodgechance = 0.15
-			self.hatabsorption = 0.8
+			self.hatabsorption = 0.7
 		end
 		
 		if skill[5] then
+			self.schemecost = 10
 			self.hatdodgechance = 0.2
-			self.hatabsorption = 0.9
+			self.hatabsorption = 0.8
 			self.GodTeleport = true
 		end
 		
@@ -301,6 +306,7 @@ function Upgrader:UpdateHatAbilityStatus(hat)
 		self.FireResist = false
 		self.GodTeleport = false
 		self.hatdodgechance = 0
+		self.schemecost = 30
 	end
 	
 	self:SetFireDamageScale()
@@ -390,6 +396,10 @@ function Upgrader:UpdateSkillStatus()
 
 	if self.fastharvester and skill.harvester == nil then
 		skill.harvester = "Harvests faster"
+	end
+
+	if self.fastresetter and skill.resetter == nil then
+		skill.resetter = "Reset mines faster"
 	end
 
 	if self.fastcutter and skill.woodie == nil then

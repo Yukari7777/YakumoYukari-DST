@@ -23,6 +23,8 @@ Assets = {
     Asset( "ATLAS", "images/selectscreen_portraits/yakumoyukari_silho.xml" ),
     Asset( "IMAGE", "bigportraits/yakumoyukari.tex" ),
     Asset( "ATLAS", "bigportraits/yakumoyukari.xml" ),
+	Asset( "IMAGE", "bigportraits/yakumoyukari_none.tex" ),
+    Asset( "ATLAS", "bigportraits/yakumoyukari_none.xml" ),
 	
 	Asset( "IMAGE", "images/map_icons/yakumoyukari.tex" ),
 	Asset( "ATLAS", "images/map_icons/yakumoyukari.xml"  ),
@@ -159,6 +161,21 @@ local function BatRetargetFn(inst)
 	
 	inst.components.combat:SetRetargetFunction(3, Retarget)
 end
+local function MosquitoRetargetFn(inst)
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	local function KillerRetarget(inst)
+		return FindEntity(inst, SpringCombatMod(20),
+        function(guy)
+            return inst.components.combat:CanTarget(guy)
+        end,
+        { "_combat", "_health" },
+        { "insect", "INLIMBO", "realyoukai" },
+        { "character", "animal", "monster" })
+	end
+	inst.components.combat:SetRetargetFunction(2, KillerRetarget)
+end
 -- Bee Retarget Function
 local function KillerbeeRetargetFn(inst)
 	if not GLOBAL.TheWorld.ismastersim then
@@ -213,7 +230,7 @@ local function FrogRetargetFn(inst)
 	end
 end
 -- spiders retargetfn
-local function FindTarget(inst, radius)
+local function SpiderFindTarget(inst, radius)
     return FindEntity(
         inst,
         SpringCombatMod(radius),
@@ -231,7 +248,7 @@ local function SpiderRetargetFn(inst)
         return inst
     end
 	local function NormalRetarget(inst)
-		return FindTarget(inst, inst.components.knownlocations:GetLocation("investigate") ~= nil and TUNING.SPIDER_INVESTIGATETARGET_DIST or TUNING.SPIDER_TARGET_DIST)
+		return SpiderFindTarget(inst, inst.components.knownlocations:GetLocation("investigate") ~= nil and TUNING.SPIDER_INVESTIGATETARGET_DIST or TUNING.SPIDER_TARGET_DIST)
 	end
 	inst.components.combat:SetRetargetFunction(1, NormalRetarget)
 end
@@ -241,9 +258,31 @@ local function WarriorRetargetFn(inst)
         return inst
     end
 	local function WarriorRetarget(inst)
-		return FindTarget(inst, TUNING.SPIDER_WARRIOR_TARGET_DIST)
+		return SpiderFindTarget(inst, TUNING.SPIDER_WARRIOR_TARGET_DIST)
 	end
 	inst.components.combat:SetRetargetFunction(2, WarriorRetarget)
+end
+
+local function SpiderqueenRetargetFn(inst)
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	if not inst.components.health:IsDead() and not inst.components.sleeper:IsAsleep() then
+        local oldtarget = inst.components.combat.target
+        local newtarget = FindEntity(inst, 10, 
+            function(guy) 
+                return inst.components.combat:CanTarget(guy) 
+            end,
+            { "character", "_combat", "realyoukai" },
+            { "monster", "INLIMBO" }
+        )
+
+        if newtarget ~= nil and newtarget ~= oldtarget then
+            inst.components.combat:SetTarget(newtarget)
+        end
+    end
+
+	inst.components.combat:SetRetargetFunction(3, Retarget)
 end
 
 ---------- print current upgrade & ability
@@ -307,11 +346,13 @@ AddModRPCHandler("yakumoyukari", "sayinfo", SayInfo)
 AddPrefabPostInit("bunnyman", BunnymanNormalRetargetFn)
 AddPrefabPostInit("pigman", PigmanNormalRetargetFn)
 AddPrefabPostInit("bat", BatRetargetFn)
+AddPrefabPostInit("mosquito", MosquitoRetargetFn)
 AddPrefabPostInit("bee", BeeRetargetFn)
 AddPrefabPostInit("killerbee", KillerbeeRetargetFn)
 AddPrefabPostInit("frog", FrogRetargetFn)
 AddPrefabPostInit("spider", SpiderRetargetFn)
 AddPrefabPostInit("spider_warrior", WarriorRetargetFn)
+AddPrefabPostInit("spiderqueen", SpiderqueenRetargetFn)
 modimport "scripts/power_init.lua"
 modimport "scripts/tunings_yukari.lua"
 modimport "scripts/strings_yukari.lua"

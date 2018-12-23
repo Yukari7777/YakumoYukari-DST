@@ -15,7 +15,7 @@ end
 
 local function PushMessage(inst)
 	local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
-	local inspect = GetModConfigData("skill", modname) or GetModConfigData("skill", "workshop-1432504104") or 2 --Added just... for me
+	local inspect = GetModConfigData("skill", modname) or GetModConfigData("skill", "workshop-1432504104") or 4
 	local ClientString = inst.inspect:value()
 
 	if inst._parent.HUD ~= nil then
@@ -58,8 +58,8 @@ local function SetFastActionLevel(inst)
 	print(level, type(level), level > 0, level > 1)
 	inst._parent.fastpicker = level > 0
 	inst._parent.fastcrafter = level > 1
-	-- inst._parent.fastcutter = level > 2 Added Tag Instead
-	inst._parent.fastharvester = level > 3
+	inst._parent.fastharvester = level > 2
+	inst._parent.fastresetter = level > 2
 end
 
 local function RegisterNetListeners(inst)

@@ -79,21 +79,15 @@ function Power:GetCurrent()
 end
 
 function Power:SetPercent(p)
-
     local old = self.current
     self.current = p*self.max
     self.inst:PushEvent("powerdelta", {oldpercent = old/self.max, newpercent = p})
-
 end
 
 function Power:DoDec(dt, ignore_damage)
-
 	if  self.inst.components.upgrader.hatequipped then	
-		self.inst.components.power:DoDelta(self.regenrate * dt, false)
+		self.inst.components.power:DoDelta(self.regenrate * dt)
 	end
-	
-    -- print ("%2.2f / %2.2f", self.current, self.max)
-	
 end
 
 return Power

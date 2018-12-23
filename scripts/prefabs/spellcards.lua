@@ -23,7 +23,7 @@ function MakeCard(name)
 				owner.components.health:DoDelta(20)
 			end
 			if owner.components.power then
-				owner.components.power:DoDelta(-5, false)
+				owner.components.power:DoDelta(-5)
 			end
 			inst.components.finiteuses:Use(1)
 
@@ -43,7 +43,7 @@ function MakeCard(name)
 				owner.components.sanity:DoDelta(-amount)
 			end
 			if owner.components.power then
-				owner.components.power:DoDelta(-60, false)
+				owner.components.power:DoDelta(-60)
 			end
 			inst.components.finiteuses:Use(1)
 			return true
@@ -67,7 +67,7 @@ function MakeCard(name)
 					v.components.combat.target = nil
 				end
 			end
-			owner.components.power:DoDelta(-1, false)
+			owner.components.power:DoDelta(-1)
 			inst.components.finiteuses:Use(1)
 		end)
 		inst.components.spellcard:SetOnRemoveTask(function(inst, owner)
@@ -123,7 +123,7 @@ function MakeCard(name)
 			end
 
 			if owner.components.power then
-				owner.components.power:DoDelta(-300, false)
+				owner.components.power:DoDelta(-300)
 			end
 
 			local str = GetString(owner.prefab, "NECRO")
@@ -150,7 +150,7 @@ function MakeCard(name)
 			owner.components.locomotor.walkspeed = 6 + delta
 			owner.components.locomotor.runspeed = 8 + delta
 			owner.components.combat:SetAttackPeriod(0)
-			owner.components.power:DoDelta(-1, false)
+			owner.components.power:DoDelta(-1)
 			inst.components.finiteuses:Use(1)
 		end)
 		inst.components.spellcard:SetOnRemoveTask(function(inst, owner)
@@ -167,8 +167,7 @@ function MakeCard(name)
 	local function balance(inst)
 		inst.components.spellcard.costpower = 150
 		inst.costpower:set(150)
-		inst.components.finiteuses:SetMaxUses(2)
-		inst.components.finiteuses:SetUses(2)
+		inst:RemoveComponent("finiteuses")
 		inst.components.spellcard:SetSpellFn(function(inst, owner)
 			local Inventory = owner.components.inventory
 			local rotcnt = 0
@@ -206,9 +205,9 @@ function MakeCard(name)
 			end
 			
 			if owner.components.power then
-				owner.components.power:DoDelta(-150, false)
+				owner.components.power:DoDelta(-150)
 			end
-			inst.components.finiteuses:Use(1)
+			inst:Remove()
 			return true
 		end)
 	end
@@ -226,7 +225,7 @@ function MakeCard(name)
 		end)
 		inst.components.spellcard:SetTaskFn(function(inst, owner)
 			local IsWearGoggle = owner.components.inventory.equipslots ~= nil and owner.components.inventory.equipslots["head"] ~= nil and owner.components.inventory.equipslots["head"].prefab == "molehat"
-			owner.components.power:DoDelta(-0.5, false)
+			owner.components.power:DoDelta(-0.5)
 			inst.components.finiteuses:Use(1)
 			if IsWearGoggle then
 				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_EYEHURT"))
@@ -258,7 +257,7 @@ function MakeCard(name)
 				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NOSPAWN"))
 			else
 				if owner.components.power then
-					owner.components.power:DoDelta(-80, false)
+					owner.components.power:DoDelta(-80)
 				end
 				local num = 5 + math.random(5)
 				
@@ -310,7 +309,7 @@ function MakeCard(name)
 			inst.fx = barrier(inst, owner)
 		end)
 		inst.components.spellcard:SetTaskFn(function(inst, owner)
-			owner.components.power:DoDelta(-1, false)
+			owner.components.power:DoDelta(-1)
 			if owner:HasTag("realyoukai") then
 				owner:RemoveTag("realyoukai")
 			end
@@ -407,7 +406,7 @@ function MakeCard(name)
 				end
 			end
 			if owner.components.power then
-				owner.components.power:DoDelta(-300, false)
+				owner.components.power:DoDelta(-300)
 			end
 			inst:Remove()
 		end)
@@ -677,7 +676,7 @@ function MakeCard(name)
 				end
 				LeftSpawnCount = math.random(3, 7)
 				if owner.components.power then
-					owner.components.power:DoDelta(-20, false)
+					owner.components.power:DoDelta(-20)
 				end
 				DoSpawn()
 				inst.components.stackable:Get():Remove()
@@ -737,7 +736,7 @@ function MakeCard(name)
 			end
 
 			if owner.components.power then
-				owner.components.power:DoDelta(-150, false)
+				owner.components.power:DoDelta(-150)
 			end
 			inst.components.finiteuses:Use(1)
 			return true

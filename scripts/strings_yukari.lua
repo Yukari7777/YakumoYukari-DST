@@ -3,7 +3,7 @@ local ACTIONS = GLOBAL.ACTIONS
 local Language = GetModConfigData("language")
 
 STRINGS.NAMES.YUKARIUMBRE = "Yukari parasol"
-STRINGS.CHARACTERS.YAKUMOYUKARI.DESCRIBE.YUKARIUMBRE = "This will make a thing called 'Scheme'"
+STRINGS.CHARACTERS.YAKUMOYUKARI.DESCRIBE.YUKARIUMBRE = "I can spawn Scheme with this."
 STRINGS.NAMES.YUKARIHAT = "Yukari Hat"
 STRINGS.CHARACTERS.YAKUMOYUKARI.DESCRIBE.YUKARIHAT = "This will gain my power."
 STRINGS.NAMES.TUNNEL = "Scheme Gate"

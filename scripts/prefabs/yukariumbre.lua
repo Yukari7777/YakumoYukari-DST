@@ -11,15 +11,13 @@ local prefab = {
 }
 
 local function onuse(staff, pos, caster)
-
     if caster.components.power then
 		if staff.isunfolded:value() then
-			caster.components.power:DoDelta(-TUNING.YDEFAULT.SPAWNG_POWER_COST, false)
+			caster.components.power:DoDelta(-TUNING.YDEFAULT.SPAWNG_POWER_COST)
 		else
-			caster.components.power:DoDelta(-TUNING.YDEFAULT.TELEPORT_POWER_COST, false)
+			caster.components.power:DoDelta(-TUNING.YDEFAULT.TELEPORT_POWER_COST)
 		end
     end
-
 end
 
 local function blinkstaff_reticuletargetfn()
@@ -44,6 +42,7 @@ local function OnEquipYukari(inst, owner)
 	owner.AnimState:Hide("ARM_normal")
 
 	inst.components.useableitem.inuse = false
+	inst.components.equippable.walkspeedmult = TUNING.CANE_SPEED_MULT
 end    
 
 local function OnUnequipYukari(inst, owner)   
@@ -143,7 +142,6 @@ local function fn()
 	inst:AddComponent("equippable")  
 	inst.components.equippable:SetOnEquip( OnEquipYukari )    
 	inst.components.equippable:SetOnUnequip( OnUnequipYukari )
-	inst.components.equippable.walkspeedmult = TUNING.CANE_SPEED_MULT
 	
 	inst:AddComponent("useableitem")
     inst.components.useableitem:SetOnUseFn(unfoldit)
