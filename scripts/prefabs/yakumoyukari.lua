@@ -173,14 +173,14 @@ local function OnSanityDelta(inst, data)
 		local sanitypercent = data.newpercent
 		local powerpercent = inst.components.power ~= nil and inst.components.power:GetPercent() or 0
 
-		if sanitypercent > 0.91 then
-			inst.Light:SetRadius(1 + powerpercent * 3);inst.Light:SetFalloff(.9 - powerpercent * 0.25);inst.Light:SetIntensity(0.3);inst.Light:SetColour((127 + powerpercent * 128)/255,0,(127 + powerpercent * 128)/255);inst.Light:Enable(true)
-		elseif sanitypercent > 0.9 then -- decrease its radius really fast
-			local gappercent = (sanitypercent - 0.9) * 100
+		if sanitypercent > 0.9 then
+			local gappercent = math.min((sanitypercent - 0.9) * 100, 1)
 			inst.Light:SetRadius((1 + powerpercent * 3) * gappercent);inst.Light:SetFalloff((.9 - powerpercent * 0.25) * gappercent);inst.Light:SetIntensity(0.3);inst.Light:SetColour((127 + powerpercent * 128) * gappercent/255,0,(127 + powerpercent * 128)/255 * gappercent);inst.Light:Enable(true)
 		else
-			inst.Light:SetRadius(0);inst.Light:SetFalloff(0);inst.Light:SetIntensity(0);inst.Light:SetColour(0,0,0);inst.Light:Enable(false)
+			inst.Light:SetRadius(0);inst.Light:Enable(false)
 		end
+	else
+		inst.Light:Enable(false)
 	end
 end
 
@@ -361,7 +361,7 @@ end
 local function MakeGrazeable(inst)
 	inst.components.inventory.NewTakeDamage = inst.components.inventory.ApplyDamage
 	function inst.components.inventory:ApplyDamage(damage, attacker, weapon, ...)
-		local totaldodge = (inst.components.upgrader.dodgechance + inst.components.upgrader.hatdodgechance) * (inst.sg:HasStateTag("idle") and 1 or 2) -- double when is moving
+		local totaldodge = (inst.components.upgrader.dodgechance + inst.components.upgrader.hatdodgechance) * (inst.sg:HasStateTag("moving") and 2 or 1) -- double when is moving
 		if inst.IsGrazing or math.random() < totaldodge then
 			inst:PushEvent("graze")
 			return 0
@@ -439,7 +439,6 @@ local master_postinit = function(inst) -- after SetPristine()
 		inst.components.upgrader:ApplyStatus()
 	end
 	inst.powertable = powertable
-	inst.applyupgradelist = ShouldApplyStatus
 	
 	inst:DoPeriodicTask(1, PeriodicFunction)
 	inst:ListenForEvent("healthdelta", OnHealthDelta )

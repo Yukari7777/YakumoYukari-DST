@@ -59,7 +59,7 @@ local function SetFastActionLevel(inst)
 	inst._parent.fastpicker = level > 0
 	inst._parent.fastcrafter = level > 1
 	inst._parent.fastharvester = level > 2
-	inst._parent.fastresetter = level > 2
+	inst._parent.fastresetter = level > 3
 end
 
 local function RegisterNetListeners(inst)

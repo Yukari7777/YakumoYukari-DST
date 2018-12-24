@@ -1014,7 +1014,7 @@ return {
 		FEATHERFAN = "The most efficient fan!",
 		TROPICALFAN = "The most efficient fan!",
 		GOOSE_FEATHER = "I don't think it's for warmers.",
-		STAFF_TORNADO = "Don't use this near my den.",
+		STAFF_TORNADO = "Don't use this near our base.",
 		MOSQUITO =
 		{
 			GENERIC = "Anopheles.",
@@ -1206,14 +1206,14 @@ return {
 		SEEDS_COOKED = "I like its flavor.",
 		SEWING_KIT = "Game logic is always good.",
 		SHOVEL = "Symbol of worker.",
-		SILK = "How can I use this for crafting??",
+		SILK = "Stiky",
 		SKELETON = "Results of all mortals.",
 		SKELETON_PLAYER = "Results of all mortals.", -- It won't actually be spawned.
 		SKULLCHEST = "Heh",
 		SMALLBIRD =
 		{
 			GENERIC = "Ew.. So cute!",
-			HUNGRY = "It's hungry, but it didn't know how to explain it.",
+			HUNGRY = "It's hungry, but it didn't know how to expose it.",
 			STARVING = "I think It's about to die because of starving.",
 		},
 		SMALLMEAT = "It's a meat. Though it's small.",

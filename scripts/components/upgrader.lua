@@ -246,6 +246,8 @@ function Upgrader:UpdateAbilityStatus()
 	if ability[4][4] then
 		self.inst:AddTag("spiderwhisperer")
 		self.inst:RemoveTag("scarytoprey")
+		self.fastactionlevel = 3
+		self.fastresetter = true
 		self.IsEfficient = true
 		self.inst.components.locomotor:SetTriggersCreep(false)
 		self.PowerGainMultiplier = 3
@@ -260,9 +262,8 @@ function Upgrader:UpdateAbilityStatus()
 	end
 	
 	if ability[4][6] then
-		self.fastactionlevel = 3
+		self.fastactionlevel = 4
 		self.fastharvester = true
-		self.fastresetter = true
 		self.bonusspeed = 3
 	end
 
