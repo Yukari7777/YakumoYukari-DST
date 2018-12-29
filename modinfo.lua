@@ -1,6 +1,6 @@
 name = "Yakumo Yukari"
 author = "Yakumo Yukari"
-version = "0.11.3"
+version = "0.11.4"
 description = "Yakumo Yukari comes from unknown world to manipulate Don't Starve Together world!\n\nVersion : "..version.."\nPress [V] to show status."
 forumthread = ""
 api_version = 6
@@ -11,6 +11,15 @@ reign_of_giants_compatible = false
 all_clients_require_mod = true 
 icon_atlas = "modicon.xml"
 icon = "modicon.tex"
+
+-- This mod contains major prefab tweaks(AddPrefabPostInit). 
+-- Have enough low priority so the mod can be loaded after any other mods to be loaded.
+priority = -5
+
+folder_name = folder_name or "workshop-"
+if not folder_name:find("workshop-") then
+    name = name.." - Test"
+end
 
 server_filter_tags = {
 	"character",

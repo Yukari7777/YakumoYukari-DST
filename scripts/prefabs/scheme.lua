@@ -1,6 +1,6 @@
 local assets=
 {   
-	Asset("ANIM", "anim/spell.zip"),    
+	Asset("ANIM", "anim/spell_none.zip"),    
 	Asset("ATLAS", "images/inventoryimages/scheme.xml"),    
 }
 
@@ -145,6 +145,7 @@ end
 
 local function OnFinish(inst, owner)
 	owner.components.upgrader.hatlevel = owner.components.upgrader.hatlevel + 1
+	owner.components.upgrader:UpdateHatAbilityStatus(inst)
 	owner.components.upgrader:ApplyStatus()
 	owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_HATUPGRADE"))
 end
@@ -177,8 +178,8 @@ local function fn()
 
 	MakeInventoryPhysics(inst)
 
-	inst.AnimState:SetBank("spell")    
-	inst.AnimState:SetBuild("spell")    
+	inst.AnimState:SetBank("spell_none")    
+	inst.AnimState:SetBuild("spell_none")    
 	inst.AnimState:PlayAnimation("idle")    
 
 	inst:AddTag("scheme")

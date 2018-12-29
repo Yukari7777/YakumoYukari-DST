@@ -50,18 +50,6 @@ function Spellcard:ClearTask(doer)
 	end
 end
 
-function Spellcard:GetLevel(inst, index)
-	if index == 1 then
-		return inst.components.upgrader.health_level
-	elseif index == 2 then
-		return inst.components.upgrader.hunger_level
-	elseif index == 3 then
-		return inst.components.upgrader.sanity_level
-	elseif index == 4 then
-		return inst.components.upgrader.power_level
-	end
-end
-
 function Spellcard:CastSpell(doer, target)
 	local inst = self.inst
 

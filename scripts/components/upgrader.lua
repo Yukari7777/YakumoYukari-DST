@@ -216,7 +216,7 @@ function Upgrader:UpdateAbilityStatus()
 	end	
 	
 	if ability[3][6] then
-		self.dodgechance = 0.4
+		self.dodgechance = 0.2
 		self.inst.components.sanity.neg_aura_mult = 0.33
 	end	
 	

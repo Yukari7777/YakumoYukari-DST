@@ -6,7 +6,6 @@ PrefabFiles = {
 	"yukarihat",
 	"upgradepanel",
 	"ultpanel",
-	"ultpanelsw",
 	"spellcards",
 	"barrierfield_fx",
 	"graze_fx",
@@ -21,6 +20,11 @@ Assets = {
     Asset( "ATLAS", "images/selectscreen_portraits/yakumoyukari.xml" ),
     Asset( "IMAGE", "images/selectscreen_portraits/yakumoyukari_silho.tex" ),
     Asset( "ATLAS", "images/selectscreen_portraits/yakumoyukari_silho.xml" ),
+	Asset( "IMAGE", "images/avatars/avatar_ghost_yakumoyukari.tex" ),
+    Asset( "ATLAS", "images/avatars/avatar_ghost_yakumoyukari.xml" ),
+	Asset( "IMAGE", "images/avatars/avatar_yakumoyukari.tex" ),
+    Asset( "ATLAS", "images/avatars/avatar_yakumoyukari.xml" ),
+
     Asset( "IMAGE", "bigportraits/yakumoyukari.tex" ),
     Asset( "ATLAS", "bigportraits/yakumoyukari.xml" ),
 	Asset( "IMAGE", "bigportraits/yakumoyukari_none.tex" ),
@@ -43,18 +47,13 @@ Assets = {
 	
 	Asset("SOUNDPACKAGE", "sound/soundpack.fev"),
 	Asset("SOUND", "sound/spell.fsb"),
-
-	Asset( "ANIM" , "anim/ui_board_5x1.zip"),
 }
 
 ----- GLOBAL & require list -----
+GLOBAL.YUKARISTATINDEX = {"health", "hunger", "sanity", "power"}
 local require = GLOBAL.require
 local assert = GLOBAL.assert
 require "class"
-GLOBAL.TUNNELNETWORK = {}
-GLOBAL.TUNNELFIRSTINDEX = nil
-GLOBAL.TUNNELLASTINDEX = nil
-GLOBAL.NUMTUNNEL = 0
 
 local STRINGS = GLOBAL.STRINGS
 local ProfileStatsSet = GLOBAL.ProfileStatsSet

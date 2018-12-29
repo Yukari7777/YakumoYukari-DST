@@ -1624,12 +1624,6 @@ return {
 		RAWLING = "有 点 怪 异.",
 	},
 
-	NECRO = {
-		"你 只 不 过 是 一 张 纸...",
-		"在 虚 空 中 永 眠 吧..",
-		"你 什 么 都 不 是..",
-	},
-
 	DESCRIBE_GENERIC = "我 甚 至 对 它 一 无 所 知.",
 	DESCRIBE_TOODARK = "太 黑 了!",
 	DESCRIBE_SMOLDERING = "那 东 西 就 要 着 火 了.",
@@ -1657,4 +1651,61 @@ return {
 	DESCRIBE_UPGRADE_HUNGER = "我 处 于 最 大 卡 路 里 燃 烧 状 态.",
 	DESCRIBE_UPGRADE_SANITY = "恩.. 什 么 都 没 改 变.",
 	DESCRIBE_UPGRADE_POWER = "我 已 经 拥 有 了 相 同 的 力 量.",
+	DESCRIBE_LOWLEVEL = "我 必 须 要 把 %s 升 级 到 %s 之 上",
+
+	ONULTIMATE = {
+		"现 在 我 可 以 避 开 死 亡..",
+		"现 在 我 有 了 世 界 之 力.",
+		"世 界 开 始 以 新 的 视 角 展 现.",
+		"是 的... 这 是 我 的 力 量."
+	},
+
+	ONULTIMATESW = {
+		"我 改 变 了 我 自 己 的 命 运...",
+		"万 物 皆 可 毁 灭.",
+		"这.. 是 我 伙 伴 的 力 量...",
+		"是 的... 这 是 我 的 力 量."
+	},
+
+	ONEATHUMAN = {
+		"...Youkai's basic instinct.",
+		"...This is really.. fresh",
+		"...Really delicious",
+	},
+
+	NECRO = {
+		"美しく残酷にこの大地から往ね！",
+		"你 只 不 过 是 一 张 纸...",
+		"在 虚 空 中 永 眠 吧..",
+		"你 什 么 都 不 是..",
+	},
+
+	LAMENT_B = {
+		"Oops",
+		"Oh, this is not good.",
+		"What is this?!",
+		"What? wait,"
+	},
+
+	LAMENT_H = {
+		"I'll never do this again!",
+		"What the f..",
+		"What the,",
+		"Oh, no.",
+		"Ahh!!",
+	},
+
+	TAUNT = {
+		"I'll set you free, if you win.",
+		"Hey! You wanna go?",
+		"Get taunted, mortals!",
+	},
+
+	NEWSIGHT = {
+		"No one can hide from my sight.",
+		"Knowing everything on the present.",
+		"You shall not hit me, the darkness.",
+	},
+
+	NODANGERSCHEME = "I can't concentrate right now!",
 }

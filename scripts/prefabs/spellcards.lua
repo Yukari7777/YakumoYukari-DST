@@ -4,7 +4,7 @@ function MakeCard(name)
 	
 	local assets =
 	{   
-		Asset("ANIM", "anim/spell.zip"),   
+		Asset("ANIM", "anim/spell_none.zip"),   
 		Asset("ATLAS", "images/inventoryimages/"..fname..".xml"),    
 		Asset("IMAGE", "images/inventoryimages/"..fname..".tex"),
 	}
@@ -71,12 +71,11 @@ function MakeCard(name)
 			inst.components.finiteuses:Use(1)
 		end)
 		inst.components.spellcard:SetOnRemoveTask(function(inst, owner)
-			owner:RemoveTag("notarget")
 			owner.AnimState:SetMultColour(1,1,1,1)
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DECLOAKING"))
 		end)
 		inst.components.finiteuses:SetOnFinished(function()
-			owner:RemoveTag("notarget")
+			local owner = inst.components.inventoryitem.owner
 			owner.AnimState:SetMultColour(1,1,1,1)
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DECLOAKING"))
 			inst:Remove()
@@ -92,7 +91,7 @@ function MakeCard(name)
 			local x,y,z = owner.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x, y, z, 40)
 			for k,v in pairs(ents) do
-				if v.components.health and not v:HasTag("player") then
+				if v.components.health and not v:HasTag("player") and not v:HasTag("wall") then
 					local maxhealth = v.components.health.maxhealth
 					v.components.health:DoDelta(math.min(-maxhealth * 0.33, -500))
 				end
@@ -105,12 +104,13 @@ function MakeCard(name)
 					v.components.crop:MakeWithered()
 				end
 				
-				if v:HasTag("tree") and v.components.growable and not v:HasTag("stump") then
+				if (v:HasTag("tree") or v:HasTag("boulder") and not v:HasTag("stump") and not v:HasTag("burnt") and not v:HasTag("mushtree")) and v.components.growable ~= nil then
 					v.components.growable:SetStage(4)
 				end
 				
 				if v:HasTag("birchnut")
 					or v:HasTag("mole")	
+					or v:HasTag("mushtree")
 					or v.prefab == "carrot_planted" then
 					v:Remove()
 				end
@@ -126,10 +126,8 @@ function MakeCard(name)
 				owner.components.power:DoDelta(-300)
 			end
 
-			local str = GetString(owner.prefab, "NECRO")
-
 			if owner.components.talker then
-				owner.components.talker:Say(str)
+				owner.components.talker:Say(GetString(owner.prefab, "NECRO"))
 			end
 			inst:Remove()
 		end)
@@ -165,21 +163,23 @@ function MakeCard(name)
 	end
 		
 	local function balance(inst)
-		inst.components.spellcard.costpower = 150
-		inst.costpower:set(150)
+		inst.components.spellcard.costpower = 100
+		inst.costpower:set(100)
 		inst:RemoveComponent("finiteuses")
+		inst:AddComponent("stackable")
+		inst.components.stackable.maxsize = TUNING.STACK_SIZE_SMALLITEM
 		inst.components.spellcard:SetSpellFn(function(inst, owner)
 			local Inventory = owner.components.inventory
 			local rotcnt = 0
 
 			local function refresh(v)
-				if v.components.perishable then
+				if v.components.perishable ~= nil then
 					local max = v.components.perishable.perishtime 
 					v.components.perishable:SetPerishTime(max)
 				end
 
 				if v.prefab == "spoiled_food" or v.prefab == "rottenegg" then
-					if v.components.stackable then
+					if v.components.stackable ~= nil then
 						rotcnt = rotcnt + v.components.stackable:StackSize()
 						v:Remove()
 					end
@@ -195,7 +195,7 @@ function MakeCard(name)
 			end
 
 			for k,v in pairs(Inventory.equipslots) do
-				if type(v) == "table" and v.components.container then
+				if type(v) == "table" and v.components.container ~= nil then
 					for k, v2 in pairs(v.components.container.slots) do
 						refresh(v2)
 					end
@@ -204,10 +204,11 @@ function MakeCard(name)
 				end
 			end
 			
-			if owner.components.power then
-				owner.components.power:DoDelta(-150)
+			owner.components.sanity:DoDelta(-75)
+			if owner.components.power ~= nil then
+				owner.components.power:DoDelta(-100)
 			end
-			inst:Remove()
+			inst.components.stackable:Get():Remove()
 			return true
 		end)
 	end
@@ -375,7 +376,6 @@ function MakeCard(name)
 					if v.rain ~= nil then
 						v.rain = 0
 					end
-					v:RemoveTag("pickable")
 					v:RemoveTag("barren")
 					v:RemoveTag("quickpick")
 				end
@@ -392,9 +392,9 @@ function MakeCard(name)
 					v.components.crop:DoGrow(2400)
 				end
 				
-				if v:HasTag("tree") and v.components.growable ~= nil and not v:HasTag("stump") then
+				if (v:HasTag("tree") or v:HasTag("boulder") and not v:HasTag("stump") and not v:HasTag("burnt") and not v:HasTag("mushtree")) and v.components.growable ~= nil then
+					v.components.growable:SetStage(2)
 					v.components.growable:DoGrowth()
-					v.components.growable:SetStage(3)
 				end
 				
 				if v.components.grower ~= nil then
@@ -405,6 +405,8 @@ function MakeCard(name)
 					v.components.burnable:Extinguish()
 				end
 			end
+
+			owner.components.sanity:DoDelta(-200)
 			if owner.components.power then
 				owner.components.power:DoDelta(-300)
 			end
@@ -752,8 +754,8 @@ function MakeCard(name)
 		
 		MakeInventoryPhysics(inst)   
 		
-		inst.AnimState:SetBank("spell")    
-		inst.AnimState:SetBuild("spell")    
+		inst.AnimState:SetBank("spell_none")    
+		inst.AnimState:SetBuild("spell_none")    
 		inst.AnimState:PlayAnimation("idle")    
 		
 		inst:AddTag("spellcard")

@@ -1860,6 +1860,21 @@ return {
 	DESCRIBE_UPGRADE_SANITY = "Things are getting.. fresh!",
 	DESCRIBE_UPGRADE_POWER = "I can feel my inner power is getting grown.",
 	DESCRIBE_INGREDIENTS = "I don't have enough Ingredients.",
+	DESCRIBE_LOWLEVEL = "I must reach %s level to %s",
+
+	ONULTIMATE = {
+		"I can now evade death..",
+		"Now I have power of TheWorld.",
+		"The world is beginning to show with new sights.",
+		"Yes... this is my power I had."
+	},
+
+	ONULTIMATESW = {
+		"I changed my destiny myself...",
+		"Everythings are... DESTROYABLE.",
+		"This, is the power who my friend had...",
+		"Yes... this is my power I had."
+	},
 
 	ONEATHUMAN = {
 		"...Youkai's basic instinct.",

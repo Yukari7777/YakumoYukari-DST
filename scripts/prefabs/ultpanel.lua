@@ -1,10 +1,11 @@
-function MakeUltimate(name, index)
-
-	local fname = name.."ult"
+function MakeUltimate(id)
+	local index = id % 4 + 1
+	local statname = _G.YUKARISTATINDEX[index]
+	local fname = statname..(id > 4 and "ultsw" or "ult")
 	
 	local assets =
 	{   
-		Asset("ANIM", "anim/spell.zip"),   
+		Asset("ANIM", "anim/spell_none.zip"),   
 		Asset("ATLAS", "images/inventoryimages/"..fname..".xml"),    
 		Asset("IMAGE", "images/inventoryimages/"..fname..".tex"),
 	}
@@ -13,43 +14,28 @@ function MakeUltimate(name, index)
 		local spellcard = inst.components.spellcard
 		local index = spellcard.index
 		local name = spellcard.name
-		local level = spellcard:GetLevel(caster, index)
+		local level = caster.components.upgrader[_G.YUKARISTATINDEX[index].."_level"]
+
+		local issw = name:find("sw") ~= nil
+		local abilityindex = issw and 6 or 5
+
 		local difficulty = GetModConfigData("difficulty", "YakumoYukari")
-		local language = GetModConfigData("language", "YakumoYukari")
-		local ultreq = 25
-		if difficulty == "easy" then ultreq = 20
-		elseif difficulty == "hard" then ultreq = 30 end
-		
-		local str = {}
-			str[1] = "I can now evade death.."
-			str[2] = "Now I have power of TheWorld."
-			str[3] = "The world is beginning to show with new sights."
-			str[4] = "Yes... this is my power I had."
-		if language == "ch" then
-			str[1] = "现 在 我 可 以 避 开 死 亡.."
-			str[2] = "现 在 我 有 了 世 界 之 力."
-			str[3] = "世 界 开 始 以 新 的 视 角 展 现."
-			str[4] = "是 的... 这 是 我 的 力 量."
-		end
+		local ultreq = difficulty == "easy" and 20 or difficulty == "hard" and 30 or 25
 		
 		if level >= ultreq then
-			if not caster.components.upgrader.ability[index][5] then
-				caster.components.talker:Say(str[index])
-				caster.components.upgrader.ability[index][5] = true
+			if not caster.components.upgrader.ability[index][abilityindex] then
+				caster.components.talker:Say(STRINGS.CHARACTERS.YAKUMOYUKARI["ONULTIMATE"..(issw and "SW" or "")][index])
+				caster.components.upgrader.ability[index][abilityindex] = true
 				caster.components.upgrader:ApplyStatus()
 				inst:Remove()
 			else
-				if caster.components.talker then
+				if caster.components.talker ~= nil then
 					caster.components.talker:Say(GetString(caster.prefab, "DESCRIBE_ABILITY_ALREADY"))
 				end
 			end
 		else
-			if caster.components.talker then
-				if difficulty == "chinese" then
-					caster.components.talker:Say("我 必 须 要 把 "..name.." 升 级 到 "..ultreq.."之 上")
-				else
-					caster.components.talker:Say("I must reach "..name.." level to "..ultreq)
-				end
+			if caster.components.talker ~= nil then
+				caster.components.talker:Say(string.format(STRINGS.CHARACTERS.YAKUMOYUKARI.DESCRIBE_LOWLEVEL, _G.YUKARISTATINDEX[index], ultreq))
 			end
 		end
 	end
@@ -65,8 +51,8 @@ function MakeUltimate(name, index)
 		
 		MakeInventoryPhysics(inst)   
 		
-		inst.AnimState:SetBank("spell")    
-		inst.AnimState:SetBuild("spell")    
+		inst.AnimState:SetBank("spell_none")    
+		inst.AnimState:SetBuild("spell_none")    
 		inst.AnimState:PlayAnimation("idle")   
 
 		inst:AddTag("ultpanel")
@@ -95,7 +81,9 @@ function MakeUltimate(name, index)
 	return Prefab("common/inventory/"..fname, fn, assets)
 end
 
-return MakeUltimate("health", 1),
-       MakeUltimate("hunger", 2),
-       MakeUltimate("sanity", 3),
-       MakeUltimate("power", 4)
+local spells = {}
+for i = 1, 8 do
+    table.insert(spells, MakeUltimate(i))
+end
+
+return unpack(spells)
