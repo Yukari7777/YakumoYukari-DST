@@ -1,3 +1,5 @@
+local STATUS = TUNING.YUKARI_STATUS
+
 local Upgrader = Class(function(self, inst)
     self.inst = inst
 
@@ -11,8 +13,9 @@ local Upgrader = Class(function(self, inst)
 	self.hungerbonus = 0
 	self.sanitybonus = 0
 	self.powerbonus = 0
-	self.bonusspeed = 0
-	self.hatbonusspeed = 0
+	self.fastactionlevel = 0
+	self.hatpowergain = 0
+	self.bonusspeedmult = 0
 	
 	self.powerupvalue = 0
 	self.regenamount = 0
@@ -25,10 +28,10 @@ local Upgrader = Class(function(self, inst)
 	self.absorbsanity = 0 
 
 	self.PowerGainMultiplier = 1
-	self.fastactionlevel = 0
+	self.hatspeedmult = 1
 	self.dodgechance = 0.1
 	self.skilltextpage = 3
-	self.schemecost = 30
+	self.schemecost = 30 -- Deprecated
 	
 	self.hatequipped = false
 	self.fireimmuned = false
@@ -81,12 +84,12 @@ end
 function Upgrader:AbilityManager()
 	local ability = self.ability
 	local hatskill = self.hatskill
+	local unlockpoint = STATUS.UNLOCKABILITY
 	local level = {self.health_level, self.hunger_level, self.sanity_level, self.power_level}
-	local point = {5, 10, 17, 25}
 
 	for i = 1, 4, 1 do
 		for j = 1, 4, 1 do
-			if not ability[i][j] and level[i] >= point[j] then
+			if not ability[i][j] and level[i] >= unlockpoint[j] then
 				ability[i][j] = true
 			end
 		end
@@ -118,14 +121,14 @@ function Upgrader:UpdateAbilityStatus()
 	if ability[1][3] then
 		self.healthbonus = 50
 		self.regenamount = 2
-		self.emergency = 8
+		self.emergency = 10
 		self.regencool = 45
 		self.curecool = 180
 	end
 	
 	if ability[1][4] then
 		self.nohealthpenalty = true
-		self.emergency = 15
+		self.emergency = 20
 		self.healthbonus = 95
 		self.regenamount = 2
 		self.regencool = 30
@@ -134,7 +137,7 @@ function Upgrader:UpdateAbilityStatus()
 	
 	if ability[1][5] then	
 		self.IsFight = false
-		self.emergency = 30
+		self.emergency = 40
 		self.regenamount = 4
 		self.regencool = 15
 		self.curecool = 60
@@ -223,6 +226,7 @@ function Upgrader:UpdateAbilityStatus()
 	if ability[4][1] then
 		self.inst.components.moisture.baseDryingRate = 0.7
 		self.PowerGainMultiplier = 1.5
+		self.bonusspeedmult = 1.05
 	end
 	
 	if ability[4][2] then
@@ -230,7 +234,7 @@ function Upgrader:UpdateAbilityStatus()
 		self.fastactionlevel = 1
 		self.fastpicker = true
 		self.powerbonus = 25
-		self.bonusspeed = 1
+		self.bonusspeedmult = 1.1
 		self.PowerGainMultiplier = 1.75
 	end
 	
@@ -239,7 +243,7 @@ function Upgrader:UpdateAbilityStatus()
 		self.fastactionlevel = 2
 		self.fastcrafter = true
 		self.powerbonus = 50
-		self.bonusspeed = 2
+		self.bonusspeedmult = 1.15
 		self.PowerGainMultiplier = 2.25
 	end
 	
@@ -252,62 +256,69 @@ function Upgrader:UpdateAbilityStatus()
 		self.inst.components.locomotor:SetTriggersCreep(false)
 		self.PowerGainMultiplier = 3
 		self.powerbonus = 75
+		self.bonusspeedmult = 1.2
 	end
 	
 	if ability[4][5] then
 		self.inst:AddTag("woodcutter")
 		self.fastcutter = true
 		self.Ability_45 = true
-        self.inst.components.combat:SetRange(3.2)
+        self.inst.components.combat:SetRange(3)
 	end
 	
 	if ability[4][6] then
 		self.fastactionlevel = 4
 		self.fastharvester = true
-		self.bonusspeed = 3
+		self.bonusspeedmult = 1.25
 	end
 
 	self.inst.yukari_classified.fastaction:set(self.fastactionlevel)
 end
 
-function Upgrader:UpdateHatAbilityStatus(hat)	
+function Upgrader:ApplyHatAbility(hat)	
 	if self.hatequipped then
 		local skill = self.hatskill
 		
 		if skill[2] then
 			self.hatdodgechance = 0.05
 			self.hatabsorption = 0.3
+			self.hatpowergain = 0.01
 		end
 		
 		if skill[3] then
-			hat.components.waterproofer:SetEffectiveness(1)
+			hat:AddTag("goggles")
 			self.WaterProofer = true
 			self.hatdodgechance = 0.1
+			self.hatspeedmult = 1.125
 			self.hatabsorption = 0.5
+			self.hatpowergain = 0.03
 		end
 		
 		if skill[4] then
 			self.FireResist = true
-			self.schemecost = 20
-			self.hatbonusspeed = 1
 			self.hatdodgechance = 0.15
 			self.hatabsorption = 0.7
+			self.hatpowergain = 0.05
 		end
 		
 		if skill[5] then
-			self.schemecost = 10
+			self.GodTeleport = true
 			self.hatdodgechance = 0.2
 			self.hatabsorption = 0.8
-			self.GodTeleport = true
+			self.hatpowergain = 0.1
+			self.hatspeedmult = 1.25
 		end
-		
+
+		hat:SetSpeedMult(self.hatspeedmult)
 		hat:SetAbsorbPercent(self.hatabsorption)
+		hat:SetWaterProofness(self.WaterProofer)
 	else
 		self.WaterProofer = false
 		self.FireResist = false
 		self.GodTeleport = false
+		self.hatpowergain = 0
 		self.hatdodgechance = 0
-		self.schemecost = 30
+		hat:Initialize()
 	end
 	
 	self:SetFireDamageScale()
@@ -317,7 +328,7 @@ function Upgrader:UpdateSkillStatus()
 	local skill = self.skill
 
 	if self.powerupvalue ~= 0 then
-		skill.dmgmult = "Damage multiplier : "..string.format("%.2f", self.inst.components.combat.damagemultiplier).." (max : "..TUNING.YDEFAULT.DAMAGE_MULTIPLIER + 0.2 * self.powerupvalue..")"
+		skill.dmgmult = "Damage multiplier : "..string.format("%.2f", self.inst.components.combat.damagemultiplier).." (max : "..TUNING.YUKARI.DAMAGE_MULTIPLIER + 0.2 * self.powerupvalue..")"
 	end
 
 	if self.ResistDark ~= 0 then
@@ -329,8 +340,8 @@ function Upgrader:UpdateSkillStatus()
 		skill.insulation =  "Total insulation : "..summer.."(summer), "..winter.."(winter)"
 	end
 
-	if self.bonusspeed ~= 0 and self.hatbonusspeed ~= 0 then
-		skill.speed = "Bonus Speed : "..self.bonusspeed + (self.hatequipped and self.hatbonusspeed or 0)
+	if self.bonusspeedmult ~= 0 and self.hatspeedmult ~= 0 then
+		skill.speed = "Bonus Speed : "..self.bonusspeedmult + (self.hatequipped and self.hatspeedmult or 0)
 	end	
 
 	if self.hatdodgechance ~= 0 then
@@ -441,38 +452,29 @@ function Upgrader:UpdateSkillStatus()
 end
 
 function Upgrader:ApplyStatus()
-	local hunger_percent = self.inst.components.hunger:GetPercent()
-	local health_percent = self.inst.components.health:GetPercent()
-	local sanity_percent = self.inst.components.sanity:GetPercent()
-	local power_percent = self.inst.components.power:GetPercent()
-	local ignoresanity = self.inst.components.sanity.ignore
-    self.inst.components.sanity.ignore = false
-
-	local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
-	local difficulty = GetModConfigData("difficulty", modname)
-	local STATUS = TUNING.STATUS_DEFAULT
-	if difficulty == "easy" then
-		STATUS = TUNING.STATUS_EASY
-	elseif difficulty == "hard" then
-		STATUS = TUNING.STATUS_HARD
-	end
-
-	self:AbilityManager()
-	self.inst.components.combat:SetAttackPeriod(self.Ability_45 and 0 or TUNING.WILSON_ATTACK_PERIOD)
-	self.inst.components.health.maxhealth = STATUS.DEFAULT_HP + self.health_level * STATUS.HP_RATE + self.healthbonus + math.max(0, (self.health_level - 30) * 7.5)
-	self.inst.components.health:SetAbsorptionAmount(1 - (self.IsDamage and 0.7 or 1) * (self.inst.yukari_classified ~= nil and self.inst.yukari_classified.inspellbait:value() and 0.5 or 1) )
-	self.inst.components.hunger.hungerrate = math.max( 0, (STATUS.DEFAULT_HR - self.hunger_level * STATUS.HR_RATE - math.max(0, (self.hunger_level - 30) * 0.025 )) ) * TUNING.WILSON_HUNGER_RATE 
-	self.inst.components.hunger.max = STATUS.DEFAULT_HU + self.hungerbonus
-	self.inst.components.sanity.max = STATUS.DEFAULT_SN + self.sanity_level * STATUS.SN_RATE + self.sanitybonus + math.max(0, (self.sanity_level - 30) * 5)
-	self.inst.components.power.max = STATUS.DEFAULT_PW + self.power_level * STATUS.PO_RATE + self.powerbonus + math.max(0, (self.power_level - 30) * 5)
-	self.inst.components.locomotor.walkspeed = 4 + self.bonusspeed + self.hatbonusspeed
-	self.inst.components.locomotor.runspeed = 6 + self.bonusspeed + self.hatbonusspeed
+	local inst = self.inst
+	local hunger_percent = inst.components.hunger:GetPercent()
+	local health_percent = inst.components.health:GetPercent()
+	local sanity_percent = inst.components.sanity:GetPercent()
+	local power_percent = inst.components.power:GetPercent()
+	local ignoresanity = inst.components.sanity.ignore
+    inst.components.sanity.ignore = false
 	
-	self.inst.components.health:SetPercent(health_percent)
-	self.inst.components.hunger:SetPercent(hunger_percent)
-	self.inst.components.sanity:SetPercent(sanity_percent)
-	self.inst.components.power:SetPercent(power_percent)
-	self.inst.components.sanity.ignore = ignoresanity
+	self:AbilityManager()
+	inst.components.combat:SetAttackPeriod(self.Ability_45 and 0 or TUNING.WILSON_ATTACK_PERIOD)
+	inst.components.health.maxhealth = STATUS.DEFAULT_HP + self.health_level * STATUS.HP_RATE + self.healthbonus + math.max(0, (self.health_level - 30) * 7.5)
+	inst.components.health:SetAbsorptionAmount(1 - (self.IsDamage and 0.7 or 1) * (inst.yukari_classified ~= nil and inst.yukari_classified.inspellbait:value() and 0.5 or 1) )
+	inst.components.hunger.hungerrate = math.max( 0, (STATUS.DEFAULT_HR - self.hunger_level * STATUS.HR_RATE - math.max(0, (self.hunger_level - 30) * 0.025 )) ) * TUNING.WILSON_HUNGER_RATE 
+	inst.components.hunger.max = STATUS.DEFAULT_HU + self.hungerbonus
+	inst.components.sanity.max = STATUS.DEFAULT_SN + self.sanity_level * STATUS.SN_RATE + self.sanitybonus + math.max(0, (self.sanity_level - 30) * 5)
+	inst.components.power.max = STATUS.DEFAULT_PW + self.power_level * STATUS.PO_RATE + self.powerbonus + math.max(0, (self.power_level - 30) * 5)
+	inst.components.locomotor:SetExternalSpeedMultiplier(inst, "dreadful", self.bonusspeedmult)
+	
+	inst.components.health:SetPercent(health_percent)
+	inst.components.hunger:SetPercent(hunger_percent)
+	inst.components.sanity:SetPercent(sanity_percent)
+	inst.components.power:SetPercent(power_percent)
+	inst.components.sanity.ignore = ignoresanity
 end
 
 return Upgrader

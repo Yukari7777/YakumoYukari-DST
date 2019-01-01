@@ -86,7 +86,7 @@ end
 
 function Power:DoDec(dt, ignore_damage)
 	if  self.inst.components.upgrader.hatequipped then	
-		self.inst.components.power:DoDelta(self.regenrate * dt)
+		self.inst.components.power:DoDelta((self.regenrate + self.inst.components.upgrader ~= nil and self.inst.components.upgrader.hatpowergain) * dt)
 	end
 end
 

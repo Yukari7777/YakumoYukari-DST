@@ -5,9 +5,9 @@ local assets=
 }
 
 local Ingredients = {
-	{{"rocks", 40}, {"log", 40}},
-	{{"silk", 30}, {"pigskin", 20}, {"tentaclespots", 10}, {"strawhat", 1}},
-	{{"monstermeat", 60}, {"nightmarefuel", 30}, {"livinglog", 20}, {"dragon_scales", 1}},
+	{{"rocks", 80}, {"log", 80}, {"rope", 20}},
+	{{"silk", 30}, {"pigskin", 20}, {"tentaclespots", 10}, {"deserthat", 1}},
+	{{"monstermeat", 60}, {"nightmarefuel", 50}, {"livinglog", 20}, {"armordragonfly", 1}},
 	{{"thulecite", 20}, {"spellcard_away", 10}, {"spellcard_matter", 5}, {"spellcard_laplace", 2}, {"spellcard_necro", 1}}
 }
 
@@ -145,7 +145,7 @@ end
 
 local function OnFinish(inst, owner)
 	owner.components.upgrader.hatlevel = owner.components.upgrader.hatlevel + 1
-	owner.components.upgrader:UpdateHatAbilityStatus(inst)
+	owner.components.upgrader:ApplyHatAbility(inst)
 	owner.components.upgrader:ApplyStatus()
 	owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_HATUPGRADE"))
 end

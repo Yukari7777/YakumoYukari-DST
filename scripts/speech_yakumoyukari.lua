@@ -229,7 +229,6 @@ return {
 	ANNOUNCE_SHELTER = {
 		"Shade is much better.",
 		"+180 Insulation under the shade",
-		"I can stay here to avoid UV rays"
 	},
 	ANNOUNCE_THORNS = "Ow! My hands!",
 	ANNOUNCE_BURNT = "AW! LIGHT OFF! That was crazy!",
@@ -787,7 +786,7 @@ return {
 		EYEPLANT = "I think I'm being watched.",
 		FARMPLOT =
 		{
-			GENERIC = "I can plant plant.",
+			GENERIC = "I can plant plants.",
 			GROWING = "She's in growth!",
 			NEEDSFERTILIZER = "I think it needs to be fertilized.",
 			BURNT = "It burnt.",

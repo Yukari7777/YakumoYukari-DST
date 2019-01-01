@@ -25,17 +25,28 @@ local function NegateStranger(inst, owner)
 	end
 end
 
-local function InitializeStatus(inst)
-	inst.components.waterproofer:SetEffectiveness(0)
-	inst.components.armor.absorb_percent = 0
-end
-
 local function SetAbsorbPercent(inst, percent)
 	inst.components.armor.absorb_percent = percent
 end
 
+local function SetSpeedMult(inst, mult)
+	inst.components.equippable.walkspeedmult = mult
+end
+
+local function SetWaterProofness(inst, val)
+	inst.components.waterproofer:SetEffectiveness(val and 1 or 0)
+	if val then inst:AddTag("waterproofer") else inst:RemoveTag("waterproofer") end
+end
+
+local function Initialize(inst)
+	inst:RemoveTag("shadowdominance")
+	inst:RemoveTag("goggles")
+	inst:SetWaterProofness(false)
+	inst:SetAbsorbPercent(0)
+	inst:SetSpeedMult(1)
+end
+
 local function fn()  
-	
 	local function onequiphat(inst, owner)
         owner.AnimState:OverrideSymbol("swap_hat", "yukarihat_swap", "swap_hat")
         owner.AnimState:Show("HAT")
@@ -52,8 +63,7 @@ local function fn()
         owner.AnimState:Show("HAIR_NOHAT")
         owner.AnimState:Show("HAIR") 
 		owner:PushEvent("hatequipped", {isequipped = false, inst = inst})
-
-		InitializeStatus(inst)
+		Initialize(inst)
     end
 
 	local inst = CreateEntity()    
@@ -98,7 +108,12 @@ local function fn()
 	inst.components.equippable:SetOnEquip( onequiphat )
     inst.components.equippable:SetOnUnequip( onunequiphat )
 	
+	inst.Initialize = Initialize
+	inst.SetWaterProofness = SetWaterProofness
 	inst.SetAbsorbPercent = SetAbsorbPercent
+	inst.SetSpeedMult = SetSpeedMult
+
+	Initialize(inst)
 	
 	return inst
 end

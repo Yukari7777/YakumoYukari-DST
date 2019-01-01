@@ -33,9 +33,11 @@ local function KeyCheckCommon(inst)
 end
 
 local function RegisterKeyEvent(classified)
+	local parent = classified._parent
+	if parent.HUD == nil then return end -- if it's not a client, stop here.
 	TheInput:AddKeyDownHandler(_G["KEY_V"], function() 
-		if KeyCheckCommon(classified._parent) then
-			SendModRPCToServer(MOD_RPC["yakumoyukari"]["sayinfo"], classified._parent) 
+		if KeyCheckCommon(parent) then
+			SendModRPCToServer(MOD_RPC["yakumoyukari"]["sayinfo"], parent) 
 		end
 	end) 
 end
@@ -66,8 +68,13 @@ local function RegisterNetListeners(inst)
 	if TheWorld.ismastersim then
 		inst._parent = inst.entity:GetParent()
 	else
-		RegisterKeyEvent(inst)
+		-- Be aware that writting something in this block means,
+		-- You do NOT want to run the thing in the server
+		-- which EXCLUDES the host of server that doesn't have cave.
+		-- In most cases that you want to make 'clienty' things,
+		-- call the function out of this block, then use parent.HUD == nil rather writting things in here.
 	end
+	RegisterKeyEvent(inst)
 	inst:ListenForEvent("onskillinspectdirty", PushMessage)
 	inst:ListenForEvent("setnightvisiondirty", SetNightVision)
 	inst:ListenForEvent("setfastactiondirty", SetFastActionLevel)
@@ -83,8 +90,11 @@ local function fn()
 
 	inst.inspect = net_string(inst.GUID, "onskillinspect", "onskillinspectdirty")
 
-	inst.inspell = net_bool(inst.GUID, "oninspell", "oninspelldirty")
-	inst.inspell:set(false)
+	inst.inspellcommon = net_bool(inst.GUID, "oninspell", "oninspelldirty")
+	inst.inspellcommon:set(false)
+
+	inst.inspellcurse = net_bool(inst.GUID, "oninspellcurse", "oninspellcursedirty")
+	inst.inspellcurse:set(false)
 
 	inst.inspellbait = net_bool(inst.GUID, "oninspellbait", "oninspellbaitdirty")
 	inst.inspellbait:set(false)

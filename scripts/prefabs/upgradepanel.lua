@@ -56,9 +56,9 @@ end
 local function GetMaxLevel()
 	local difficulty = GetModConfigData("difficulty", modname)
 
-	local maxlevel = TUNING.YDEFAULT.UPGRADE_MAX
+	local maxlevel = TUNING.YUKARI.UPGRADE_MAX
 	if difficulty == "easy" then
-		maxlevel = TUNING.YDEFAULT.UPGRADE_MAX - 5
+		maxlevel = TUNING.YUKARI.UPGRADE_MAX - 5
 	elseif difficulty == "hard" then
 		maxlevel = math.huge 
 	end

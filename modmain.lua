@@ -48,12 +48,17 @@ Assets = {
 	Asset("SOUNDPACKAGE", "sound/soundpack.fev"),
 	Asset("SOUND", "sound/spell.fsb"),
 }
+AddMinimapAtlas("images/map_icons/yakumoyukari.xml")
+AddMinimapAtlas("images/map_icons/yukarihat.xml")
+AddMinimapAtlas("images/map_icons/yukariumbre.xml")
+AddMinimapAtlas("images/map_icons/minimap_tunnel.xml")
+AddMinimapAtlas("images/map_icons/scheme.xml")
 
------ GLOBAL & require list -----
-GLOBAL.YUKARISTATINDEX = {"health", "hunger", "sanity", "power"}
+---------- GLOBAL & require list ----------
 local require = GLOBAL.require
 local assert = GLOBAL.assert
 require "class"
+GLOBAL.YUKARISTATINDEX = {"health", "hunger", "sanity", "power"}
 
 local STRINGS = GLOBAL.STRINGS
 local ProfileStatsSet = GLOBAL.ProfileStatsSet
@@ -64,28 +69,34 @@ local TheInput = GLOBAL.TheInput
 local EQUIPSLOTS = GLOBAL.EQUIPSLOTS
 local FindEntity = GLOBAL.FindEntity
 local SpringCombatMod = GLOBAL.SpringCombatMod
+
 local Language = GetModConfigData("language")
-
------ Basic settings for Yukari -----
-STRINGS.CHARACTER_TITLES.yakumoyukari = "Youkai of Boundaries"
-STRINGS.CHARACTER_NAMES.yakumoyukari = "Yakumo Yukari"
-STRINGS.CHARACTER_DESCRIPTIONS.yakumoyukari = "has own ability 'youkai power'.\nbecomes dreadful when she obtains the power from the world."
-STRINGS.CHARACTER_QUOTES.yakumoyukari = "\"I have taken the first napkin.\""
-STRINGS.CHARACTERS.YAKUMOYUKARI = require "speech_yakumoyukari"
-if Language == "ch" then
-	STRINGS.CHARACTER_TITLES.yakumoyukari = "境界的妖怪"
-	STRINGS.CHARACTER_DESCRIPTIONS.yakumoyukari = "拥 有 自 己 的 能 力 '妖 力'.\n 当 她 从 自 己 的 世 界 中 获 得 ' 力 量 ' 之 后 将 变 得 极 其 可 怕."
-	STRINGS.CHARACTER_QUOTES.yakumoyukari = "\"我 将 会 掌 控 这 个 世 界！.\""
-	STRINGS.CHARACTERS.YAKUMOYUKARI = require "speech_yakumoyukari_ch"
+GLOBAL.YUKARI_LANGUAGE = "en"
+if Language == "AUTO" then
+	local KnownModIndex = GLOBAL.KnownModIndex
+	for _, moddir in ipairs(KnownModIndex:GetModsToLoad()) do
+		local modname = KnownModIndex:GetModInfo(moddir).name
+--		if modname == "한글 모드 서버 버전" or modname == "한글 모드 클라이언트 버전" then 
+--			GLOBAL.YUKARI_LANGUAGE = "kr"
+		if modname == "Chinese modname Pack" or modname == "Chinese Plus" then
+			GLOBAL.YUKARI_LANGUAGE = "ch"
+--		elseif modname == "Russian modname Pack" or modname == "Russification Pack for DST" or modname == "Russian For Mods (Client)" then
+--			GLOBAL.YUKARI_LANGUAGE = "ru"
+		end 
+	end 
+else
+	GLOBAL.YUKARI_LANGUAGE = Language
 end
-AddMinimapAtlas("images/map_icons/yakumoyukari.xml")
-AddMinimapAtlas("images/map_icons/yukarihat.xml")
-AddMinimapAtlas("images/map_icons/yukariumbre.xml")
-AddMinimapAtlas("images/map_icons/minimap_tunnel.xml")
-AddMinimapAtlas("images/map_icons/scheme.xml")
 
----------------- OVERRIDE -----------------
+TUNING.YUKARI_STATUS = TUNING["YUKARI_STATUS"..(GetModConfigData("difficulty") or "")]
 
+modimport "scripts/power_init.lua"
+modimport "scripts/tunings_yukari.lua"
+modimport "scripts/strings_yukari.lua"
+modimport "scripts/actions_yukari.lua" -- actions must be loaded before stategraph loads
+modimport "scripts/stategraph_yukari.lua"
+modimport "scripts/recipes_yukari.lua"
+---------------- overrides -----------------
 -- Bunnyman Retarget Function
 local function BunnymanNormalRetargetFn(inst)
 	if not GLOBAL.TheWorld.ismastersim then
@@ -283,17 +294,26 @@ local function SpiderqueenRetargetFn(inst)
 
 	inst.components.combat:SetRetargetFunction(3, Retarget)
 end
-
+AddPrefabPostInit("bunnyman", BunnymanNormalRetargetFn)
+AddPrefabPostInit("pigman", PigmanNormalRetargetFn)
+AddPrefabPostInit("bat", BatRetargetFn)
+AddPrefabPostInit("mosquito", MosquitoRetargetFn)
+AddPrefabPostInit("bee", BeeRetargetFn)
+AddPrefabPostInit("killerbee", KillerbeeRetargetFn)
+AddPrefabPostInit("frog", FrogRetargetFn)
+AddPrefabPostInit("spider", SpiderRetargetFn)
+AddPrefabPostInit("spider_warrior", WarriorRetargetFn)
+AddPrefabPostInit("spiderqueen", SpiderqueenRetargetFn)
 ---------- print current upgrade & ability
-function SayInfo(inst)
+local function SayInfo(inst)
 	local HP = 0
 	local HN = 0
 	local SA = 0
 	local PO = 0
 	local str = ""
 	local skilltable = {}
-	local inspect = GetModConfigData("skill") or GetModConfigData("skill", "workshop-1432504104") or 1
-	inst.info = inst.info >= (inst.components.upgrader.skilltextpage or 3) and 0 or inst.info
+	local inspect = GetModConfigData("skill") or 1
+	inst.info = inst.info >= (inst.components.upgrader.skilltextpage or TUNING.YUKARI.SKILLPAGE) and 0 or inst.info
 
 	if inst.info == 0 then
 		HP = inst.components.upgrader.health_level
@@ -337,25 +357,6 @@ function SayInfo(inst)
 	inst.info = inst.info + 1
 	if inspect > 1 then inst.yukari_classified.inspect:set(str) end
 	if inspect % 2 == 1 then inst.components.talker:Say(str) end
-	
 end
 AddModRPCHandler("yakumoyukari", "sayinfo", SayInfo)
-
--------------------------------
-AddPrefabPostInit("bunnyman", BunnymanNormalRetargetFn)
-AddPrefabPostInit("pigman", PigmanNormalRetargetFn)
-AddPrefabPostInit("bat", BatRetargetFn)
-AddPrefabPostInit("mosquito", MosquitoRetargetFn)
-AddPrefabPostInit("bee", BeeRetargetFn)
-AddPrefabPostInit("killerbee", KillerbeeRetargetFn)
-AddPrefabPostInit("frog", FrogRetargetFn)
-AddPrefabPostInit("spider", SpiderRetargetFn)
-AddPrefabPostInit("spider_warrior", WarriorRetargetFn)
-AddPrefabPostInit("spiderqueen", SpiderqueenRetargetFn)
-modimport "scripts/power_init.lua"
-modimport "scripts/tunings_yukari.lua"
-modimport "scripts/strings_yukari.lua"
-modimport "scripts/actions_yukari.lua" -- actions must be loaded before stategraph loads
-modimport "scripts/stategraph_yukari.lua"
-modimport "scripts/recipes_yukari.lua"
 AddModCharacter("yakumoyukari", "FEMALE")

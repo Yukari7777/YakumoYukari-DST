@@ -1,6 +1,6 @@
 name = "Yakumo Yukari"
 author = "Yakumo Yukari"
-version = "0.11.4"
+version = "0.11.5"
 description = "Yakumo Yukari comes from unknown world to manipulate Don't Starve Together world!\n\nVersion : "..version.."\nPress [V] to show status.\nYOU MUST ENABLE SCHEME OR YOU'LL GET CRASHED."
 forumthread = ""
 api_version = 6
@@ -41,25 +41,28 @@ configuration_options = {
 	{
 		name = "language",
 		label = "Language",
-		hover = "Set language",
+		hover = "Set Language",
 		options = {
-			{ description = "english", data = "en" },
-			{ description = "chinese", data = "ch" },
+			{ description = "Auto", data = "AUTO" },
+			--{ description = "ÇÑ±¹¾î", data = "kr" },
+			{ description = "English", data = "en" },
+			{ description = "ñéÙþ", data = "ch" },
+			--{ description = "¬â¬å¬ã¬ã¬Ü¬Ú¬Û", data = "ru" },
 		},
-		default = "en",
+		default = "AUTO",
 	},
 
 	{
 		name = "difficulty",
-		label = "Play Style",
+		label = "Difficulty",
 		hover = "Set difficulty.",
 		options =
 		{
-			{ description = "PVP", data = "easy" },
-			{ description = "Standard", data = "default" },
-			{ description = "Farmer", data = "hard" },
+			{ description = "Easy", data = "EASY" },
+			{ description = "Normal", data = "" },
+			{ description = "Hard", data = "HARD" },
 		},
-		default = "default",
+		default = "",
 	},
 
 	{

@@ -3,17 +3,18 @@ local MakePlayerCharacter = require "prefabs/player_common"
 local assets = {
 	Asset("SCRIPT", "scripts/prefabs/player_common.lua"),
 	Asset("SOUND", "sound/willow.fsb"),
-
 	Asset("IMAGE", "images/colour_cubes/beaver_vision_cc.tex"),
-
 	Asset("ANIM", "anim/ghost_yakumoyukari_build.zip"),
 }
 
 local prefabs = { -- deps; should be a list of prefabs that it wants to have loaded in order to be able to create prefab.
 	"yukari_classified",
 	"yakumoyukari_none",
+	"mindcontroller",
 }
 
+-- Custom classified set
+-- if you want to scrap functions, rename "yukari" in those 4 functions below.
 local function YukariOnSetOwner(inst)
 	if TheWorld.ismastersim then
         inst.yukari_classified.Network:SetClassifiedTarget(inst)
@@ -55,11 +56,11 @@ end
 local function GetStartInv()
 	local difficulty = GetModConfigData("difficulty", "YakumoYukari")
 	if difficulty == "easy" then
-		return {"meat",
-				"meat",
-				"meat",
-				"meat",
-				"meat",
+		return {"humanmeat",
+				"humanmeat",
+				"humanmeat",
+				"humanmeat",
+				"humanmeat",
 				"scheme",
 				"yukariumbre",
 				"yukarihat"}
@@ -113,6 +114,10 @@ local function onpreload(inst, data)
 	end
 end
 
+local function GetEquippedYukariHat(inst)
+	return inst.components.inventory.equipslots:GetEquippedItem(EQUIPSLOTS.HEAD) ~= nil and inst.components.inventory.equipslots:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat" and inst.components.inventory.equipslots:GetEquippedItem(EQUIPSLOTS.HEAD) or nil
+end
+
 local function OnhitEvent(inst, data)
 	local CanAOE = math.random() < 0.4
 
@@ -128,10 +133,9 @@ local function OnhitEvent(inst, data)
 		end
 	end
 
-	if inst.components.upgrader.IsAOE and CanAOE then
+	if CanAOE and inst.components.upgrader.IsAOE then
 		inst.components.combat:DoAreaAttack(data.target, 3, data.weapon, nil, data.stimuli, {"INLIMBO"})
 	end
-	
 end
 
 local function DoPowerRestore(inst, amount)
@@ -140,31 +144,39 @@ local function DoPowerRestore(inst, amount)
 	--inst.HUD.controls.status.power:PulseGreen() 
 	--inst.HUD.controls.status.power:ScaleTo(1.3,1,.7)
 end
+
+local function MakeInvincible(inst)
+	inst.components.upgrader.CanbeInvincibled = false
+	inst.invin_cool = 1440
+	inst.IsInvincible = true
+	inst.components.health:SetInvincible(true)
+	inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_INVINCIBILITY_ACTIVATE"))
+	inst:DoTaskInTime(10, function()
+		inst.IsInvincible = false
+		inst.components.health:SetInvincible(false)
+		inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_INVINCIBILITY_DONE"))
+	end)
+end
 	
-function OnHealthDelta(inst)
-	if  inst.components.health.currenthealth <= 30 
-	and inst.components.upgrader.InvincibleLearned
-	and inst.components.upgrader.CanbeInvincibled then
-		inst.components.upgrader.CanbeInvincibled = false
-		inst.invin_cool = 1440
-		inst.IsInvincible = true
-		inst.components.health:SetInvincible(true)
-		inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_INVINCIBILITY_ACTIVATE"))
-		inst:DoTaskInTime(10, function()
-			inst.IsInvincible = false
-			inst.components.health:SetInvincible(false)
-			inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_INVINCIBILITY_DONE"))
-		end)
+local function OnHealthDelta(inst, data)
+	if inst.components.upgrader.InvincibleLearned 
+	and inst.components.upgrader.CanbeInvincibled
+	and inst.components.health.currenthealth <= math.max(30, inst.components.health:GetMaxWithPenalty() * 0.15) then
+		MakeInvincible(inst)
 	end
 end
 
 function OnHungerDelta(inst, data)
-	if inst.yukari_classified ~= nil and inst.yukari_classified.inspell:value() then
+	if inst.yukari_classified ~= nil and inst.yukari_classified.inspellcurse:value() or inst.yukari_classified == nil then
 		return
 	end
 
-	if inst.components.hunger then
-		inst.components.combat.damagemultiplier = TUNING.YDEFAULT.DAMAGE_MULTIPLIER + math.max(data.newpercent - (1 - inst.components.upgrader.powerupvalue * 0.2), 0)
+	if inst.components.combat ~= nil then
+		local dmgmult = TUNING.YUKARI.DAMAGE_MULTIPLIER + math.max(data.newpercent - (1 - inst.components.upgrader.powerupvalue * 0.2), 0)
+		local scale = 1 + (dmgmult - TUNING.YUKARI.DAMAGE_MULTIPLIER) * 0.25
+		inst.components.combat.damagemultiplier = dmgmult
+
+		inst:ApplyScale("dreadful", scale)
 	end
 end
 
@@ -223,11 +235,11 @@ end
 local function PeriodicFunction(inst)
 	inst.components.sanity.night_drain_mult = 1 - inst.components.upgrader.ResistDark - (inst.components.upgrader.hatequipped and 0.2 or 0)
 	
-	if inst.components.health and inst.IsInvincible then
+	if inst.components.health ~= nil and inst.IsInvincible then
 		InvincibleRegen(inst)
 	end
 
-	if inst.components.health and inst.nohealthpenalty then
+	if inst.components.health ~= nil and inst.nohealthpenalty then
 		inst.components.heath:SetPenalty(0)
 	end
 
@@ -252,7 +264,7 @@ end
 
 local function DebugFunction(inst)
 	inst:DoPeriodicTask(1, function()
-		if inst.components.power and inst.infpower then
+		if inst.components.power ~= nil and inst.infpower then
 			inst.components.power.max = 300
 			inst.components.power.current = 300
 		end
@@ -303,7 +315,7 @@ local function MakeSaneOnMeatEat(inst)
 			if food.prefab == "humanmeat" or food.prefab == "humanmeat_cooked" or food.prefab == "humanmeat_dried" then
 				food.components.edible.sanityvalue = TUNING.SANITY_LARGE
 				food.components.edible.healthvalue = TUNING.HEALING_MED
-				inst:PushEvent("makefriend")
+				inst:PushEvent("makefriend") -- Just for sound effect
 				inst:DoTaskInTime(math.random() * 0.5, function()
 					inst.components.talker:Say(GetString(inst.prefab, "ONEATHUMAN"))
 				end)
@@ -350,7 +362,7 @@ local function OnEquip(inst, data)
 		inst.components.upgrader.fireimmuned = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == "armordragonfly"
 
 		if data.item.prefab == "yukarihat" then
-			inst.components.upgrader:UpdateHatAbilityStatus(data.item)
+			inst.components.upgrader:ApplyHatAbility(data.item)
 		end
 		inst.components.upgrader:ApplyStatus()
 	end
@@ -419,14 +431,14 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:AddComponent("power")
 
 	inst.soundsname = "willow"
-	inst.starting_inventory = start_inv -- starting_inventory passed as a parameter is deprecated
+	inst.starting_inventory = start_inv -- starting_inventory passed as the parameter of MakePlayerCharacter is deprecated
 	
 	inst.components.sanity:SetMax(75)
 	inst.components.health:SetMaxHealth(80)
 	inst.components.hunger:SetMax(150)
 	inst.components.hunger.hungerrate = 1.5 * TUNING.WILSON_HUNGER_RATE
-	inst.components.combat.damagemultiplier = TUNING.YDEFAULT.DAMAGE_MULTIPLIER
-	inst.components.combat.areahitdamagepercent = TUNING.YDEFAULT.AREA_DAMAGE_PERCENT
+	inst.components.combat.damagemultiplier = TUNING.YUKARI.DAMAGE_MULTIPLIER
+	inst.components.combat.areahitdamagepercent = TUNING.YUKARI.AREA_DAMAGE_PERCENT
 	inst.components.builder.science_bonus = 1
 	inst.components.eater:SetOnEatFn(oneat)
 	MakeSaneOnMeatEat(inst)
@@ -438,6 +450,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.OnLoad = function(inst)
 		inst.components.upgrader:ApplyStatus()
 	end
+	inst.GetYukariHat = GetEquippedYukariHat
 	inst.powertable = powertable
 	
 	inst:DoPeriodicTask(1, PeriodicFunction)
