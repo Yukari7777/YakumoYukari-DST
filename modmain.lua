@@ -69,11 +69,13 @@ local TheInput = GLOBAL.TheInput
 local EQUIPSLOTS = GLOBAL.EQUIPSLOTS
 local FindEntity = GLOBAL.FindEntity
 local SpringCombatMod = GLOBAL.SpringCombatMod
+local KnownModIndex = GLOBAL.KnownModIndex
+
+GLOBAL.YUKARI_MODNAME = KnownModIndex:GetModActualName("Yakumo Yukari")
 
 local Language = GetModConfigData("language")
 GLOBAL.YUKARI_LANGUAGE = "en"
 if Language == "AUTO" then
-	local KnownModIndex = GLOBAL.KnownModIndex
 	for _, moddir in ipairs(KnownModIndex:GetModsToLoad()) do
 		local modname = KnownModIndex:GetModInfo(moddir).name
 --		if modname == "한글 모드 서버 버전" or modname == "한글 모드 클라이언트 버전" then 

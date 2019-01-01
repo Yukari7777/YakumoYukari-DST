@@ -11,7 +11,7 @@ local Ingredients = {
 	{{"thulecite", 20}, {"spellcard_away", 10}, {"spellcard_matter", 5}, {"spellcard_laplace", 2}, {"spellcard_necro", 1}}
 }
 
---local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
+--local modname = _G.YUKARI_MODNAME
 
 local function GetIngameName(prefab)
 	return STRINGS.NAMES[string.upper(prefab)]
@@ -141,13 +141,16 @@ local function DoUpgrade(inst, owner)
 			end
 		end
 	end
+
+	owner.components.upgrader.hatlevel = owner.components.upgrader.hatlevel + 1
+	owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_HATUPGRADE"))
 end
 
 local function OnFinish(inst, owner)
-	owner.components.upgrader.hatlevel = owner.components.upgrader.hatlevel + 1
-	owner.components.upgrader:ApplyHatAbility(inst)
+	inst.canspell:set(false)
+	inst.components.spellcard:SetCondition(false)
+	owner.components.upgrader:ApplyHatAbility(owner:GetYukariHat())
 	owner.components.upgrader:ApplyStatus()
-	owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_HATUPGRADE"))
 end
 
 local function SetState(inst, data)

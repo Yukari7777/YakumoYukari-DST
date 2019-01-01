@@ -49,7 +49,7 @@ AddStategraphActionHandler("wilson", ActionHandler(ACTIONS.RESETMINE, SetFastRes
 AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.RESETMINE, SetFastResetter))
 
 local function SetFastHarvester(inst, action) 
-	return inst:HasTag("quagmire_fasthands") or (inst.yukari_classified ~= nil and inst.yukari_classified.fastaction:value() > 3) and "domediumaction" or "dolongaction"
+	return inst:HasTag("quagmire_fasthands") or (inst.yukari_classified ~= nil and inst.yukari_classified.fastaction:value() > 3) and "doshortaction" or "dolongaction"
 end
 AddStategraphActionHandler("wilson", ActionHandler(ACTIONS.HARVEST, SetFastHarvester))
 AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.HARVEST, SetFastHarvester))

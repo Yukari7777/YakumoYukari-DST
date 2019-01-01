@@ -1,4 +1,5 @@
 local MakePlayerCharacter = require "prefabs/player_common"
+local modname = _G.YUKARI_MODNAME
 
 local assets = {
 	Asset("SCRIPT", "scripts/prefabs/player_common.lua"),
@@ -14,7 +15,6 @@ local prefabs = { -- deps; should be a list of prefabs that it wants to have loa
 }
 
 -- Custom classified set
--- if you want to scrap functions, rename "yukari" in those 4 functions below.
 local function YukariOnSetOwner(inst)
 	if TheWorld.ismastersim then
         inst.yukari_classified.Network:SetClassifiedTarget(inst)
@@ -54,7 +54,7 @@ end
 
 -- Custom starting items
 local function GetStartInv()
-	local difficulty = GetModConfigData("difficulty", "YakumoYukari")
+	local difficulty = GetModConfigData("difficulty", modname)
 	if difficulty == "easy" then
 		return {"humanmeat",
 				"humanmeat",
@@ -115,7 +115,7 @@ local function onpreload(inst, data)
 end
 
 local function GetEquippedYukariHat(inst)
-	return inst.components.inventory.equipslots:GetEquippedItem(EQUIPSLOTS.HEAD) ~= nil and inst.components.inventory.equipslots:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat" and inst.components.inventory.equipslots:GetEquippedItem(EQUIPSLOTS.HEAD) or nil
+	return inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat" and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) or nil
 end
 
 local function OnhitEvent(inst, data)
@@ -150,7 +150,7 @@ local function MakeInvincible(inst)
 	inst.invin_cool = 1440
 	inst.IsInvincible = true
 	inst.components.health:SetInvincible(true)
-	inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_INVINCIBILITY_ACTIVATE"))
+	inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_INVINCIBILITY_ACTIVATE"), nil, nil, true, nil, {1,0,0,1})
 	inst:DoTaskInTime(10, function()
 		inst.IsInvincible = false
 		inst.components.health:SetInvincible(false)
@@ -173,7 +173,7 @@ function OnHungerDelta(inst, data)
 
 	if inst.components.combat ~= nil then
 		local dmgmult = TUNING.YUKARI.DAMAGE_MULTIPLIER + math.max(data.newpercent - (1 - inst.components.upgrader.powerupvalue * 0.2), 0)
-		local scale = 1 + (dmgmult - TUNING.YUKARI.DAMAGE_MULTIPLIER) * 0.25
+		local scale = 1 + (dmgmult - TUNING.YUKARI.DAMAGE_MULTIPLIER) * 0.1
 		inst.components.combat.damagemultiplier = dmgmult
 
 		inst:ApplyScale("dreadful", scale)

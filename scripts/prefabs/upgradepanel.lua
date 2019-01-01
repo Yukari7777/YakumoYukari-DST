@@ -1,4 +1,4 @@
-local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
+local modname = _G.YUKARI_MODNAME
 
 local Ingredients = {
 	{"honey", "healingsalve", "bandage"},

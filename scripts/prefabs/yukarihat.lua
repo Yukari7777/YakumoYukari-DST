@@ -40,7 +40,6 @@ end
 
 local function Initialize(inst)
 	inst:RemoveTag("shadowdominance")
-	inst:RemoveTag("goggles")
 	inst:SetWaterProofness(false)
 	inst:SetAbsorbPercent(0)
 	inst:SetSpeedMult(1)
@@ -54,6 +53,7 @@ local function fn()
         owner.AnimState:Hide("HAIR_NOHAT")
         owner.AnimState:Hide("HAIR") 
 		owner:PushEvent("hatequipped", {isequipped = true, inst = inst})
+
 		NegateStranger(inst, owner)
     end
 
@@ -83,7 +83,6 @@ local function fn()
 	inst.AnimState:PlayAnimation("idle")    
 
 	inst:AddTag("hat")
-	inst:AddTag("yakumoyukari")
 	
 	if not TheWorld.ismastersim then
 		return inst

@@ -14,8 +14,8 @@ local Upgrader = Class(function(self, inst)
 	self.sanitybonus = 0
 	self.powerbonus = 0
 	self.fastactionlevel = 0
-	self.hatpowergain = 0
-	self.bonusspeedmult = 0
+	self.hatbonuspowergain = 0
+	self.bonusspeedmult = 1
 	
 	self.powerupvalue = 0
 	self.regenamount = 0
@@ -44,6 +44,7 @@ local Upgrader = Class(function(self, inst)
 	self.InvincibleLearned = false
 	self.CanbeInvincibled = false
 	self.WaterProofer = false
+	self.IsGoggle = false
 	self.FireResist = false
 	self.GodTeleport = false
 	self.SpikeEater = false
@@ -145,6 +146,7 @@ function Upgrader:UpdateAbilityStatus()
 	
 	if ability[1][6] then
 		self.IsVampire = true  
+		self.healthbonus = 195
 	end
 	
 	if ability[2][1] then
@@ -185,6 +187,7 @@ function Upgrader:UpdateAbilityStatus()
 	end	
 	
 	if ability[2][6] then
+		self.hungerbonus = 150
 		self.IsAOE = true
 	end
 	
@@ -220,13 +223,14 @@ function Upgrader:UpdateAbilityStatus()
 	
 	if ability[3][6] then
 		self.dodgechance = 0.2
+		self.sanitybonus = 175
 		self.inst.components.sanity.neg_aura_mult = 0.33
 	end	
 	
 	if ability[4][1] then
 		self.inst.components.moisture.baseDryingRate = 0.7
 		self.PowerGainMultiplier = 1.5
-		self.bonusspeedmult = 1.05
+		self.bonusspeedmult = 1.033
 	end
 	
 	if ability[4][2] then
@@ -234,7 +238,7 @@ function Upgrader:UpdateAbilityStatus()
 		self.fastactionlevel = 1
 		self.fastpicker = true
 		self.powerbonus = 25
-		self.bonusspeedmult = 1.1
+		self.bonusspeedmult = 1.066
 		self.PowerGainMultiplier = 1.75
 	end
 	
@@ -243,7 +247,7 @@ function Upgrader:UpdateAbilityStatus()
 		self.fastactionlevel = 2
 		self.fastcrafter = true
 		self.powerbonus = 50
-		self.bonusspeedmult = 1.15
+		self.bonusspeedmult = 1.1
 		self.PowerGainMultiplier = 2.25
 	end
 	
@@ -256,7 +260,7 @@ function Upgrader:UpdateAbilityStatus()
 		self.inst.components.locomotor:SetTriggersCreep(false)
 		self.PowerGainMultiplier = 3
 		self.powerbonus = 75
-		self.bonusspeedmult = 1.2
+		self.bonusspeedmult = 1.133
 	end
 	
 	if ability[4][5] then
@@ -269,7 +273,7 @@ function Upgrader:UpdateAbilityStatus()
 	if ability[4][6] then
 		self.fastactionlevel = 4
 		self.fastharvester = true
-		self.bonusspeedmult = 1.25
+		self.bonusspeedmult = 1.2
 	end
 
 	self.inst.yukari_classified.fastaction:set(self.fastactionlevel)
@@ -282,46 +286,52 @@ function Upgrader:ApplyHatAbility(hat)
 		if skill[2] then
 			self.hatdodgechance = 0.05
 			self.hatabsorption = 0.3
-			self.hatpowergain = 0.01
+			self.hatspeedmult = 1.05
+			self.hatbonuspowergain = 0.01
 		end
 		
 		if skill[3] then
-			hat:AddTag("goggles")
+			self.IsGoggle = true
+			self.inst.components.playervision:ForceGoggleVision(true)
 			self.WaterProofer = true
 			self.hatdodgechance = 0.1
-			self.hatspeedmult = 1.125
+			self.hatspeedmult = 1.1
 			self.hatabsorption = 0.5
-			self.hatpowergain = 0.03
+			self.hatbonuspowergain = 0.03
 		end
 		
 		if skill[4] then
 			self.FireResist = true
 			self.hatdodgechance = 0.15
 			self.hatabsorption = 0.7
-			self.hatpowergain = 0.05
+			self.hatspeedmult = 1.15
+			self.hatbonuspowergain = 0.05
 		end
 		
 		if skill[5] then
 			self.GodTeleport = true
 			self.hatdodgechance = 0.2
 			self.hatabsorption = 0.8
-			self.hatpowergain = 0.1
-			self.hatspeedmult = 1.25
+			self.hatbonuspowergain = 0.1
+			self.hatspeedmult = 1.2
 		end
-
-		hat:SetSpeedMult(self.hatspeedmult)
-		hat:SetAbsorbPercent(self.hatabsorption)
-		hat:SetWaterProofness(self.WaterProofer)
 	else
 		self.WaterProofer = false
 		self.FireResist = false
 		self.GodTeleport = false
-		self.hatpowergain = 0
+		self.IsGoggle = false
+		self.inst.components.playervision:ForceGoggleVision(false)
+		self.hatbonuspowergain = 0
 		self.hatdodgechance = 0
-		hat:Initialize()
+		self.hatspeedmult = 1
 	end
 	
-	self:SetFireDamageScale()
+	if hat ~= nil then
+		hat:SetSpeedMult(self.hatspeedmult)
+		hat:SetAbsorbPercent(self.hatabsorption)
+		hat:SetWaterProofness(self.WaterProofer)
+		self:SetFireDamageScale()
+	end
 end
 
 function Upgrader:UpdateSkillStatus()
@@ -340,8 +350,8 @@ function Upgrader:UpdateSkillStatus()
 		skill.insulation =  "Total insulation : "..summer.."(summer), "..winter.."(winter)"
 	end
 
-	if self.bonusspeedmult ~= 0 and self.hatspeedmult ~= 0 then
-		skill.speed = "Bonus Speed : "..self.bonusspeedmult + (self.hatequipped and self.hatspeedmult or 0)
+	if self.bonusspeedmult ~= 1 and self.hatspeedmult ~= 1 then
+		skill.speed = "Speed Bonus : "..self.bonusspeedmult * (self.hatequipped and self.hatspeedmult or 1)
 	end	
 
 	if self.hatdodgechance ~= 0 then

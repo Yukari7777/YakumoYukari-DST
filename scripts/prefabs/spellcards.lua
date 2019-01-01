@@ -67,8 +67,10 @@ local function away(inst)
 end
 	
 local function necro(inst)
-	inst:RemoveComponent("finiteuses")
 	inst:AddTag("heavyaction")
+	inst:RemoveComponent("finiteuses")
+	inst:AddComponent("stackable")
+	inst.components.stackable.maxsize = TUNING.STACK_SIZE_SPELLCARD
 	inst.components.spellcard.costpower = TUNING.SPELLNECRO_POWERCOST
 	inst.costpower:set(TUNING.SPELLNECRO_POWERCOST)
 	inst.components.spellcard:SetSpellFn(function(inst, owner)
@@ -106,14 +108,14 @@ local function necro(inst)
 			end
 		end
 
-		if owner.components.power then
+		if owner.components.power ~= nil then
 			owner.components.power:DoDelta(-TUNING.SPELLNECRO_POWERCOST)
 		end
 
-		if owner.components.talker then
+		if owner.components.talker ~= nil then
 			owner.components.talker:Say(GetString(owner.prefab, "NECRO"))
 		end
-		inst:Remove()
+		inst.components.stackable:Get():Remove()
 	end)
 end
 	
@@ -142,6 +144,7 @@ local function curse(inst)
 		owner.components.combat.damagemultiplier = 1 + mult * 0.5
 		owner.components.locomotor.walkspeed = 4 + mult
 		owner.components.locomotor.runspeed = 6 + mult
+		owner.components.locomotor:SetExternalSpeedMultiplier(inst, "dreadful", 1)
 		owner:ApplyScale("dreadful", 1 + mult * 0.083)
 		owner.components.combat:SetAttackPeriod(0)
 		owner.components.power:DoDelta(-TUNING.SPELL_POWERCOST_NORMAL * 1.5)
@@ -177,7 +180,7 @@ local function balance(inst)
 	inst.costpower:set(TUNING.SPELLBALANCE_POWERCOST)
 	inst:RemoveComponent("finiteuses")
 	inst:AddComponent("stackable")
-	inst.components.stackable.maxsize = TUNING.STACK_SIZE_SMALLITEM
+	inst.components.stackable.maxsize = TUNING.STACK_SIZE_SPELLCARD
 	inst.components.spellcard:SetSpellFn(function(inst, owner)
 		local Inventory = owner.components.inventory
 		local rotcnt = 0
@@ -355,9 +358,9 @@ end
 local function addictive(inst)
 	inst.components.spellcard.costpower = TUNING.SPELLADDICTIVE_POWERCOST
 	inst.costpower:set(TUNING.SPELLADDICTIVE_POWERCOST)
-	inst:AddComponent("stackable")
 	inst:RemoveComponent("finiteuses")
-	inst.components.stackable.maxsize = TUNING.STACK_SIZE_SMALLITEM
+	inst:AddComponent("stackable")
+	inst.components.stackable.maxsize = TUNING.STACK_SIZE_SPELLCARD
 	inst.components.spellcard:SetSpellFn(function(inst, owner)
 		local x,y,z = owner.Transform:GetWorldPosition()
 		local ents = TheSim:FindEntities(x, y, z, 60)
@@ -433,7 +436,7 @@ local function lament(inst)
 	inst.costpower:set(TUNING.SPELLLAMENT_POWERCOST)
 	inst:RemoveComponent("finiteuses")
 	inst:AddComponent("stackable")
-	inst.components.stackable.maxsize = TUNING.STACK_SIZE_SMALLITEM
+	inst.components.stackable.maxsize = TUNING.STACK_SIZE_SPELLCARD
 	inst.Activated = false
 	local LeftSpawnCount = 0
 	inst.components.spellcard:SetSpellFn(function(inst, owner)
@@ -476,9 +479,9 @@ local function lament(inst)
 		local function SleepNearbyPlayer(prefab, owner)
 			prefab:DoTaskInTime(1, function(prefab, owner)
 				local x, y, z = prefab.Transform:GetWorldPosition()
-				local ents = TheSim:FindEntities(x, y, z, TUNING.MANDRAKE_SLEEP_RANGE, nil, nil, { "player" })
+				local ents = TheSim:FindEntities(x, y, z, 15, nil, nil, { "player" })
 				for i, v in ipairs(ents) do
-					v:PushEvent("yawn", { grogginess = 4, knockoutduration = TUNING.MANDRAKE_SLEEP_TIME + math.random() })
+					v:PushEvent("yawn", { grogginess = 4, knockoutduration = 15 + math.random() })
 				end
 			end)
 			prefab:DoTaskInTime(2.5, function(prefab)
@@ -705,7 +708,7 @@ local function matter(inst) -- Universe of Matter and Antimatter
 	inst.costpower:set(TUNING.SPELLMATTER_POWERCOST)
 	inst:RemoveComponent("finiteuses")
 	inst:AddComponent("stackable")
-	inst.components.stackable.maxsize = TUNING.STACK_SIZE_SMALLITEM
+	inst.components.stackable.maxsize = TUNING.STACK_SIZE_SPELLCARD
 	inst.components.spellcard:SetSpellFn(function(inst, owner)
 		local Inventory = owner.components.inventory
 		local function repair(v)
