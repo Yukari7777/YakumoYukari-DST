@@ -102,15 +102,22 @@ local function onpreload(inst, data)
 			inst.components.upgrader:ApplyStatus()
 
 			--re-set these from the save data, because of load-order clipping issues
-			if data.health and data.health.health then inst.components.health.currenthealth = data.health.health end
-			if data.hunger and data.hunger.hunger then inst.components.hunger.current = data.hunger.hunger end
-			if data.sanity and data.sanity.current then inst.components.sanity.current = data.sanity.current end
-			if data.power and data.power.current then inst.components.power.current = data.power.current end
+			if data.health ~= nil and data.health.health ~= nil then inst.components.health.currenthealth = data.health.health end
+			if data.hunger ~= nil and data.hunger.hunger ~= nil then inst.components.hunger.current = data.hunger.hunger end
+			if data.sanity ~= nil and data.sanity.current ~= nil then inst.components.sanity.current = data.sanity.current end
+			if data.power ~= nil and data.power.current ~= nil then inst.components.power.current = data.power.current end
 			inst.components.health:DoDelta(0)
 			inst.components.hunger:DoDelta(0)
 			inst.components.sanity:DoDelta(0)
 			inst.components.power:DoDelta(0)
 		end
+	end
+end
+
+local function OnWorldLoaded(inst)
+	local yukarihat = inst:GetYukariHat()
+	if yukarihat ~= nil then
+		inst.components.upgrader:ApplyHatAbility(yukarihat)
 	end
 end
 
@@ -173,7 +180,7 @@ function OnHungerDelta(inst, data)
 
 	if inst.components.combat ~= nil then
 		local dmgmult = TUNING.YUKARI.DAMAGE_MULTIPLIER + math.max(data.newpercent - (1 - inst.components.upgrader.powerupvalue * 0.2), 0)
-		local scale = 1 + (dmgmult - TUNING.YUKARI.DAMAGE_MULTIPLIER) * 0.1
+		local scale = 0.95 + (dmgmult - TUNING.YUKARI.DAMAGE_MULTIPLIER) * 0.15
 		inst.components.combat.damagemultiplier = dmgmult
 
 		inst:ApplyScale("dreadful", scale)
@@ -447,13 +454,11 @@ local master_postinit = function(inst) -- after SetPristine()
 	
 	inst.OnSave = onsave
 	inst.OnPreLoad = onpreload
-	inst.OnLoad = function(inst)
-		inst.components.upgrader:ApplyStatus()
-	end
 	inst.GetYukariHat = GetEquippedYukariHat
 	inst.powertable = powertable
 	
 	inst:DoPeriodicTask(1, PeriodicFunction)
+	inst:DoTaskInTime(1, OnWorldLoaded)
 	inst:ListenForEvent("healthdelta", OnHealthDelta )
 	inst:ListenForEvent("hungerdelta", OnHungerDelta )
 	inst:ListenForEvent("sanitydelta", OnSanityDelta )
@@ -463,7 +468,6 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:ListenForEvent("unequip", OnEquip )
 	inst:ListenForEvent("graze", Graze )
 	inst:ListenForEvent("debugmode", DebugFunction, inst)
-
 end
 
 return MakePlayerCharacter("yakumoyukari", prefabs, assets, common_postinit, master_postinit)

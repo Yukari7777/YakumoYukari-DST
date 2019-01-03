@@ -84,10 +84,12 @@ function Power:SetPercent(p)
     self.inst:PushEvent("powerdelta", {oldpercent = old/self.max, newpercent = p})
 end
 
+function Power:GetRegenAmount()
+	return self.inst.components.upgrader.hatequipped and (self.regenrate + (self.inst.components.upgrader ~= nil and self.inst.components.upgrader.hatbonuspowergain or 0)) or 0
+end
+
 function Power:DoDec(dt, ignore_damage)
-	if  self.inst.components.upgrader.hatequipped then	
-		self.inst.components.power:DoDelta((self.regenrate + (self.inst.components.upgrader ~= nil and self.inst.components.upgrader.hatbonuspowergain or 0)) * dt)
-	end
+	self.inst.components.power:DoDelta(self:GetRegenAmount() * dt)
 end
 
 return Power

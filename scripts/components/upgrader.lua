@@ -283,6 +283,8 @@ function Upgrader:ApplyHatAbility(hat)
 	if self.hatequipped then
 		local skill = self.hatskill
 		
+		self.hatabsorption = 0.2
+
 		if skill[2] then
 			self.hatdodgechance = 0.05
 			self.hatabsorption = 0.3
@@ -292,7 +294,7 @@ function Upgrader:ApplyHatAbility(hat)
 		
 		if skill[3] then
 			self.IsGoggle = true
-			self.inst.components.playervision:ForceGoggleVision(true)
+			--self.inst.components.playervision:ForceGoggleVision(true)
 			self.WaterProofer = true
 			self.hatdodgechance = 0.1
 			self.hatspeedmult = 1.1
@@ -320,9 +322,10 @@ function Upgrader:ApplyHatAbility(hat)
 		self.FireResist = false
 		self.GodTeleport = false
 		self.IsGoggle = false
-		self.inst.components.playervision:ForceGoggleVision(false)
+		--self.inst.components.playervision:ForceGoggleVision(false)
 		self.hatbonuspowergain = 0
 		self.hatdodgechance = 0
+		self.hatabsorption = 0.01
 		self.hatspeedmult = 1
 	end
 	
@@ -330,6 +333,7 @@ function Upgrader:ApplyHatAbility(hat)
 		hat:SetSpeedMult(self.hatspeedmult)
 		hat:SetAbsorbPercent(self.hatabsorption)
 		hat:SetWaterProofness(self.WaterProofer)
+		hat:SetGoggle(self.IsGoggle)
 		self:SetFireDamageScale()
 	end
 end

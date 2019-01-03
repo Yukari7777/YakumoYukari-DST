@@ -4,12 +4,35 @@ local function SetDirty(netvar, val)
     netvar:set(val)
 end
 
+local function YukariToggleGoggles(self, show)
+	local owner = self.owner
+	local shouldshow = true
+	if owner ~= nil then
+		shouldshow = owner.replica.inventory:EquipHasTag("goggles") and not owner.replica.inventory:EquipHasTag("yukarihat")
+	end
+
+	if show then
+        if not self.shown and shouldshow then
+            self:Show()
+            self:AddChild(self.storm_overlays):MoveToBack()
+        end
+    elseif self.shown then
+        self:Hide()
+        self.storm_root:AddChild(self.storm_overlays)
+    end
+end
+
+local function DoHUDTweak(inst)
+	inst._parent.HUD.gogglesover.ToggleGoggles = YukariToggleGoggles
+end
+
 local function OnEntityReplicated(inst)
     inst._parent = inst.entity:GetParent()
     if inst._parent == nil then
         print("Unable to initialize classified data for player Yukari")
     else
 		inst._parent:AttachYukariClassified(inst)
+		DoHUDTweak(inst)
     end
 end
 

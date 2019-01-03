@@ -10,7 +10,7 @@ local prefabs = {
 }
 
 local function NegateStranger(inst, owner)
-	if owner.prefab ~= "yakumoyukari" then
+	if not owner:HasTag("yakumoyukari") then
 		if owner:HasTag("player") then
 			owner.components.sanity:SetInducedInsanity(inst, true)
 			owner.components.debuffable:AddDebuff("mindcontroller", "mindcontroller")
@@ -27,6 +27,8 @@ end
 
 local function SetAbsorbPercent(inst, percent)
 	inst.components.armor.absorb_percent = percent
+	inst.components.armor.condition = percent * 100
+	inst:PushEvent("percentusedchange", { percent = percent })
 end
 
 local function SetSpeedMult(inst, mult)
@@ -41,8 +43,24 @@ end
 local function Initialize(inst)
 	inst:RemoveTag("shadowdominance")
 	inst:SetWaterProofness(false)
-	inst:SetAbsorbPercent(0)
+	inst:SetGoggle(false)
+	inst:SetAbsorbPercent(.01)
 	inst:SetSpeedMult(1)
+end
+
+local function SetGoggle(inst, val)
+	if val then
+		inst:AddTag("goggles")
+	else
+		inst:RemoveTag("goggles")
+	end
+end
+
+local function GetPercentTweak(self)
+	if self.condition == 1 then -- see SerializePercentUsed in inventoryitem_replica.lua
+		return 0 
+	end
+	return self.condition / self.maxcondition
 end
 
 local function fn()  
@@ -53,7 +71,6 @@ local function fn()
         owner.AnimState:Hide("HAIR_NOHAT")
         owner.AnimState:Hide("HAIR") 
 		owner:PushEvent("hatequipped", {isequipped = true, inst = inst})
-
 		NegateStranger(inst, owner)
     end
 
@@ -83,14 +100,15 @@ local function fn()
 	inst.AnimState:PlayAnimation("idle")    
 
 	inst:AddTag("hat")
-	
+	inst:AddTag("yukarihat")
+
 	if not TheWorld.ismastersim then
 		return inst
     end
 
 	inst.entity:SetPristine()
 	
-	
+
 	inst:AddComponent("inspectable")
 	
 	inst:AddComponent("inventoryitem")   
@@ -100,7 +118,9 @@ local function fn()
 	inst.components.waterproofer:SetEffectiveness(0)
 	
 	inst:AddComponent("armor")
+	inst.components.armor.GetPercent = GetPercentTweak
 	inst.components.armor:InitIndestructible(0)
+	inst.components.armor.condition = 1
 
 	inst:AddComponent("equippable")    
 	inst.components.equippable.equipslot = EQUIPSLOTS.HEAD
@@ -111,8 +131,7 @@ local function fn()
 	inst.SetWaterProofness = SetWaterProofness
 	inst.SetAbsorbPercent = SetAbsorbPercent
 	inst.SetSpeedMult = SetSpeedMult
-
-	Initialize(inst)
+	inst.SetGoggle = SetGoggle
 	
 	return inst
 end
