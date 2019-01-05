@@ -1,10 +1,25 @@
 local TUNING = TUNING.YUKARI
 
+local function SetInitialCost(inst, cost)
+	inst.components.spellcard.costpower = cost
+	inst.costpower:set(cost)
+end
+
+local function MakeStackableCommon(inst, cost)
+	SetInitialCost(inst, cost)
+	inst:AddComponent("stackable")
+	inst.components.stackable.maxsize = TUNING.STACK_SIZE_SPELLCARD
+end
+
+local function MakeBuffSpellCommon(inst, uses, costmult)
+	SetInitialCost(inst, TUNING.SPELL_POWERCOST_NORMAL * (costmult or 1))
+	inst:AddComponent("finiteuses")
+	inst.components.finiteuses:SetMaxUses(uses)
+	inst.components.finiteuses:SetUses(uses)
+end
+
 local function test(inst)
-	inst.components.spellcard.costpower = TUNING.SPELLTEST_POWERCOST
-	inst.costpower:set(TUNING.SPELLTEST_POWERCOST)
-	inst.components.finiteuses:SetMaxUses(TUNING.SPELLTEST_USES)
-	inst.components.finiteuses:SetUses(TUNING.SPELLTEST_USES)
+	MakeStackableCommon(inst, TUNING.SPELLTEST_POWERCOST)
 	inst.components.spellcard:SetSpellFn(function(inst, owner)
 		if owner.components.health then
 			owner.components.health:DoDelta(20)
@@ -12,33 +27,26 @@ local function test(inst)
 		if owner.components.power then
 			owner.components.power:DoDelta(-TUNING.SPELLTEST_POWERCOST)
 		end
-		inst.components.finiteuses:Use(1)
+		inst.components.stackable:Get():Remove()
 	end)
 end
 	
 local function mesh(inst)
-	inst.components.spellcard.costpower = TUNING.SPELLMESH_POWERCOST
-	inst.costpower:set(TUNING.SPELLMESH_POWERCOST)
-	inst.components.finiteuses:SetMaxUses(TUNING.SPELLMESH_USES)
-	inst.components.finiteuses:SetUses(TUNING.SPELLMESH_USES)
+	MakeStackableCommon(inst, TUNING.SPELLMESH_POWERCOST)
 	inst.components.spellcard:SetSpellFn(function(inst, owner)
-		if owner.components.sanity then
-			local amount = owner.components.sanity:GetMaxWithPenalty() * owner.components.sanity:GetPercent()
+		if owner.components.sanity ~= nil then
 			owner.components.sanity:SetPercent(1)
-			owner.components.sanity:DoDelta(-amount)
+			owner.components.sanity:DoDelta(-owner.components.sanity:GetMaxWithPenalty() * owner.components.sanity:GetPercent())
 		end
-		if owner.components.power then
+		if owner.components.power ~= nil then
 			owner.components.power:DoDelta(-TUNING.SPELLMESH_POWERCOST)
 		end
-		inst.components.finiteuses:Use(1)
+		inst.components.stackable:Get():Remove()
 	end)
 end
 	
 local function away(inst)
-	inst.components.spellcard.costpower = TUNING.SPELL_POWERCOST_NORMAL
-	inst.costpower:set(TUNING.SPELL_POWERCOST_NORMAL)
-	inst.components.finiteuses:SetMaxUses(TUNING.SPELLAWAY_USES)
-	inst.components.finiteuses:SetUses(TUNING.SPELLAWAY_USES)
+	MakeBuffSpellCommon(inst, TUNING.SPELLAWAY_USES)
 	inst.components.spellcard:SetSpellFn(function(inst, owner)
 		owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_CLOAKING"))
 		owner.AnimState:SetMultColour(0.3,0.3,0.3,.3)
@@ -47,83 +55,73 @@ local function away(inst)
 		local x,y,z = owner.Transform:GetWorldPosition()
 		local ents = TheSim:FindEntities(x, y, z, 100)
 		for k,v in pairs(ents) do
-			if v.components.combat and v.components.combat.target == owner then
+			if v.components.combat ~= nil and v.components.combat.target == owner then
 				v.components.combat.target = nil
 			end
 		end
 		owner.components.power:DoDelta(-TUNING.SPELL_POWERCOST_NORMAL)
 		inst.components.finiteuses:Use(1)
 	end)
+	inst.components.spellcard:SetDoneSpeech("DESCRIBE_DECLOAKING")
 	inst.components.spellcard:SetOnRemoveTask(function(inst, owner)
 		owner.AnimState:SetMultColour(1,1,1,1)
-		owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DECLOAKING"))
 	end)
 	inst.components.finiteuses:SetOnFinished(function()
-		local owner = inst.components.inventoryitem.owner
-		owner.AnimState:SetMultColour(1,1,1,1)
-		owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DECLOAKING"))
 		inst:Remove()
 	end)
 end
 	
 local function necro(inst)
 	inst:AddTag("heavyaction")
-	inst:RemoveComponent("finiteuses")
-	inst:AddComponent("stackable")
-	inst.components.stackable.maxsize = TUNING.STACK_SIZE_SPELLCARD
-	inst.components.spellcard.costpower = TUNING.SPELLNECRO_POWERCOST
-	inst.costpower:set(TUNING.SPELLNECRO_POWERCOST)
+	MakeStackableCommon(inst, TUNING.SPELLNECRO_POWERCOST)
+	inst.components.spellcard:SetDoneSpeech("NECRO")
 	inst.components.spellcard:SetSpellFn(function(inst, owner)
 		local x,y,z = owner.Transform:GetWorldPosition()
 		local ents = TheSim:FindEntities(x, y, z, 40)
-		for k,v in pairs(ents) do
-			if v.components.health and not v:HasTag("player") and not v:HasTag("wall") then
-				local maxhealth = v.components.health.maxhealth
-				v.components.health:DoDelta(math.min(-maxhealth * 0.33, -500))
-			end
-				
-			if v.components.pickable then
-				v.components.pickable:MakeBarren()
-			end
-				
-			if v.components.crop then
-				v.components.crop:MakeWithered()
-			end
-				
-			if (v:HasTag("tree") or v:HasTag("boulder") and not v:HasTag("stump") and not v:HasTag("burnt") and not v:HasTag("mushtree")) and v.components.growable ~= nil then
-				v.components.growable:SetStage(4)
-			end
-				
-			if v:HasTag("birchnut")
-				or v:HasTag("mole")	
-				or v:HasTag("mushtree")
-				or v.prefab == "carrot_planted" then
-				v:Remove()
-			end
-				
-			if v:HasTag("flower") then
-				local Evil = SpawnPrefab("flower_evil")
-				Evil.Transform:SetPosition(v:GetPosition():Get())
-				v:Remove()
-			end
-		end
 
+		for k,v in pairs(ents) do
+			v:DoTaskInTime(math.random() * 1.2, function()
+				if v.components.health ~= nil and not v:HasTag("player") and not v:HasTag("wall") then
+					local maxhealth = v.components.health.maxhealth
+					v.components.health:DoDelta(math.min(-maxhealth * 0.33, -500))
+				end
+				
+				if v.components.pickable ~= nil then
+					v.components.pickable:MakeBarren()
+				end
+				
+				if v.components.crop ~= nil then
+					v.components.crop:MakeWithered()
+				end
+				
+				if (v:HasTag("tree") or v:HasTag("boulder") and not v:HasTag("stump") and not v:HasTag("burnt") and not v:HasTag("mushtree")) and v.components.growable ~= nil then
+					v.components.growable:SetStage(4)
+				end
+				
+				if v:HasTag("birchnut")
+					or v:HasTag("mole")	
+					or v:HasTag("mushtree")
+					or v.prefab == "carrot_planted" then
+					v:Remove()
+				end
+				
+				if v:HasTag("flower") then
+					SpawnPrefab("flower_evil").Transform:SetPosition(v:GetPosition():Get())
+					v:Remove()
+				end
+			end)
+		end
+			
 		if owner.components.power ~= nil then
 			owner.components.power:DoDelta(-TUNING.SPELLNECRO_POWERCOST)
 		end
 
-		if owner.components.talker ~= nil then
-			owner.components.talker:Say(GetString(owner.prefab, "NECRO"))
-		end
 		inst.components.stackable:Get():Remove()
 	end)
 end
 	
 local function curse(inst)
-	inst.components.spellcard.costpower = TUNING.SPELL_POWERCOST_NORMAL
-	inst.costpower:set(TUNING.SPELL_POWERCOST_NORMAL)
-	inst.components.finiteuses:SetMaxUses(TUNING.SPELLCURSE_USES)
-	inst.components.finiteuses:SetUses(TUNING.SPELLCURSE_USES)
+	MakeBuffSpellCommon(inst, TUNING.SPELLCURSE_USES, 3)
 	inst.components.spellcard:SetSpellFn(function(inst, owner)
 		inst.olddmg = owner.components.combat.damagemultiplier
 		local YukariHat = owner:GetYukariHat()
@@ -150,37 +148,24 @@ local function curse(inst)
 		owner.components.power:DoDelta(-TUNING.SPELL_POWERCOST_NORMAL * 1.5)
 		inst.components.finiteuses:Use(1)
 	end, 0.5)
+	inst.components.spellcard:SetDoneSpeech("DESCRIBE_NOREINFORCE")
 	inst.components.spellcard:SetOnRemoveTask(function(inst, owner)
 		local YukariHat = owner:GetYukariHat()
 		if YukariHat ~= nil then
 			YukariHat:RemoveTag("shadowdominance")
 		end
 		owner.components.upgrader:ApplyStatus()
-		owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NOREINFORCE"))
 		if owner.yukari_classified ~= nil then
 			owner.yukari_classified.inspellcurse:set(false)
 		end
 	end)
 	inst.components.finiteuses:SetOnFinished(function()
-		local owner = inst.components.inventoryitem.owner
-		local YukariHat = owner:GetYukariHat()
-		if YukariHat ~= nil then
-			YukariHat:RemoveTag("shadowdominance")
-		end
-		owner.components.upgrader:ApplyStatus()
-		owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NOREINFORCE"))
-		if owner.yukari_classified ~= nil then
-			owner.yukari_classified.inspellcurse:set(false)
-		end
+		inst:Remove()
 	end)
 end
 		
 local function balance(inst)
-	inst.components.spellcard.costpower = TUNING.SPELLBALANCE_POWERCOST
-	inst.costpower:set(TUNING.SPELLBALANCE_POWERCOST)
-	inst:RemoveComponent("finiteuses")
-	inst:AddComponent("stackable")
-	inst.components.stackable.maxsize = TUNING.STACK_SIZE_SPELLCARD
+	MakeStackableCommon(inst, TUNING.SPELLBALANCE_POWERCOST)
 	inst.components.spellcard:SetSpellFn(function(inst, owner)
 		local Inventory = owner.components.inventory
 		local rotcnt = 0
@@ -221,15 +206,14 @@ local function balance(inst)
 		if owner.components.power ~= nil then
 			owner.components.power:DoDelta(-TUNING.SPELLBALANCE_POWERCOST)
 		end
+
 		inst.components.stackable:Get():Remove()
 	end)
 end
 	
 local function laplace(inst)
-	inst.components.spellcard.costpower = TUNING.SPELL_POWERCOST_NORMAL / 2
-	inst.costpower:set(TUNING.SPELL_POWERCOST_NORMAL / 2)
-	inst.components.finiteuses:SetMaxUses(TUNING.SPELLLAPLACE_USES)
-	inst.components.finiteuses:SetUses(TUNING.SPELLLAPLACE_USES)
+	MakeBuffSpellCommon(inst, TUNING.SPELLLAPLACE_USES, 0.5)
+	inst.components.spellcard.saydonespeech = true
 	inst.components.spellcard:SetSpellFn(function(inst, owner)
 		if owner.yukari_classified ~= nil then
 			owner.yukari_classified.nightvision:set(true)
@@ -252,32 +236,24 @@ local function laplace(inst)
 		owner.yukari_classified.nightvision:set(false)
 	end)
 	inst.components.finiteuses:SetOnFinished(function()
-		local owner = inst.components.inventoryitem.owner
-		if owner.components.talker == nil then --item is in backpack
-			owner = owner.components.inventoryitem.owner
-		end
-		owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
-		owner.yukari_classified.nightvision:set(false)
 		inst:Remove()
 	end)
 end
 	
 local function butter(inst)
-	inst.components.spellcard.costpower = TUNING.SPELLBUTTER_POWERCOST
-	inst.costpower:set(TUNING.SPELLBUTTER_POWERCOST)
-	inst:RemoveComponent("finiteuses")
+	MakeStackableCommon(inst, TUNING.SPELLNECRO_POWERCOST)
 	inst.components.spellcard:SetSpellFn(function(inst, owner)
-		if not (TheWorld.components.butterflyspawner and TheWorld.components.birdspawner) then
+		if not (TheWorld.components.butterflyspawner ~= nil and TheWorld.components.birdspawner ~= nil) then
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_NOSPAWN"))
 		else
-			if owner.components.power then
+			if owner.components.power ~= nil then
 				owner.components.power:DoDelta(-TUNING.SPELLBUTTER_POWERCOST)
 			end
 			local num = 5 + math.random(5)
 				
 			local x, y, z = owner.Transform:GetWorldPosition()
 			local ents = TheSim:FindEntities(x,y,z, 12, nil, nil, {'magicbutter'})
-			if #ents > 10 then
+			if #ents > 20 then
 				owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_TOOMANYBUTTER"))
 				return
 			end
@@ -292,16 +268,14 @@ local function butter(inst)
 					end
 				end)
 			end
-			inst:Remove()
+			inst.components.stackable:Get():Remove()
 		end
 	end)
 end
 	
 local function bait(inst)
-	inst.components.spellcard.costpower = TUNING.SPELL_POWERCOST_NORMAL
-	inst.costpower:set(TUNING.SPELL_POWERCOST_NORMAL)
-	inst.components.finiteuses:SetMaxUses(TUNING.SPELLBAIT_USES)
-	inst.components.finiteuses:SetUses(TUNING.SPELLBAIT_USES)
+	MakeBuffSpellCommon(inst, TUNING.SPELLBAIT_USES)
+	inst.components.spellcard.saydonespeech = true
 	local function barrier(inst, owner)
 		local fx = SpawnPrefab("barrierfield_fx")
 		local fx_hitanim = function()
@@ -343,84 +317,74 @@ local function bait(inst)
 		inst.fx = nil
 	end)
 	inst.components.finiteuses:SetOnFinished(function()
-		local owner = inst.components.inventoryitem.owner
-		owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_DONEEFFCT"))
-		if owner.yukari_classified ~= nil then
-			owner.yukari_classified.inspellbait:set(false)
-		end
-		owner.components.upgrader:ApplyStatus()
-		inst.fx:kill_fx()
-		inst.fx = nil
 		inst:Remove()
 	end)
 end
 	
 local function addictive(inst)
-	inst.components.spellcard.costpower = TUNING.SPELLADDICTIVE_POWERCOST
-	inst.costpower:set(TUNING.SPELLADDICTIVE_POWERCOST)
-	inst:RemoveComponent("finiteuses")
-	inst:AddComponent("stackable")
-	inst.components.stackable.maxsize = TUNING.STACK_SIZE_SPELLCARD
+	MakeStackableCommon(inst, TUNING.SPELLADDICTIVE_POWERCOST)
 	inst.components.spellcard:SetSpellFn(function(inst, owner)
-		local x,y,z = owner.Transform:GetWorldPosition()
+		local x, y, z = owner.Transform:GetWorldPosition()
 		local ents = TheSim:FindEntities(x, y, z, 60)
-		for k,v in pairs(ents) do
-			if v.components.timer ~= nil then 
-				v.components.timer:SetTimeLeft("grow", 0) 
-			end
-
-			if v.components.witherable ~= nil then
-				v.components.witherable:OnRemoveFromEntity()
-				v.components.witherable.withered = false
-				v:RemoveTag("withered")
-				v:RemoveTag("witherable")
-			end
-
-			if v.components.diseaseable ~= nil then
-				v.components.diseaseable:OnRemoveFromEntity()
-				v:RemoveComponent("diseaseable")
-			end
-
-			if v.components.pickable ~= nil then
-				v.components.pickable.cycles_left = nil
-				v.components.pickable.protected_cycles = nil
-				v.components.pickable.transplanted = false
-				v.components.pickable:Regen()
-				if v.components.timer:TimerExists("morphing") or v.components.timer:TimerExists("morphrelay") or v.components.timer:TimerExists("morphdelay") then
-					v.components.timer:OnRemoveFromEntity()
-					v:RemoveComponent("timer")
+		for k, v in pairs(ents) do
+			v:DoTaskInTime(math.random() * 1.2, function()
+				if v.components.timer ~= nil then 
+					v.components.timer:SetTimeLeft("grow") 
 				end
-				if v.rain ~= nil then
-					v.rain = 0
-				end
-				v:RemoveTag("barren")
-				v:RemoveTag("quickpick")
-			end
-				
-			if v.components.hackable ~= nil then
-				v:RemoveTag("withered")
-				v:RemoveTag("witherable")
-				v.components.hackable.withered = false
-				v.components.hackable.witherable = false
-				v.components.hackable:Regen()
-			end
 
-			if v.components.crop ~= nil then
-				v.components.crop:DoGrow(2400)
-			end
+				if v.components.witherable ~= nil then
+					v.components.witherable:OnRemoveFromEntity()
+					v.components.witherable.withered = false
+					v:RemoveTag("withered")
+					v:RemoveTag("witherable")
+				end
+
+				if v.components.diseaseable ~= nil then
+					v.components.diseaseable:OnRemoveFromEntity()
+					v:RemoveComponent("diseaseable")
+				end
+
+				if v.components.pickable ~= nil then
+					v.components.pickable.cycles_left = nil
+					v.components.pickable.protected_cycles = nil
+					v.components.pickable.transplanted = false
+					v.components.pickable:Regen()
+					if v.components.timer:TimerExists("morphing") or v.components.timer:TimerExists("morphrelay") or v.components.timer:TimerExists("morphdelay") then
+						v.components.timer:OnRemoveFromEntity()
+						v:RemoveComponent("timer")
+					end
+					if v.rain ~= nil then
+						v.rain = 0
+					end
+					v:RemoveTag("barren")
+					v:RemoveTag("quickpick")
+				end
 				
-			if (v:HasTag("tree") or v:HasTag("boulder") and not v:HasTag("stump") and not v:HasTag("burnt") and not v:HasTag("mushtree")) and v.components.growable ~= nil then
-				v.components.growable:SetStage(2)
-				v.components.growable:DoGrowth()
-			end
+				if v.components.hackable ~= nil then
+					v:RemoveTag("withered")
+					v:RemoveTag("witherable")
+					v.components.hackable.withered = false
+					v.components.hackable.witherable = false
+					v.components.hackable:Regen()
+				end
+
+				if v.components.crop ~= nil then
+					v.components.crop:DoGrow(2400)
+				end
 				
-			if v.components.grower ~= nil then
-				v.components.grower.cycles_left = 6
-			end
+				if (v:HasTag("tree") or v:HasTag("boulder") and not v:HasTag("stump") and not v:HasTag("burnt") and not v:HasTag("mushtree")) and v.components.growable ~= nil then
+					v.components.growable:SetStage(2)
+					v.components.growable:DoGrowth()
+				end
 				
-			if v.components.burnable ~= nil then
-				v.components.burnable:Extinguish()
-			end
+				if v.components.grower ~= nil then
+					v.components.grower.cycles_left = 6
+				end
+				
+				if v.components.burnable ~= nil then
+					v.components.burnable:Extinguish()
+				end
+			end)
 		end
 
 		owner.components.sanity:DoDelta(-TUNING.SPELLADDICTIVE_SANITYCOST)
@@ -431,12 +395,8 @@ local function addictive(inst)
 	end)
 end
 	
-local function lament(inst)
-	inst.components.spellcard.costpower = TUNING.SPELLLAMENT_POWERCOST
-	inst.costpower:set(TUNING.SPELLLAMENT_POWERCOST)
-	inst:RemoveComponent("finiteuses")
-	inst:AddComponent("stackable")
-	inst.components.stackable.maxsize = TUNING.STACK_SIZE_SPELLCARD
+local function lament(inst) -- TODO : Recode with StartThread()
+	MakeStackableCommon(inst, TUNING.SPELLLAMENT_POWERCOST)
 	inst.Activated = false
 	local LeftSpawnCount = 0
 	inst.components.spellcard:SetSpellFn(function(inst, owner)
@@ -704,11 +664,7 @@ local function lament(inst)
 end
 	
 local function matter(inst) -- Universe of Matter and Antimatter
-	inst.components.spellcard.costpower = TUNING.SPELLMATTER_POWERCOST
-	inst.costpower:set(TUNING.SPELLMATTER_POWERCOST)
-	inst:RemoveComponent("finiteuses")
-	inst:AddComponent("stackable")
-	inst.components.stackable.maxsize = TUNING.STACK_SIZE_SPELLCARD
+	MakeStackableCommon(inst, TUNING.SPELLMATTER_POWERCOST)
 	inst.components.spellcard:SetSpellFn(function(inst, owner)
 		local Inventory = owner.components.inventory
 		local function repair(v)
@@ -716,7 +672,7 @@ local function matter(inst) -- Universe of Matter and Antimatter
 			if v.components.fueled ~= nil 
 			and v.components.fueled.fueltype ~= "MAGIC"	
 			and v.components.fueled.fueltype ~= "NIGHTMARE" then
-					v.components.fueled:DoDelta(3600)
+				v.components.fueled:DoDelta(3600)
 			end
 				
 			if v.components.finiteuses ~= nil
@@ -748,7 +704,7 @@ local function matter(inst) -- Universe of Matter and Antimatter
 		end
 
 		for k,v in pairs(Inventory.equipslots) do
-			if type(v) == "table" and v.components.container then
+			if type(v) == "table" and v.components.container ~= nil then
 				for k, v2 in pairs(v.components.container.slots) do
 					repair(v2)
 				end
@@ -758,7 +714,7 @@ local function matter(inst) -- Universe of Matter and Antimatter
 		end
 
 		owner.components.sanity:DoDelta(-TUNING.SPELLMATTER_SANITYCOST)
-		if owner.components.power then
+		if owner.components.power ~= nil then
 			owner.components.power:DoDelta(-TUNING.SPELLMATTER_POWERCOST)
 		end
 		inst.components.stackable:Get():Remove()
@@ -802,10 +758,6 @@ local function MakeCard(name)
 		if not TheWorld.ismastersim then
 			return inst
 		end
-
-
-		inst:AddComponent("finiteuses")
-		inst.components.finiteuses:SetOnFinished( onfinished )
 
 		inst:AddComponent("inspectable")        
 		

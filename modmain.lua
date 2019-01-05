@@ -72,6 +72,7 @@ local SpringCombatMod = GLOBAL.SpringCombatMod
 local KnownModIndex = GLOBAL.KnownModIndex
 
 GLOBAL.YUKARI_MODNAME = KnownModIndex:GetModActualName("Yakumo Yukari")
+GLOBAL.YUKARI_DIFFICULTY = GetModConfigData("difficulty")
 
 local Language = GetModConfigData("language")
 GLOBAL.YUKARI_LANGUAGE = "en"
@@ -90,7 +91,7 @@ else
 	GLOBAL.YUKARI_LANGUAGE = Language
 end
 
-TUNING.YUKARI_STATUS = TUNING["YUKARI_STATUS"..(GetModConfigData("difficulty") or "")]
+TUNING.YUKARI_STATUS = TUNING["YUKARI_STATUS"..(GLOBAL.YUKARI_DIFFICULTY or "")]
 
 modimport "scripts/power_init.lua"
 modimport "scripts/tunings_yukari.lua"

@@ -1,4 +1,5 @@
 local MakePlayerCharacter = require "prefabs/player_common"
+local STATUS = TUNING.YUKARI_STATUS
 local modname = _G.YUKARI_MODNAME
 
 local assets = {
@@ -126,21 +127,20 @@ local function GetEquippedYukariHat(inst)
 end
 
 local function OnhitEvent(inst, data)
-	local CanAOE = math.random() < 0.4
+	local CanAOE = inst.components.upgrader.IsAOE and math.random() < 0.4
 
 	if inst.components.upgrader.IsVampire then
 		local target = data.target
-		local RegenAmount = inst.components.upgrader.IsAOE and 2 or 1
-		if target and target.components.health and not target:HasTag("chester") or
+		if target and target.components.health ~= nil and not target:HasTag("chester") or
 		(target.components.follower and target.components.follower.leader == inst) then
-			inst.components.health:DoDelta(RegenAmount, nil, nil, true)
+			inst.components.health:DoDelta(1, nil, nil, true)
 			if CanAOE then
-				inst.components.health:DoDelta(5, nil, nil, true)
+				inst.components.health:DoDelta(1, nil, nil, true)
 			end
 		end
 	end
 
-	if CanAOE and inst.components.upgrader.IsAOE then
+	if CanAOE then
 		inst.components.combat:DoAreaAttack(data.target, 3, data.weapon, nil, data.stimuli, {"INLIMBO"})
 	end
 end
@@ -187,19 +187,26 @@ function OnHungerDelta(inst, data)
 	end
 end
 
-local function OnSanityDelta(inst, data)
-	if inst.components.upgrader.NightVision and (TheWorld.state.phase == "night" or TheWorld:HasTag("cave")) then
-		local sanitypercent = data.newpercent
+local function SetLight(inst, var)
+	if var then
+		local gappercent = math.min((var - 0.9) * 100, 1)
 		local powerpercent = inst.components.power ~= nil and inst.components.power:GetPercent() or 0
+		inst.Light:SetRadius((1 + powerpercent * 3) * gappercent);inst.Light:SetFalloff((.9 - powerpercent * 0.25) * gappercent);inst.Light:SetIntensity(0.3);inst.Light:SetColour((127 + powerpercent * 128) * gappercent/255,0,(127 + powerpercent * 128)/255 * gappercent);inst.Light:Enable(true)
+	else
+		inst.Light:SetRadius(0);inst.Light:Enable(false)
+	end
+end
 
+local function OnSanityDelta(inst, data)
+	if inst.components.upgrader.NightVision and (TheWorld.state.phase == "night" or TheWorld:HasTag("cave")) and inst.sleepingbag == nil then
+		local sanitypercent = data.newpercent
 		if sanitypercent > 0.9 then
-			local gappercent = math.min((sanitypercent - 0.9) * 100, 1)
-			inst.Light:SetRadius((1 + powerpercent * 3) * gappercent);inst.Light:SetFalloff((.9 - powerpercent * 0.25) * gappercent);inst.Light:SetIntensity(0.3);inst.Light:SetColour((127 + powerpercent * 128) * gappercent/255,0,(127 + powerpercent * 128)/255 * gappercent);inst.Light:Enable(true)
+			inst:SetLight(sanitypercent)
 		else
-			inst.Light:SetRadius(0);inst.Light:Enable(false)
+			inst:SetLight(false)
 		end
 	else
-		inst.Light:Enable(false)
+		inst:SetLight(false)
 	end
 end
 
@@ -242,6 +249,10 @@ end
 local function PeriodicFunction(inst)
 	inst.components.sanity.night_drain_mult = 1 - inst.components.upgrader.ResistDark - (inst.components.upgrader.hatequipped and 0.2 or 0)
 	
+	if inst.sleepingbag ~= nil then
+		inst:SetLight(false)
+	end
+
 	if inst.components.health ~= nil and inst.IsInvincible then
 		InvincibleRegen(inst)
 	end
@@ -282,7 +293,7 @@ local function DebugFunction(inst)
 end	
 
 local powertable = {
-	-- Rule : meat value per 10, reduced by 25% when cooked or dried.
+	-- Rule : 10 per meat value 1, reduced by 25% when cooked or dried.
 	P300 = {"minotaurhorn", "deerclops_eyeball", "tigereye"},
 	P100 = {"humanmeat"},
 	P80 = {"humanmeat_cooked", "humanmeat_dried"},
@@ -305,6 +316,10 @@ local function oneat(inst, food)
 			if food.prefab == v2 then
 				key = k
 				local delta = tonumber(string.sub(key, 2))
+				if food.components.perishable ~= nil then
+					delta = delta - delta * ( (1 - food.components.perishable:GetPercent()) * STATUS.POWER_RESTORE_PERISH_MULT )
+				end 
+
 				DoPowerRestore(inst, delta)
 				break
 			end
@@ -455,6 +470,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.OnSave = onsave
 	inst.OnPreLoad = onpreload
 	inst.GetYukariHat = GetEquippedYukariHat
+	inst.SetLight = SetLight
 	inst.powertable = powertable
 	
 	inst:DoPeriodicTask(1, PeriodicFunction)

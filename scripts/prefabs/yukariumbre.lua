@@ -51,7 +51,7 @@ local function OnUnequipYukari(inst, owner)
 	owner.DynamicShadow:SetSize(1.3, 0.6)	
 	
 	inst.isunfolded:set(false)
-	inst.components.weapon:SetDamage(TUNING.YUKARI.YUKARI_UMBRE_DAMAGE)
+	inst.components.weapon:SetDamage(TUNING.YUKARI.UMBRE_DAMAGE)
 	inst.components.waterproofer:SetEffectiveness(0)
 end    
 
@@ -64,7 +64,7 @@ local function Fold(inst)
 		owner.AnimState:OverrideSymbol("swap_object", "swap_yukariumbre", "swap")
 		owner.SoundEmitter:PlaySound("dontstarve/wilson/use_umbrella_down")
 		owner.DynamicShadow:SetSize(1.3, 0.6)
-		inst.components.weapon:SetDamage(TUNING.YUKARI.YUKARI_UMBRE_DAMAGE)
+		inst.components.weapon:SetDamage(TUNING.YUKARI.UMBRE_DAMAGE)
 		inst.components.waterproofer:SetEffectiveness(0)
 		inst.components.equippable.walkspeedmult = TUNING.CANE_SPEED_MULT
 		inst:RemoveTag("umbrella")
@@ -76,7 +76,7 @@ local function Fold(inst)
 		owner.AnimState:OverrideSymbol("swap_object", "swap_yukariumbre2", "swap")
 		owner.SoundEmitter:PlaySound("dontstarve/wilson/use_umbrella_up") 
 		owner.DynamicShadow:SetSize(2.2, 1.4)
-		inst.components.weapon:SetDamage(TUNING.YUKARI.YUKARI_UMBRE_DAMAGE_SMALL)
+		inst.components.weapon:SetDamage(TUNING.YUKARI.UMBRE_DAMAGE_SMALL)
 		inst.components.waterproofer:SetEffectiveness(1)
 		inst.components.equippable.walkspeedmult = 1
 		inst:AddTag("umbrella")
@@ -134,7 +134,7 @@ local function fn()
 	inst.components.inventoryitem.atlasname = "images/inventoryimages/yukariumbre.xml"  
 	
 	inst:AddComponent("weapon")
-    inst.components.weapon:SetDamage(TUNING.YUKARI.YUKARI_UMBRE_DAMAGE)
+    inst.components.weapon:SetDamage(TUNING.YUKARI.UMBRE_DAMAGE)
 	
 	inst:AddComponent("equippable")  
 	inst.components.equippable:SetOnEquip( OnEquipYukari )    

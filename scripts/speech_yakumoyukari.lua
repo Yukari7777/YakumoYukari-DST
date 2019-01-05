@@ -1844,7 +1844,7 @@ return {
 	DESCRIBE_CANNOTRESIST = "I can't resist more if I do this.",
 	DESCRIBE_NOREINFORCE = "I'm not reinforced anymore!",
 	DESCRIBE_EYEHURT = "Ouch! My eyes!",
-	DESCRIBE_DONEEFFCT = "The effect is over.",
+	DESCRIBE_DONEEFFCT = "The effect has over.",
 	DESCRIBE_NOSPAWN = "I can't spawn.",
 	DESCRIBE_TOOMANYBUTTER = "I think It's enough..?",
 	DESCRIBE_ABILITY_ALREADY = "I already have this ability.",

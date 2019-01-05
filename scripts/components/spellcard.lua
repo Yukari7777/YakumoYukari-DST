@@ -14,7 +14,9 @@ local Spellcard = Class(function(self, inst)
 	self.taskfn = nil
 	self.taskinterval = nil
 	self.onremovetask = nil
-	
+	self.donespeech = nil
+
+	self.saydonespeech = false
 	self.isdangeritem = false
 	self.tick = 0
 	
@@ -38,13 +40,23 @@ function Spellcard:SetTaskFn(fn, interval)
 	self.taskinterval = interval
 end
 
+function Spellcard:SetDoneSpeech(key)
+	self.donespeech = GetString(self.inst.prefab, key)
+	self.saydonespeech = true
+end
+
 function Spellcard:SetOnRemoveTask(fn)
 	self.onremovetask = fn
 end
 
 function Spellcard:ClearTask(doer)
-	self.task:Cancel()
-	self.task = nil
+	if self.saydonespeech then
+		self.inst.components.talker:Say(self.donespeech or GetString(self.inst.prefab, "DESCRIBE_DONEEFFCT"))
+	end
+	if self.task ~= nil then
+		self.task:Cancel()
+		self.task = nil
+	end
 	if self.onremovetask ~= nil then
 		self.onremovetask(self.inst, doer)
 	end
@@ -73,6 +85,7 @@ function Spellcard:CastSpell(doer, target)
 	end
 
 	if self.onfinish ~= nil then
+		self:ClearTask(doer)
 		self.onfinish(inst, doer)
 	end
 end
