@@ -53,7 +53,7 @@ configuration_options = {
 	},
 
 	{
-		name = "difficulty",
+		name = "diff",
 		label = "Difficulty",
 		hover = "Set difficulty.",
 		options =
