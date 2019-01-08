@@ -61,14 +61,17 @@ require "class"
 GLOBAL.YUKARISTATINDEX = {"health", "hunger", "sanity", "power"}
 
 local STRINGS = GLOBAL.STRINGS
+local ProfileStatsSet = GLOBAL.ProfileStatsSet
+local SpawnPrefab = GLOBAL.SpawnPrefab
+local ThePlayer = GLOBAL.ThePlayer
+local GetString = GLOBAL.GetString
+local TheInput = GLOBAL.TheInput
+local EQUIPSLOTS = GLOBAL.EQUIPSLOTS
 local FindEntity = GLOBAL.FindEntity
+local SpringCombatMod = GLOBAL.SpringCombatMod
 local KnownModIndex = GLOBAL.KnownModIndex
 
-if GLOBAL.UpvalueHacker ~= nil then
-	GLOBAL.UpvalueHacker = require("tools/upvaluehacker")
-end
-
-GLOBAL.YUKARI_MODNAME = KnownModIndex:GetModActualName("Yakumo Yukari") -- This is also a little trick. ModActualName will be overrided to my test version's if it exists.
+GLOBAL.YUKARI_MODNAME = KnownModIndex:GetModActualName("Yakumo Yukari")
 GLOBAL.YUKARI_DIFFICULTY = GetModConfigData("diff")
 
 local Language = GetModConfigData("language")
@@ -90,94 +93,222 @@ end
 
 modimport "scripts/tunings_yukari.lua"
 TUNING.YUKARI_STATUS = TUNING["YUKARI_STATUS"..(GLOBAL.YUKARI_DIFFICULTY or "")]
-local STATUS = TUNING.YUKARI_STATUS
 
 modimport "scripts/power_init.lua"
 modimport "scripts/strings_yukari.lua"
 modimport "scripts/actions_yukari.lua" -- actions must be loaded before stategraph loads
 modimport "scripts/stategraph_yukari.lua"
 modimport "scripts/recipes_yukari.lua"
----------------------- tunings -------------------------
-local SpringCombatMod = GLOBAL.SpringCombatMod
-
-local function FindYoukai(inst, oldfn)
-	local TargetRadius = 8
-
-	if inst:HasTag("pig") then
-		TargetRadius = TUNING.PIG_TARGET_DIST
-	elseif inst:HasTag("bat") then
-		TargetRadius = TUNING.BAT_TARGET_DIST
-	elseif inst:HasTag("mosquito") then
-		TargetRadius = SpringCombatMod(20)
-	elseif inst:HasTag("bee") then	
-		if inst:HasTag("worker") then
-			TargetRadius = 4
-		elseif inst:HasTag("killer") then
-			TargetRadius = SpringCombatMod(8)
-		end
-	elseif inst:HasTag("frog") then
-		TargetRadius = TUNING.FROG_TARGET_DIST
-	elseif inst:HasTag("spider") then
-		if inst.prefab == "spider_warrior" then
-			TargetRadius = SpringCombatMod(TUNING.SPIDER_WARRIOR_TARGET_DIST)
-		else
-			TargetRadius = SpringCombatMod(inst.components.knownlocations:GetLocation("investigate") ~= nil and TUNING.SPIDER_INVESTIGATETARGET_DIST or TUNING.SPIDER_TARGET_DIST)
-		end
-	elseif inst:HasTag("spiderqueen") then
-		TargetRadius = 10
+---------------- overrides -----------------
+-- Bunnyman Retarget Function
+local function BunnymanNormalRetargetFn(inst)
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	local function is_meat(item)
+		return item.components.edible and item.components.edible.foodtype == GLOBAL.FOODTYPE.MEAT
 	end
+	
+	local function NormalRetargetFn(inst)
+		return FindEntity(inst, TUNING.PIG_TARGET_DIST,
+			function(guy)
+				return inst.components.combat:CanTarget(guy)
+					and (guy:HasTag("monster") or guy:HasTag("youkai")
+					or (guy.components.inventory ~= nil and
+						guy:IsNear(inst, TUNING.BUNNYMAN_SEE_MEAT_DIST) and
+						guy.components.inventory:FindItem(is_meat) ~= nil))
+			end,
+			{ "_combat", "_health" }, -- see entityreplica.lua
+			{ "realyoukai" }, -- not even be targetted with meat
+			{ "monster", "player" })
+	end
+	inst.components.combat:SetRetargetFunction(3, NormalRetargetFn)
+end
+-- Pigman Retarget Function
+local function PigmanNormalRetargetFn(inst)
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	local function NormalRetargetFn(inst)
+		return FindEntity(inst, TUNING.PIG_TARGET_DIST,
+			function(guy)
+				return (guy.LightWatcher == nil or guy.LightWatcher:IsInLight())
+					and inst.components.combat:CanTarget(guy) and (guy:HasTag("monster") or guy:HasTag("youkai"))
+			end,
+			{ "_combat" }, -- see entityreplica.lua
+			inst.components.follower.leader ~= nil and
+			{ "playerghost", "INLIMBO", "abigail" } or
+			{ "playerghost", "INLIMBO", "realyoukai" })
+	end
+	inst.components.combat:SetRetargetFunction(3, NormalRetargetFn)
+end
+-- Bat Retarget Function
+local function BatRetargetFn(inst)
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	local function MakeTeam(inst, attacker, ...) 
+		local leader = SpawnPrefab("teamleader")
+		leader.components.teamleader:SetUp(attacker, inst)
+		leader.components.teamleader:BroadcastDistress(inst)
+	end
+	
+	local function Retarget(inst)
+		local ta = inst.components.teamattacker
+		local newtarget = FindEntity(inst, TUNING.BAT_TARGET_DIST, function(guy)
+				return inst.components.combat:CanTarget(guy)
+			end,
+			nil,
+			{"bat", "realyoukai"},
+			{"character", "monster"}
+		)
 
-	local x, y, z = inst.Transform:GetWorldPosition()
-	local ents = TheSim:FindEntities(x, y, z, TargetRadius * STATUS.FIND_YOUKAI_MULT, { "_combat" })
+		if newtarget and not ta.inteam and not ta:SearchForTeam() then
+			MakeTeam(inst, newtarget)
+		end
 
-	for k, v in ipairs(ents) do
-		if v ~= inst and v.entity:IsVisible() then 
-			if v:HasTag("youkai") then
-				return v
-			elseif v:HasTag("realyoukai") then
-				table.remove(ents, k)  -- no matter what. If Yukari is the real dreadful, do not target.
+		if ta.inteam and not ta.teamleader:CanAttack() then
+			return newtarget
+		end
+	end
+	
+	inst.components.combat:SetRetargetFunction(3, Retarget)
+end
+local function MosquitoRetargetFn(inst)
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	local function KillerRetarget(inst)
+		return FindEntity(inst, SpringCombatMod(20),
+        function(guy)
+            return inst.components.combat:CanTarget(guy)
+        end,
+        { "_combat", "_health" },
+        { "insect", "INLIMBO", "realyoukai" },
+        { "character", "animal", "monster" })
+	end
+	inst.components.combat:SetRetargetFunction(2, KillerRetarget)
+end
+-- Bee Retarget Function
+local function KillerbeeRetargetFn(inst)
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	local function KillerRetarget(inst)
+		return FindEntity(inst, SpringCombatMod(8),
+			function(guy)
+				return inst.components.combat:CanTarget(guy)
+			end,
+			{ "_combat", "_health" },
+			{ "insect", "INLIMBO", "realyoukai" },
+			{ "character", "animal", "monster" })
+	end
+	inst.components.combat:SetRetargetFunction(2, KillerRetarget)
+end
+local function BeeRetargetFn(inst)
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	local function SpringBeeRetarget(inst)
+		return GLOBAL.TheWorld.state.isspring and
+		FindEntity(inst, 4,
+			function(guy)
+				return inst.components.combat:CanTarget(guy)
+			end,
+			{ "_combat", "_health" },
+			{ "insect", "INLIMBO", "realyoukai" },
+			{ "character", "animal", "monster" })
+		or nil
+	end
+	inst.components.combat:SetRetargetFunction(2, SpringBeeRetarget)
+end
+-- frog Retarget Function
+local function FrogRetargetFn(inst)
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	local function retargetfn(inst)
+		if not inst.components.health:IsDead() and not inst.components.sleeper:IsAsleep() then
+		return FindEntity(inst, TUNING.FROG_TARGET_DIST, function(guy) 
+			if not guy.components.health:IsDead() then
+				return guy.components.inventory ~= nil
 			end
-		end
+		end,
+		{"_combat","_health"},
+		{"realyoukai"})
 	end
-
-	return FindEntity(inst, TargetRadius * STATUS.FIND_YOUKAI_MULT, function(guy)
-		if guy:HasTag("realyoukai") then
-			print("guyhastag realyoukai")
-			return "RY"
-		end
-	end, { "yakumoyukari", "_combat", "_health" })
+	end
+	if inst.components.combat ~= nil then
+		inst.components.combat:SetRetargetFunction(3, retargetfn)
+	end
+end
+-- spiders retargetfn
+local function SpiderFindTarget(inst, radius)
+    return FindEntity(
+        inst,
+        SpringCombatMod(radius),
+        function(guy)
+            return inst.components.combat:CanTarget(guy)
+                and not (inst.components.follower ~= nil and inst.components.follower.leader == guy)
+        end,
+        { "_combat", "character" },
+        { "monster", "INLIMBO", "spiderwhisperer" }
+    )
 end
 
-local function ResetRetargetFn(inst)
+local function SpiderRetargetFn(inst)
 	if not GLOBAL.TheWorld.ismastersim then
         return inst
     end
 
-	print("UpvalueHacker", inst.prefab, GLOBAL.UpvalueHacker.GetUpvalue(inst.components.combat.targetfn, "FindTarget"))
-
-	local targetfnold = inst.components.combat.targetfn
-	local function targetfnfixed(inst)
---		local findyoukai = FindYoukai(inst)
---		print("findyoukai", findyoukai)
---		if findyoukai == "RY" or findyoukai == nil then
---			return 
---		else 
---			return targetfnold(inst)
---		end
+	local function NormalRetarget(inst)
+		return SpiderFindTarget(inst, inst.components.knownlocations:GetLocation("investigate") ~= nil and TUNING.SPIDER_INVESTIGATETARGET_DIST or TUNING.SPIDER_TARGET_DIST)
 	end
-
-	-- GLOBAL.UpvalueHacker.SetUpvalue(inst.components.combat.targetfn, targetfnfixed, inst.components.combat.targetfn)
-	--print("UpvalueHacker2", inst.prefab, GLOBAL.UpvalueHacker.GetUpvalue(inst.components.combat.targetfn, "FindTarget"))
-	
+	inst.components.combat:SetRetargetFunction(1, NormalRetarget)
 end
 
-local RetargetList = { "bunnyman", "pigman", "bat", "mosquito", "bee", "killerbee", "frog", "spider", "spider_warrior", "spierqueen" } 
-for k, v in ipairs(RetargetList) do
-	print("RetargetList", k, v)
-	AddPrefabPostInit(v, ResetRetargetFn)
+local function WarriorRetargetFn(inst)
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	local function WarriorRetarget(inst)
+		return SpiderFindTarget(inst, TUNING.SPIDER_WARRIOR_TARGET_DIST)
+	end
+	inst.components.combat:SetRetargetFunction(2, WarriorRetarget)
 end
 
----------- print current upgrade & ability ---------------
+local function SpiderqueenRetargetFn(inst)
+	if not GLOBAL.TheWorld.ismastersim then
+        return inst
+    end
+	if not inst.components.health:IsDead() and not inst.components.sleeper:IsAsleep() then
+        local oldtarget = inst.components.combat.target
+        local newtarget = FindEntity(inst, 10, 
+            function(guy) 
+                return inst.components.combat:CanTarget(guy) 
+            end,
+            { "character", "_combat", "realyoukai" },
+            { "monster", "INLIMBO" }
+        )
+
+        if newtarget ~= nil and newtarget ~= oldtarget then
+            inst.components.combat:SetTarget(newtarget)
+        end
+    end
+
+	inst.components.combat:SetRetargetFunction(3, Retarget)
+end
+AddPrefabPostInit("bunnyman", BunnymanNormalRetargetFn)
+AddPrefabPostInit("pigman", PigmanNormalRetargetFn)
+AddPrefabPostInit("bat", BatRetargetFn)
+AddPrefabPostInit("mosquito", MosquitoRetargetFn)
+AddPrefabPostInit("bee", BeeRetargetFn)
+AddPrefabPostInit("killerbee", KillerbeeRetargetFn)
+AddPrefabPostInit("frog", FrogRetargetFn)
+AddPrefabPostInit("spider", SpiderRetargetFn)
+AddPrefabPostInit("spider_warrior", WarriorRetargetFn)
+AddPrefabPostInit("spiderqueen", SpiderqueenRetargetFn)
+---------- print current upgrade & ability
 local function SayInfo(inst)
 	local HP = 0
 	local HN = 0
@@ -232,5 +363,4 @@ local function SayInfo(inst)
 	if inspect % 2 == 1 then inst.components.talker:Say(str) end
 end
 AddModRPCHandler("yakumoyukari", "sayinfo", SayInfo)
-
 AddModCharacter("yakumoyukari", "FEMALE")
