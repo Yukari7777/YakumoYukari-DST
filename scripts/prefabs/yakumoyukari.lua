@@ -327,7 +327,7 @@ local function oneat(inst, food)
 	end
 end
 
-local function MakeSaneOnMeatEat(inst)
+local function MakeSaneOnEatMeat(inst)
 	inst.components.eater.eatmeat = inst.components.eater.Eat
 	function inst.components.eater:Eat(food)
 		if self:CanEat(food) then
@@ -463,7 +463,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.components.combat.areahitdamagepercent = TUNING.YUKARI.AREA_DAMAGE_PERCENT
 	inst.components.builder.science_bonus = 1
 	inst.components.eater:SetOnEatFn(oneat)
-	MakeSaneOnMeatEat(inst)
+	MakeSaneOnEatMeat(inst)
 	MakeGrazeable(inst)
 	MakeDapperOnEquipItem(inst)
 	

@@ -153,18 +153,22 @@ local function ResetRetargetFn(inst)
         return inst
     end
 
-	print("UpvalueHacker", inst.prefab, GLOBAL.UpvalueHacker.GetUpvalue(inst.components.combat.targetfn))
+	print("UpvalueHacker", inst.prefab, GLOBAL.UpvalueHacker.GetUpvalue(inst.components.combat.targetfn, "FindTarget"))
 
 	local targetfnold = inst.components.combat.targetfn
-	inst.components.combat.targetfn = function(inst)
+	local function targetfnfixed(inst)
 --		local findyoukai = FindYoukai(inst)
 --		print("findyoukai", findyoukai)
 --		if findyoukai == "RY" or findyoukai == nil then
 --			return 
 --		else 
-			return targetfnold(inst)
-		--end
+--			return targetfnold(inst)
+--		end
 	end
+
+	-- GLOBAL.UpvalueHacker.SetUpvalue(inst.components.combat.targetfn, targetfnfixed, inst.components.combat.targetfn)
+	--print("UpvalueHacker2", inst.prefab, GLOBAL.UpvalueHacker.GetUpvalue(inst.components.combat.targetfn, "FindTarget"))
+	
 end
 
 local RetargetList = { "bunnyman", "pigman", "bat", "mosquito", "bee", "killerbee", "frog", "spider", "spider_warrior", "spierqueen" } 
