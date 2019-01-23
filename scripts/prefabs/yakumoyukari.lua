@@ -126,7 +126,7 @@ local function GetEquippedYukariHat(inst)
 	return inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat" and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) or nil
 end
 
-local function OnhitEvent(inst, data)
+local function OnAttackOther(inst, data)
 	local CanAOE = inst.components.upgrader.IsAOE and math.random() < 0.4
 
 	if inst.components.upgrader.IsVampire then
@@ -478,7 +478,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:ListenForEvent("healthdelta", OnHealthDelta )
 	inst:ListenForEvent("hungerdelta", OnHungerDelta )
 	inst:ListenForEvent("sanitydelta", OnSanityDelta )
-	inst:ListenForEvent("onattackother", OnhitEvent )
+	inst:ListenForEvent("onattackother", OnAttackOther )
 	inst:ListenForEvent("hatequipped", OnEquipHat )
 	inst:ListenForEvent("equip", OnEquip )
 	inst:ListenForEvent("unequip", OnEquip )

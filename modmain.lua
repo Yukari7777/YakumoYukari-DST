@@ -12,7 +12,6 @@ PrefabFiles = {
 	"puff_fx",
 	"scheme",
 }
-
 Assets = {
     Asset( "IMAGE", "images/saveslot_portraits/yakumoyukari.tex" ),
     Asset( "ATLAS", "images/saveslot_portraits/yakumoyukari.xml" ),
@@ -55,9 +54,7 @@ AddMinimapAtlas("images/map_icons/minimap_tunnel.xml")
 AddMinimapAtlas("images/map_icons/scheme.xml")
 
 ---------- GLOBAL & require list ----------
-local require = GLOBAL.require
 local assert = GLOBAL.assert
-require "class"
 GLOBAL.YUKARISTATINDEX = {"health", "hunger", "sanity", "power"}
 
 local STRINGS = GLOBAL.STRINGS

@@ -19,7 +19,7 @@ YTELE.mount_valid = false
 local CASTTOHO = AddAction("CASTTOHO", "castspell", function(act)
 	local item = act.invobject or act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
 
-	if item and item.components.spellcard then
+	if item and item.components.spellcard ~= nil then
 		item.components.spellcard:CastSpell(act.doer, act.target)
 		return true
 	end

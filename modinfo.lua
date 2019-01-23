@@ -1,6 +1,6 @@
 name = "Yakumo Yukari"
 author = "Yakumo Yukari"
-version = "0.11.6"
+version = "0.11.7"
 description = "Yakumo Yukari comes from unknown world to manipulate Don't Starve Together world!\n\nVersion : "..version.."\nPress [V] to show status.\nYOU MUST ENABLE SCHEME OR YOU'LL GET CRASHED."
 forumthread = ""
 api_version = 6
@@ -16,7 +16,7 @@ icon = "modicon.tex"
 -- Have enough low priority so the mod can be loaded after any other mods to be loaded.
 priority = -5
 
-folder_name = folder_name or "workshop-"
+folder_name = folder_name or ""
 if not folder_name:find("workshop-") then
     name = name.." - Test"
 end

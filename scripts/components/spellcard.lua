@@ -51,7 +51,7 @@ end
 
 function Spellcard:ClearTask(doer)
 	if self.saydonespeech then
-		self.inst.components.talker:Say(self.donespeech or GetString(self.inst.prefab, "DESCRIBE_DONEEFFCT"))
+		doer.components.talker:Say(self.donespeech or GetString(doer.prefab, "DESCRIBE_DONEEFFCT"))
 	end
 	if self.task ~= nil then
 		self.task:Cancel()
@@ -63,6 +63,7 @@ function Spellcard:ClearTask(doer)
 end
 
 function Spellcard:CastSpell(doer, target)
+	local doer = doer.components.inventoryitem ~= nil and doer.components.inventoryitem:GetGrandOwner() or doer
 	local inst = self.inst
 
 	if self.task ~= nil then
@@ -76,7 +77,7 @@ function Spellcard:CastSpell(doer, target)
 	if self.taskfn ~= nil then
 		self.task = doer.DoPeriodicTask(doer, self.taskinterval or 1, function()
 			local islow = doer.components.power.current < self.costpower
-			if not inst.components.inventoryitem:IsHeld() or islow then
+			if not inst.components.inventoryitem:IsHeld() or islow and doer.components.talker ~= nil then
 				doer.components.talker:Say(GetString(doer.prefab, islow and "DESCRIBE_LOWPOWER" or "DESCRIBE_DONEEFFCT"))
 				return self:ClearTask(doer)
 			end

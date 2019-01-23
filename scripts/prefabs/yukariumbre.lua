@@ -130,7 +130,7 @@ local function fn()
 	inst:AddComponent("inspectable")     
 	
 	inst:AddComponent("inventoryitem") 
-	inst.components.inventoryitem.imagename = "yukariumbre"    
+	inst.components.inventoryitem.imagename = "yukariumbre"
 	inst.components.inventoryitem.atlasname = "images/inventoryimages/yukariumbre.xml"  
 	
 	inst:AddComponent("weapon")
