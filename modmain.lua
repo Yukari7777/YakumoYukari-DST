@@ -1,3 +1,9 @@
+local KnownModIndex = GLOBAL.KnownModIndex
+GLOBAL.assert(KnownModIndex:IsModEnabled(KnownModIndex:GetModActualName("Scheme")) or KnownModIndex:IsModEnabled(KnownModIndex:GetModActualName("Scheme - Test")), 
+"\n[Yakumo Yukari] No Scheme Network mod detected. Please enable Scheme mod as well. Terminating the server...\n"..
+"[야쿠모 유카리] 스키마 네트워크 모드가 감지되지 않았습니다. 해당 모드도 활성화 해주세요. 서버를 종료합니다...\n"..
+"[八云紫] 无法检测[计划 Network] Mod, 请先启用该Mod。正在终止服务器。。。\n")
+
 PrefabFiles = {
 	"yukari_classified",
 	"yakumoyukari",
@@ -12,6 +18,7 @@ PrefabFiles = {
 	"puff_fx",
 	"scheme",
 }
+
 Assets = {
     Asset( "IMAGE", "images/saveslot_portraits/yakumoyukari.tex" ),
     Asset( "ATLAS", "images/saveslot_portraits/yakumoyukari.xml" ),
@@ -54,7 +61,6 @@ AddMinimapAtlas("images/map_icons/minimap_tunnel.xml")
 AddMinimapAtlas("images/map_icons/scheme.xml")
 
 ---------- GLOBAL & require list ----------
-local assert = GLOBAL.assert
 local STRINGS = GLOBAL.STRINGS
 local ProfileStatsSet = GLOBAL.ProfileStatsSet
 local SpawnPrefab = GLOBAL.SpawnPrefab
