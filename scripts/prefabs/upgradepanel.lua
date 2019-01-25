@@ -1,5 +1,3 @@
-local modname = _G.YUKARI_MODNAME
-
 local Ingredients = {
 	{"honey", "healingsalve", "bandage"},
 	{"berries", "meatballs", "bonestew"},
@@ -18,30 +16,17 @@ local function GetIngameName(prefab)
 	return STRINGS.NAMES[string.upper(prefab)]
 end
 
-local function GetIndex(inst)
-	local utype = inst.components.spellcard.name
-	if utype == "healthpanel" then return 1
-	elseif utype == "hungerpanel" then return 2
-	elseif utype == "sanitypanel" then return 3
-	elseif utype == "powerpanel" then return 4
-	end
-end
-
 local function GetStatLevel(owner, index)
-	if index == 1 then return owner.components.upgrader.health_level
-	elseif index == 2 then return owner.components.upgrader.hunger_level
-	elseif index == 3 then return owner.components.upgrader.sanity_level
-	elseif index == 4 then return owner.components.upgrader.power_level
-	end
+	return owner.components.upgrader[_G.YUKARISTATINDEX[index].."_level"]
 end
 
 local function GetIngreCount(owner, index)
-	local difficulty = GetModConfigData("difficulty", modname)
+	local difficulty = _G.YUKARI_DIFFICULTY
 	local level = GetStatLevel(owner, index) + 1
 	
 	local a = math.ceil(level * 0.7) + math.min(1, math.floor(level/10)) * math.floor(1.155 ^ (level - 10) ) -- 25 / 267 - 18 / 159
 	local b = math.min(1, math.floor(level/10)) * math.floor(1.1336 ^ (level - 10) + 0.2 * (level - 10) ) -- 9 / 64 - 5 / 28 
-	if difficulty == "hard" then
+	if difficulty == "HARD" then
 		a = level + math.min(1, math.floor(level/10)) * math.floor(1.162 ^ (level - 10) ) -- 50 / 595
 		b = math.min(1, math.floor(level/10)) * math.floor(1.1336 ^ (level - 10) + 0.3 * (level - 10) ) -- 18 / 150
 	end
@@ -51,19 +36,6 @@ local function GetIngreCount(owner, index)
 	
 	return info
 	
-end
-
-local function GetMaxLevel()
-	local difficulty = GetModConfigData("difficulty", modname)
-
-	local maxlevel = TUNING.YUKARI.UPGRADE_MAX
-	if difficulty == "easy" then
-		maxlevel = TUNING.YUKARI.UPGRADE_MAX - 5
-	elseif difficulty == "hard" then
-		maxlevel = math.huge 
-	end
-
-	return maxlevel
 end
 
 local function CountInventoryItem(owner, item)
@@ -102,10 +74,9 @@ local function GetStr(owner, index)
 	local items = Ingredients[index]
 	local count = GetIngreCount(owner, index)
 	local currentLevel = GetStatLevel(owner, index)
-	local maxlevel = GetMaxLevel()
 	
 	local text = ""
-	if currentLevel < maxlevel then
+	if currentLevel < TUNING.YUKARI_STATUS.MAX_UPGRADE then
 		for i = 1, 3, 1 do
 			if count[i] > 0 then
 				text = text.."\n"..GetIngameName(items[i]).." - "..CountInventoryItem(owner, items[i]).." / "..count[i]
@@ -119,14 +90,13 @@ local function GetStr(owner, index)
 end
 
 local function GetCanpell(inst, owner)
-	local index = GetIndex(inst)
+	local index = inst.index 
 	local items = Ingredients[index]
-	local condition = owner.components.inventory ~= nil
 	local count = GetIngreCount(owner, index)
 	local currentLevel = GetStatLevel(owner, index)
-	local maxlevel = GetMaxLevel()
 
-	if currentLevel < maxlevel then 
+	local condition = owner.components.inventory ~= nil
+	if currentLevel < TUNING.YUKARI_STATUS.MAX_UPGRADE then 
 		for i = 1, 3, 1 do 
 			condition = condition and ( CountInventoryItem(owner, items[i]) >= count[i] )
 		end	
@@ -146,27 +116,27 @@ end
 
 local function GetDesc(inst, viewer)
 	if viewer.prefab == "yakumoyukari" then
-		local index = GetIndex(inst)
-		local currentLevel = GetStatLevel(viewer, index)
+		local index = inst.index 
+		local CurrentLevel = GetStatLevel(viewer, index)
 		local condition = GetCanpell(inst, viewer)
 		SetState(inst, viewer)
 
-		return string.format( STRINGS.YUKARI_CURRENT_LEVEL.." - "..currentLevel..GetStr(viewer, index)..(condition and "\nI can spell." or "") )
+		return string.format( STRINGS.YUKARI_CURRENT_LEVEL.." - "..CurrentLevel..GetStr(viewer, index)..(condition and "\nI can spell." or "") )
 	end
 end
 
 local function DoUpgrade(inst, owner)
-	local index = GetIndex(inst)
-	local items = Ingredients[index]
-	local count = GetIngreCount(owner, index)
-	local inventory = owner.components.inventory
-
 	if not GetCanpell(inst, owner) then
 		inst.components.spellcard:SetCondition(false)
 		inst.canspell:set(false)
 		owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_INGREDIENTS"))
 		return false
 	end
+
+	local index = inst.index 
+	local items = Ingredients[index]
+	local count = GetIngreCount(owner, index)
+	local inventory = owner.components.inventory
 	
 	local function remove(item, left_count)
 		if left_count > 0 then
@@ -197,7 +167,7 @@ local function DoUpgrade(inst, owner)
 			end
 
 			for k,v in pairs(inventory.equipslots) do
-				if type(v) == "table" and v.components.container then
+				if type(v) == "table" and v.components.container ~= nil then
 					for k, v2 in pairs(v.components.container.slots) do
 						if items[i] == "berries" and (v2.prefab == "berries" or v2.prefab == "berries_juicy") or v2.prefab == items[i] then
 							left_count = remove(v2, left_count)
@@ -208,19 +178,9 @@ local function DoUpgrade(inst, owner)
 		end
 	end
 
-	if index == 1 then
-		owner.components.upgrader.health_level = owner.components.upgrader.health_level + 1
-		owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_UPGRADE_HEALTH"))
-	elseif index == 2 then
-		owner.components.upgrader.hunger_level = owner.components.upgrader.hunger_level + 1
-		owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_UPGRADE_HUNGER"))
-	elseif index == 3 then
-		owner.components.upgrader.sanity_level = owner.components.upgrader.sanity_level + 1
-		owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_UPGRADE_SANITY"))
-	elseif index == 4 then
-		owner.components.upgrader.power_level = owner.components.upgrader.power_level + 1
-		owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_UPGRADE_POWER"))	
-	end	
+	local stat = _G.YUKARISTATINDEX[index]
+	owner.components.upgrader[stat.."_level"] = owner.components.upgrader[stat.."_level"] + 1
+	owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_UPGRADE_"..stat:upper()))
 
 	owner.components.upgrader:ApplyStatus()
 end
@@ -231,10 +191,10 @@ local function OnFinish(inst, owner)
 	inst.canspell:set(condition)
 end
 
-
-function MakePanel(iname)
-	local fname = iname.."panel"
-	local fup = string.upper(iname).."UP"
+function MakePanel(id)
+	local stat = _G.YUKARISTATINDEX[id]
+	local fname = stat.."panel"
+	local fup = string.upper(stat).."UP"
 	
 	local assets =
 	{   
@@ -257,7 +217,6 @@ function MakePanel(iname)
 		inst.AnimState:PlayAnimation("idle")
 
 		inst:AddTag("spellcard")
-		inst:AddTag("yakumoyukari")
 
 		inst.canspell = net_bool(inst.GUID, "canspell")
 
@@ -267,6 +226,7 @@ function MakePanel(iname)
 
 		inst.entity:SetPristine()
 
+		inst.index = id
 
 		inst:AddComponent("inspectable")			
 		inst.components.inspectable.getspecialdescription = GetDesc
@@ -287,7 +247,9 @@ function MakePanel(iname)
 	return Prefab("common/inventory/"..fname, fn, assets)
 end
 
-return MakePanel("health"),
-       MakePanel("hunger"),
-       MakePanel("sanity"),
-       MakePanel("power")
+local panels = {}
+for i = 1, 4 do
+    table.insert(panels, MakePanel(i))
+end
+
+return unpack(panels)

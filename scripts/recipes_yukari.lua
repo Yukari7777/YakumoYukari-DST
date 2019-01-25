@@ -1,5 +1,5 @@
 local TECH = GLOBAL.TECH
-local difficulty = GetModConfigData("difficulty")
+local difficulty = GetModConfigData("diff")
 
 local TOUHOU = AddRecipeTab("TOUHOU", 777, "images/inventoryimages/touhoutab.xml", "touhoutab.tex", "yakumoyukari")
 
@@ -7,7 +7,7 @@ local HealthIngredient = { Ingredient("healingsalve", 2), Ingredient("log", 3) }
 local HungerIngredient = { Ingredient("bonestew", 1), Ingredient("meatballs", 2) }
 local SanityIngredient = { Ingredient("petals", 4), Ingredient("nightmarefuel", 2) }
 local PowerIngredient = { Ingredient("purplegem", 2), Ingredient("livinglog", 3) }
-if difficulty == "easy" then
+if difficulty == "EASY" then
 	HealthIngredient = { Ingredient("healingsalve", 1), Ingredient("log", 2) }
 	HungerIngredient = { Ingredient("meatballs", 3) }
 	SanityIngredient = { Ingredient("petals", 3), Ingredient("nightmarefuel", 1) }

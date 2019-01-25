@@ -55,8 +55,6 @@ AddMinimapAtlas("images/map_icons/scheme.xml")
 
 ---------- GLOBAL & require list ----------
 local assert = GLOBAL.assert
-GLOBAL.YUKARISTATINDEX = {"health", "hunger", "sanity", "power"}
-
 local STRINGS = GLOBAL.STRINGS
 local ProfileStatsSet = GLOBAL.ProfileStatsSet
 local SpawnPrefab = GLOBAL.SpawnPrefab
@@ -68,7 +66,7 @@ local FindEntity = GLOBAL.FindEntity
 local SpringCombatMod = GLOBAL.SpringCombatMod
 local KnownModIndex = GLOBAL.KnownModIndex
 
-GLOBAL.YUKARI_MODNAME = KnownModIndex:GetModActualName("Yakumo Yukari")
+GLOBAL.YAKUMOYUKARI_MODNAME = KnownModIndex:GetModActualName("Yakumo Yukari")
 GLOBAL.YUKARI_DIFFICULTY = GetModConfigData("diff")
 
 local Language = GetModConfigData("language")
@@ -87,6 +85,8 @@ if Language == "AUTO" then
 else
 	GLOBAL.YUKARI_LANGUAGE = Language
 end
+
+GLOBAL.YUKARISTATINDEX = { "health", "hunger", "sanity", "power" }
 
 modimport "scripts/tunings_yukari.lua"
 TUNING.YUKARI_STATUS = TUNING["YUKARI_STATUS"..(GLOBAL.YUKARI_DIFFICULTY or "")]
@@ -314,16 +314,16 @@ local function SayInfo(inst)
 	local str = ""
 	local skilltable = {}
 	local inspect = GetModConfigData("skill") or 1
-	inst.info = inst.info >= (inst.components.upgrader.skilltextpage or TUNING.YUKARI.SKILLPAGE) and 0 or inst.info
+	inst.infopage = inst.infopage >= (inst.components.upgrader.skilltextpage or TUNING.YUKARI.SKILLPAGE) and 0 or inst.infopage
 
-	if inst.info == 0 then
+	if inst.infopage == 0 then
 		HP = inst.components.upgrader.health_level
 		HN = inst.components.upgrader.hunger_level
 		SA = inst.components.upgrader.sanity_level
 		PO = inst.components.upgrader.power_level
 
 		str = STRINGS.NAMES.HEALTHPANEL.." : "..HP.."\n"..STRINGS.NAMES.HUNGERPANEL.." : "..HN.."\n"..STRINGS.NAMES.SANITYPANEL.." : "..SA.."\n"..STRINGS.NAMES.POWERPANEL.." : "..PO.."\n"
-	elseif inst.info == 1 then
+	elseif inst.infopage == 1 then
 		for i = 1, inst.components.upgrader.skillsort, 1 do
 			for j = 1, inst.components.upgrader.skilllevel, 1 do
 				if inst.components.upgrader.ability[i][j] then
@@ -348,14 +348,14 @@ local function SayInfo(inst)
 		inst.components.upgrader.skilltextpage = (skillindex ~= 0 and 2 + math.ceil(skillindex / 3) or 3)
 
 		for k = 1, 3 do
-			str = str..(skilltable[(inst.info-2) * 3 + k] or "").."\n"
+			str = str..(skilltable[(inst.infopage-2) * 3 + k] or "").."\n"
 		end
 
 		if str == "\n\n\n" then
 			str = STRINGS.YUKARI_NOSKILL.."\n"
 		end
 	end
-	inst.info = inst.info + 1
+	inst.infopage = inst.infopage + 1
 	if inspect > 1 then inst.yukari_classified.inspect:set(str) end
 	if inspect % 2 == 1 then inst.components.talker:Say(str) end
 end

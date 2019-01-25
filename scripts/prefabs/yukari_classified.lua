@@ -93,8 +93,8 @@ local function RegisterNetListeners(inst)
 		-- Be aware that writting something in this block means,
 		-- You do NOT want to run the thing in the server
 		-- which EXCLUDES the host of server that doesn't have cave.
-		-- In most cases that you want to make 'clienty' things,
-		-- call the function out of this block, then use parent.HUD == nil rather writting things in here.
+		-- In most cases that you want to make 'clienty' things, call the function out of this block.
+		-- Then use parent.HUD == nil rather writting things in here.
 	end
 	RegisterKeyEvent(inst)
 	inst:ListenForEvent("onskillinspectdirty", PushMessage)
@@ -142,6 +142,5 @@ local function fn()
 
     return inst
 end
-
 
 return Prefab("yukari_classified", fn)

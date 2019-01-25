@@ -1,6 +1,6 @@
 local MakePlayerCharacter = require "prefabs/player_common"
 local STATUS = TUNING.YUKARI_STATUS
-local modname = _G.YUKARI_MODNAME
+local YCONST = TUNING.YUKARI
 
 local assets = {
 	Asset("SCRIPT", "scripts/prefabs/player_common.lua"),
@@ -55,8 +55,8 @@ end
 
 -- Custom starting items
 local function GetStartInv()
-	local difficulty = GetModConfigData("difficulty", modname)
-	if difficulty == "easy" then
+	local difficulty = _G.YUKARI_DIFFICULTY
+	if difficulty == "EASY" then
 		return {"humanmeat",
 				"humanmeat",
 				"humanmeat",
@@ -126,13 +126,17 @@ local function GetEquippedYukariHat(inst)
 	return inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD).prefab == "yukarihat" and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD) or nil
 end
 
+local function IsPreemitive(ent)
+	return (TheNet:GetPVPEnabled() and ent:HasTag("player")) or (ent.components.combat ~= nil and ent.components.combat.target ~= nil)
+end
+
 local function OnAttackOther(inst, data)
+	local target = data.target
+	if target == nil then return end
 	local CanAOE = inst.components.upgrader.IsAOE and math.random() < 0.4
 
 	if inst.components.upgrader.IsVampire then
-		local target = data.target
-		if target and target.components.health ~= nil and not target:HasTag("chester") or
-		(target.components.follower and target.components.follower.leader == inst) then
+		if target.components.health ~= nil and not target:HasTag("chester") and not target:HasTag("wall") and not target:HasTag("companion") then
 			inst.components.health:DoDelta(1, nil, nil, true)
 			if CanAOE then
 				inst.components.health:DoDelta(1, nil, nil, true)
@@ -140,8 +144,8 @@ local function OnAttackOther(inst, data)
 		end
 	end
 
-	if CanAOE then
-		inst.components.combat:DoAreaAttack(data.target, 3, data.weapon, nil, data.stimuli, {"INLIMBO"})
+	if CanAOE and (data.weapon == nil or data.weapon.components.projectile == nil) then	
+		inst.components.combat:DoAreaAttack(target, YCONST.AOE_RADIUS, data.weapon, IsPreemitive, data.stimuli, { "INLIMBO", "companion", "wall" })
 	end
 end
 
@@ -154,7 +158,7 @@ end
 
 local function MakeInvincible(inst)
 	inst.components.upgrader.CanbeInvincibled = false
-	inst.invin_cool = 1440
+	inst.invin_cool = STATUS.INVINCIBLE_COOLTIME
 	inst.IsInvincible = true
 	inst.components.health:SetInvincible(true)
 	inst.components.talker:Say(GetString(inst.prefab, "DESCRIBE_INVINCIBILITY_ACTIVATE"), nil, nil, true, nil, {1,0,0,1})
@@ -253,12 +257,14 @@ local function PeriodicFunction(inst)
 		inst:SetLight(false)
 	end
 
-	if inst.components.health ~= nil and inst.IsInvincible then
-		InvincibleRegen(inst)
-	end
+	if inst.components.health ~= nil then
+		if inst.IsInvincible then
+			InvincibleRegen(inst)
+		end
 
-	if inst.components.health ~= nil and inst.nohealthpenalty then
-		inst.components.heath:SetPenalty(0)
+		if inst.components.upgrader.nohealthpenalty then
+			inst.components.heath:SetPenalty(0)
+		end
 	end
 
 	Cooldown(inst)
@@ -272,7 +278,7 @@ local function Graze(inst)
 		end)
 	end
 	local pt = Vector3(inst.Transform:GetWorldPosition())
-	for i = 1, math.random(3,10) do
+	for i = 1, math.random(3, 10) do
 		local fx = SpawnPrefab("graze_fx")
 		fx.Transform:SetPosition(pt.x + math.random() / 2, pt.y + 0.7 + math.random() / 2 , pt.z + math.random() / 2 )
 	end
@@ -367,13 +373,16 @@ local ShouldApplyStatus = {
 }
 
 local function OnEquip(inst, data) 
-	if inst.components.upgrader ~= nil and inst.components.upgrader.IsEfficient and data.eslot == EQUIPSLOTS.HANDS and data.item ~= nil and data.item.components.tool ~= nil then
-		MakeToolEfficient(data.item)
+	local item = data ~= nil and data.item ~= nil and data.item or nil
+	if item == nil then return end
+
+	if inst.components.upgrader ~= nil and inst.components.upgrader.IsEfficient and data.eslot == EQUIPSLOTS.HANDS and item.components.tool ~= nil then
+		MakeToolEfficient(item)
 	end
 	
 	local ShouldApply = false
 	for k, v in pairs(ShouldApplyStatus) do
-		if data.item.prefab == v then
+		if item.prefab == v then
 			ShouldApply = true
 			break
 		end
@@ -383,12 +392,11 @@ local function OnEquip(inst, data)
 		-- I don't like how Klei sets the fire_damage_scale.
 		inst.components.upgrader.fireimmuned = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == "armordragonfly"
 
-		if data.item.prefab == "yukarihat" then
-			inst.components.upgrader:ApplyHatAbility(data.item)
+		if item.prefab == "yukarihat" then
+			inst.components.upgrader:ApplyHatAbility(item)
 		end
 		inst.components.upgrader:ApplyStatus()
 	end
-	
 end
 
 
@@ -396,7 +404,9 @@ local function MakeGrazeable(inst)
 	inst.components.inventory.NewTakeDamage = inst.components.inventory.ApplyDamage
 	function inst.components.inventory:ApplyDamage(damage, attacker, weapon, ...)
 		local totaldodge = (inst.components.upgrader.dodgechance + inst.components.upgrader.hatdodgechance) * (inst.sg:HasStateTag("moving") and 2 or 1) -- double when is moving
-		if inst.IsGrazing or math.random() < totaldodge then
+		local candodge = inst.IsGrazing or math.random() < totaldodge and inst.components.freezeable == nil and not inst.components.health:IsInvincible() and (attacker ~= nil and attacker.components ~= nil and attacker.components.combat ~= nil)
+
+		if candodge then
 			inst:PushEvent("graze")
 			return 0
 		end
@@ -421,16 +431,7 @@ end
 
 local function common_postinit(inst) -- things before SetPristine()
 	inst.entity:AddLight()
-	inst.MiniMapEntity:SetIcon( "yakumoyukari.tex" )
-
-	inst.IsInvincible = false
-	inst.IsGrazing = false
-	inst.naughtiness = 0
-	inst.regen_cool = 0
-	inst.poison_cool = 0
-	inst.invin_cool = 0
-	inst.grazecnt = 0
-	inst.info = 0
+	inst.MiniMapEntity:SetIcon("yakumoyukari.tex")
 
 	inst.maxpower = net_ushortint(inst.GUID, "maxpower")
 	inst.currentpower = net_ushortint(inst.GUID, "currentpower")
@@ -448,6 +449,15 @@ end
 local master_postinit = function(inst) -- after SetPristine()
 	inst.yukari_classified = SpawnPrefab("yukari_classified")
     inst:AddChild(inst.yukari_classified)
+
+	inst.IsInvincible = false
+	inst.IsGrazing = false
+	inst.naughtiness = 0
+	inst.regen_cool = 0
+	inst.poison_cool = 0
+	inst.invin_cool = 0
+	inst.grazecnt = 0
+	inst.infopage = 0
 
 	inst:AddComponent("upgrader")
 	inst:AddComponent("power")
@@ -471,10 +481,10 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.OnPreLoad = onpreload
 	inst.GetYukariHat = GetEquippedYukariHat
 	inst.SetLight = SetLight
-	inst.powertable = powertable
+	inst.PowerRestores = powertable
 	
 	inst:DoPeriodicTask(1, PeriodicFunction)
-	inst:DoTaskInTime(1, OnWorldLoaded)
+	--inst:DoTaskInTime(1, OnWorldLoaded)
 	inst:ListenForEvent("healthdelta", OnHealthDelta )
 	inst:ListenForEvent("hungerdelta", OnHungerDelta )
 	inst:ListenForEvent("sanitydelta", OnSanityDelta )

@@ -433,7 +433,7 @@ function Upgrader:UpdateSkillStatus()
 	end
 
 	if self.IsAOE and skill.AOE == nil then
-		skill.AOE = "40% chance to do area-of-effect with the damage amount of 60% in range 5"
+		skill.AOE = "40% chance to do area-of-effect with the damage amount of 60% in range 3"
 	end
 
 	if self.NightVision and skill.nightvision == nil then

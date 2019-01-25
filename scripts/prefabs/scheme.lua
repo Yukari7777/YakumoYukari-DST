@@ -11,14 +11,12 @@ local Ingredients = {
 	{{"thulecite", 20}, {"spellcard_away", 10}, {"spellcard_matter", 5}, {"spellcard_laplace", 2}, {"spellcard_necro", 1}}
 }
 
---local modname = _G.YUKARI_MODNAME
-
 local function GetIngameName(prefab)
 	return STRINGS.NAMES[string.upper(prefab)]
 end
 
 local function GetTable(owner)
-	--local difficulty = GetModConfigData("difficulty", modname)
+	--local difficulty = _G.YUKARI_DIFFICULTY
 	local hatlevel = owner.components.upgrader.hatlevel
 	local list = {}
 	

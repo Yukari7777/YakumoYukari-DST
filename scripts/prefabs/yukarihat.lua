@@ -21,6 +21,8 @@ local function NegateStranger(inst, owner)
 				owner.components.sanity:SetInducedInsanity(inst, false)
 				owner.components.inventory:DropItem(inst, true, true)
 			end)
+		else
+			owner.components.inventory:DropItem(inst, true, true)
 		end
 	end
 end
@@ -63,25 +65,26 @@ local function GetPercentTweak(self)
 	return self.condition / self.maxcondition
 end
 
-local function fn()  
-	local function onequiphat(inst, owner)
-        owner.AnimState:OverrideSymbol("swap_hat", "yukarihat_swap", "swap_hat")
-        owner.AnimState:Show("HAT")
-        owner.AnimState:Show("HAT_HAIR")
-        owner.AnimState:Hide("HAIR_NOHAT")
-        owner.AnimState:Hide("HAIR") 
-		owner:PushEvent("hatequipped", {isequipped = true, inst = inst})
-		NegateStranger(inst, owner)
-    end
+local function onequiphat(inst, owner)
+    owner.AnimState:OverrideSymbol("swap_hat", "yukarihat_swap", "swap_hat")
+    owner.AnimState:Show("HAT")
+    owner.AnimState:Show("HAT_HAIR")
+    owner.AnimState:Hide("HAIR_NOHAT")
+    owner.AnimState:Hide("HAIR") 
+	owner:PushEvent("hatequipped", {isequipped = true, inst = inst})
+	NegateStranger(inst, owner)
+end
 
-    local function onunequiphat(inst, owner)
-        owner.AnimState:Hide("HAT")
-        owner.AnimState:Hide("HAT_HAIR")
-        owner.AnimState:Show("HAIR_NOHAT")
-        owner.AnimState:Show("HAIR") 
-		owner:PushEvent("hatequipped", {isequipped = false, inst = inst})
-		Initialize(inst)
-    end
+local function onunequiphat(inst, owner)
+    owner.AnimState:Hide("HAT")
+    owner.AnimState:Hide("HAT_HAIR")
+    owner.AnimState:Show("HAIR_NOHAT")
+    owner.AnimState:Show("HAIR") 
+	owner:PushEvent("hatequipped", {isequipped = false, inst = inst})
+	Initialize(inst)
+end
+
+local function fn()  
 
 	local inst = CreateEntity()    
 	

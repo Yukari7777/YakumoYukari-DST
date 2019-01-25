@@ -120,12 +120,12 @@ function yokaibadge:OnUpdate(dt)
 		self:SetPercent(self.owner.replica.power:GetCurrent(), self.owner.replica.power:Max())
 	end
 	
-	if self.owner:HasTag("playerghost") then
-		self:SetScale(0, 0, 0)
-	else
-		self:SetScale(1, 1, 1)
-	end
-
+--	if self.owner:HasTag("playerghost") then
+--		self:SetScale(0, 0, 0)
+--	else
+--		self:SetScale(1, 1, 1)
+--	end
+--
 end
 
 return yokaibadge
