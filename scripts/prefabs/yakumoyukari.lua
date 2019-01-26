@@ -263,7 +263,7 @@ local function PeriodicFunction(inst)
 		end
 
 		if inst.components.upgrader.nohealthpenalty then
-			inst.components.heath:SetPenalty(0)
+			inst.components.health:SetPenalty(0)
 		end
 	end
 
