@@ -1,9 +1,3 @@
-local KnownModIndex = GLOBAL.KnownModIndex
-GLOBAL.assert(KnownModIndex:IsModEnabled(KnownModIndex:GetModActualName("Scheme")) or KnownModIndex:IsModEnabled(KnownModIndex:GetModActualName("Scheme - Test")), 
-"\n[Yakumo Yukari] No Scheme Network mod detected. Please enable Scheme mod as well. Terminating the server...\n"..
-"[야쿠모 유카리] 스키마 네트워크 모드가 감지되지 않았습니다. 해당 모드도 활성화 해주세요. 서버를 종료합니다...\n"..
-"[八云紫] 无法检测[计划 Network] Mod, 请先启用该Mod。正在终止服务器。。。\n")
-
 PrefabFiles = {
 	"yukari_classified",
 	"yakumoyukari",
@@ -311,6 +305,17 @@ AddPrefabPostInit("frog", FrogRetargetFn)
 AddPrefabPostInit("spider", SpiderRetargetFn)
 AddPrefabPostInit("spider_warrior", WarriorRetargetFn)
 AddPrefabPostInit("spiderqueen", SpiderqueenRetargetFn)
+AddSimPostInit(function()
+	if not GLOBAL.TheWorld.ismastersim then
+        return 
+    end
+
+	local KnownModIndex = GLOBAL.KnownModIndex
+	GLOBAL.assert(KnownModIndex:IsModEnabled(KnownModIndex:GetModActualName("Scheme")) or KnownModIndex:IsModEnabled(KnownModIndex:GetModActualName("Scheme - Test")), 
+	"\n[Yakumo Yukari] No Scheme Network mod detected. Please enable Scheme mod as well. Terminating the server...\n"..
+	"[야쿠모 유카리] 스키마 네트워크 모드가 감지되지 않았습니다. 해당 모드도 활성화 해주세요. 서버를 종료합니다...\n"..
+	"[八云紫] 无法检测[计划 Network] Mod, 请先启用该Mod。正在终止服务器。。。\n")
+end)
 ---------- print current upgrade & ability
 local function SayInfo(inst)
 	local HP = 0
