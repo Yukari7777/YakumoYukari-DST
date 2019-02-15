@@ -37,6 +37,11 @@ inspectflag[5].description = "chat, character"
 inspectflag[6].description = "chat, console"
 inspectflag[7].description = "everywhere"
 
+local Keys = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "PERIOD", "SLASH", "SEMICOLON", "TILDE", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "INSERT", "DELETE", "HOME", "END", "PAGEUP", "PAGEDOWN", "MINUS", "EQUALS", "BACKSPACE", "CAPSLOCK", "SCROLLOCK", "BACKSLASH"}
+
+local KeyOptions = {}
+for i = 1, #Keys do KeyOptions[i] = { description = ""..Keys[i].."", data = "KEY_"..Keys[i] } end
+
 configuration_options = {
 	{
 		name = "language",
@@ -73,5 +78,11 @@ configuration_options = {
 		default = 1,
 	},
 
-
+	{
+		name = "skillkey",
+		label = "Print status key by",
+		hover = "Set which key to press to show the status info.",
+		options = KeyOptions,
+		default = "KEY_V",
+	},
 }

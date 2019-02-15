@@ -58,7 +58,9 @@ end
 local function RegisterKeyEvent(classified)
 	local parent = classified._parent
 	if parent.HUD == nil then return end -- if it's not a client, stop here.
-	TheInput:AddKeyDownHandler(_G["KEY_V"], function() 
+
+	local INFOKEY = GetModConfigData("skillkey", _G.YAKUMOYUKARI_MODNAME) or "KEY_V"
+	TheInput:AddKeyDownHandler(_G[INFOKEY], function() 
 		if KeyCheckCommon(parent) then
 			SendModRPCToServer(MOD_RPC["yakumoyukari"]["sayinfo"], parent) 
 		end

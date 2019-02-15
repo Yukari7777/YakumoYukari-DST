@@ -3,8 +3,6 @@ local KnownModIndex = GLOBAL.KnownModIndex
 
 AddReplicableComponent("power")
 
-table.insert(Assets, Asset("ANIM", "anim/power.zip"))
-
 local function IsModEnabled(modname)
 	for k, v in ipairs(KnownModIndex:GetModsToLoad()) do
 		if KnownModIndex:GetModInfo(v).name == modname  then
@@ -14,27 +12,39 @@ local function IsModEnabled(modname)
 	return false
 end
 
-local function StatusDisplaysInit(class)
-
-	if class.owner.prefab == "yakumoyukari" then
+local function StatusDisplaysInit(self)
+	if self.owner:HasTag("yakumoyukari") then
 		local YokaiBadge = require "widgets/yokaibadge"
 
-		class.power = class:AddChild(YokaiBadge(nil, class.owner))
+		self.power = self:AddChild(YokaiBadge(self.owner))
 		if IsModEnabled("Combined Status") then
-			class.brain:SetPosition(0, 35, 0)
-			class.stomach:SetPosition(-62, 35, 0)
-			class.heart:SetPosition(62, 35, 0)
-			class.power:SetScale(.9,.9,.9)
-			class.power:SetPosition(-62, -50, 0)
+			self.brain:SetPosition(0, 35, 0)
+			self.stomach:SetPosition(-62, 35, 0)
+			self.heart:SetPosition(62, 35, 0)
+			self.power:SetScale(.9,.9,.9)
+			self.power:SetPosition(-62, -50, 0)
 		else
-			class.power:SetPosition(-40, -50,0)
-			class.brain:SetPosition(40, -50, 0)
-			class.stomach:SetPosition(-40,17,0)
+			self.power:SetPosition(-40, -50,0)
+			self.brain:SetPosition(40, -50, 0)
+			self.stomach:SetPosition(-40,17,0)
 		end
-			
-		class.inst:ListenForEvent("powerdelta", function(inst, data) class.power:SetPercent(data.newpercent, class.owner.replica.power:Max()) end, class.owner)
+		
+		self.inst:ListenForEvent("powerdelta", function(inst, data) self.power:SetPercent(data.newpercent, self.owner.replica.power:Max()) end, self.owner)
 	end
-	
+
+	local _SetGhostMode = self.SetGhostMode
+	function self:SetGhostMode(ghostmode)
+		if not self.isghostmode == not ghostmode then --force boolean
+			return
+		end
+
+		_SetGhostMode(self, ghostmode)
+		if ghostmode then
+			self.power:Hide()
+		else
+			self.power:Show()
+		end
+	end
 end
 
 AddClassPostConstruct("widgets/statusdisplays", StatusDisplaysInit)
