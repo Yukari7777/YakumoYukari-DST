@@ -22,7 +22,7 @@ local function YukariToggleGoggles(self, show)
     end
 end
 
-local function DoHUDTweak(inst)
+local function PatchHUD(inst)
 	inst._parent.HUD.gogglesover.ToggleGoggles = YukariToggleGoggles
 end
 
@@ -32,7 +32,12 @@ local function OnEntityReplicated(inst)
         print("Unable to initialize classified data for player Yukari")
     else
 		inst._parent:AttachYukariClassified(inst)
-		DoHUDTweak(inst)
+		for i, v in ipairs({ "power" }) do
+            if inst._parent.replica[v] ~= nil then
+                inst._parent.replica[v]:AttachClassified(inst)
+            end
+        end
+		PatchHUD(inst)
     end
 end
 
@@ -113,6 +118,10 @@ local function fn()
     inst:AddTag("CLASSIFIED")
 
 	inst.inspect = net_string(inst.GUID, "onskillinspect", "onskillinspectdirty")
+
+	inst.maxpower = net_ushortint(inst.GUID, "maxpower")
+	inst.currentpower = net_ushortint(inst.GUID, "currentpower")
+	inst.powerratescale = net_ushortint(inst.GUID, "powerratescale")
 
 	inst.inspellcommon = net_bool(inst.GUID, "oninspell", "oninspelldirty")
 	inst.inspellcommon:set(false)

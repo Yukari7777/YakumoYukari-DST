@@ -71,7 +71,7 @@ function yokaibadge:OnLoseFocus()
 end
 
 function yokaibadge:OnUpdate(dt)
-	if self.owner ~= nil and self.owner.replica.power ~= nil then
+	if self.owner ~= nil and self.owner.yukari_classified ~= nil and self.owner.replica.power ~= nil then
 		self.num:SetString(tostring(math.floor(self.owner.replica.power:GetCurrent())))
 		if self.combinedmod ~= nil then
 			local maxtxt = self.showmaxonnumbers and "Max:\n" or ""

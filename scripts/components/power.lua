@@ -53,11 +53,9 @@ end
 
 function Power:SetMax(amount)
     self.max = amount
-    self.current = amount
 end
 
 function Power:DoDelta(delta, overtime)
-	
     local old = self.current
 	self.current = self.current + delta
     if self.current < 0 then 
@@ -67,7 +65,6 @@ function Power:DoDelta(delta, overtime)
     end
 	
     self.inst:PushEvent("powerdelta", {oldpercent = old/self.max, newpercent = self.current/self.max, overtime = overtime})
-    
 end
 
 function Power:GetPercent()
@@ -80,7 +77,7 @@ end
 
 function Power:SetPercent(p)
     local old = self.current
-    self.current = p*self.max
+    self.current = p * self.max
     self.inst:PushEvent("powerdelta", {oldpercent = old/self.max, newpercent = p})
 end
 

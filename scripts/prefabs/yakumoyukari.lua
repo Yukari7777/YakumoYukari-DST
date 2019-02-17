@@ -433,9 +433,6 @@ local function common_postinit(inst) -- things before SetPristine()
 	inst.entity:AddLight()
 	inst.MiniMapEntity:SetIcon("yakumoyukari.tex")
 
-	inst.maxpower = net_ushortint(inst.GUID, "maxpower")
-	inst.currentpower = net_ushortint(inst.GUID, "currentpower")
-
 	inst:AddTag("youkai")
 	inst:AddTag("yakumoyukari")
 
