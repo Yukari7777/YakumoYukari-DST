@@ -15,18 +15,50 @@ local Power = Class(function(self, inst)
     self.max = 75
     self.current = 50
 
-    self.regenrate = 1/10
+	self.rate = 0
+	self.ratescale = RATE_SCALE.NEUTRAL
 	
-    self.period = 1
-	
-	self.task = self.inst:DoPeriodicTask(self.period, function() self:DoDec(self.period) end)
 	self.inst:ListenForEvent("respawn", function(inst) self:OnRespawn() end)
+	self.inst:StartUpdatingComponent(self)
 	
 end, nil, {
 	max = onmax,
     current = oncurrent,
-    --ratescale = onratescale,
+    ratescale = onratescale,
 })
+
+function Power:SetModifier(key, value)
+    if value == nil or value == 0 then
+        return self:RemoveModifier(key)
+    elseif self._modifiers == nil then
+        self._modifiers = { [key] = value }
+        self.rate = value
+        return 
+    end
+    local m = self._modifiers[key]
+    if m == value then
+        return 
+    end
+    self._modifiers[key] = value
+    self.rate = self.rate + value - (m or 0)
+end
+
+function Power:RemoveModifier(key)
+    if self._modifiers == nil then
+        return 
+    end
+    local m = self._modifiers[key]
+    if m == nil then
+        return 
+    end
+    self._modifiers[key] = nil
+    if next(self._modifiers) == nil then
+        self._modifiers = nil
+        self.rate = 0
+    else
+        self.rate = self.rate - m
+    end
+end
 
 function Power:OnRespawn()
 	self.current = 75
@@ -48,7 +80,7 @@ function Power:LongUpdate(dt)
 end
 
 function Power:GetDebugString()
-    return string.format("%2.2f / %2.2f", self.current, self.max)
+    return string.format("%2.2f / %2.2f", self.current, self.max, self.ratescale)
 end
 
 function Power:SetMax(amount)
@@ -81,12 +113,27 @@ function Power:SetPercent(p)
     self.inst:PushEvent("powerdelta", {oldpercent = old/self.max, newpercent = p})
 end
 
-function Power:GetRegenAmount()
-	return self.inst.components.upgrader.hatequipped and (self.regenrate + (self.inst.components.upgrader ~= nil and self.inst.components.upgrader.hatbonuspowergain or 0)) or 0
+function Power:GetRateScale()
+	return self.ratescale
 end
 
-function Power:DoDec(dt, ignore_damage)
-	self.inst.components.power:DoDelta(self:GetRegenAmount() * dt)
+function Power:RecalcRateScale()
+	self.ratescale =
+		(self.rate <= -2 and RATE_SCALE.DECREASE_HIGH) or
+        (self.rate <= -1 and RATE_SCALE.DECREASE_MED) or
+        (self.rate < 0 and RATE_SCALE.DECREASE_LOW) or
+		(self.current == self.max and RATE_SCALE.NEUTRAL) or
+        (self.rate >= .2 and RATE_SCALE.INCREASE_HIGH) or
+        (self.rate >= .13 and RATE_SCALE.INCREASE_MED) or
+        (self.rate > 0 and RATE_SCALE.INCREASE_LOW) or
+        RATE_SCALE.NEUTRAL
 end
+
+function Power:OnUpdate(dt)
+	self:RecalcRateScale()
+	self:DoDelta(self.rate * dt, true)
+end
+
+Power.LongUpdate = Power.OnUpdate
 
 return Power

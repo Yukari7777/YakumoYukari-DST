@@ -325,7 +325,7 @@ local function SayInfo(inst)
 	local str = ""
 	local skilltable = {}
 	local inspect = GetModConfigData("skill") or 1
-	inst.infopage = inst.infopage >= (inst.components.upgrader.skilltextpage or TUNING.YUKARI.SKILLPAGE) and 0 or inst.infopage
+	inst.infopage = inst.infopage >= (inst.components.upgrader.skilltextpage or TUNING.YUKARI.SKILLPAGE_BASE) and 0 or inst.infopage
 
 	if inst.infopage == 0 then
 		HP = inst.components.upgrader.health_level

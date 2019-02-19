@@ -1,8 +1,6 @@
 local Power = Class(function(self, inst)
     self.inst = inst
 
-	print("power replica", inst.yukari_classified, inst.player_classified)
-
 	if TheWorld.ismastersim then
         self.classified = inst.yukari_classified
     elseif self.classified == nil and inst.yukari_classified ~= nil then
@@ -26,7 +24,6 @@ end
 Power.OnRemoveEntity = Power.OnRemoveFromEntity
 
 function Power:AttachClassified(classified)
-	print("power attach classified", classified)
     self.classified = classified
     self.ondetachclassified = function() self:DetachClassified() end
     self.inst:ListenForEvent("onremove", self.ondetachclassified, classified)

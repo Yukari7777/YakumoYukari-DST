@@ -1,15 +1,13 @@
 local Spellcard = Class(function(self, inst)
 	self.inst = inst
+	self.caster = nil
 	self.othercondition = nil
 	self.spell = nil
 	self.onfinish = nil
-	
-	self.duration = nil
-	self.costpower = nil
+	self.costpower = 0
+
 	self.index = nil
 	self.name = nil
-	self.level = nil
-	self.maxlevel = nil
 	self.task = nil
 	self.taskfn = nil
 	self.taskinterval = nil
@@ -41,7 +39,7 @@ function Spellcard:SetTaskFn(fn, interval)
 end
 
 function Spellcard:SetDoneSpeech(key)
-	self.donespeech = GetString(self.inst.prefab, key)
+	self.donespeech = GetString(self.inst, key)
 	self.saydonespeech = true
 end
 
@@ -49,17 +47,33 @@ function Spellcard:SetOnRemoveTask(fn)
 	self.onremovetask = fn
 end
 
+function Spellcard:GetRateScale()
+	return self.taskfn ~= nil and -(self.costpower / (self.taskinterval or 1)) or 0
+end
+
+function Spellcard:OnRemoveFromEntity()
+	if self.caster ~= nil then
+		self.caster.components.power:RemoveModifier(self.inst)
+		self:ClearTask(self.caster)
+	end
+end
+
 function Spellcard:ClearTask(doer)
 	if self.saydonespeech then
 		doer.components.talker:Say(self.donespeech or GetString(doer.prefab, "DESCRIBE_DONEEFFCT"))
 	end
+
 	if self.task ~= nil then
 		self.task:Cancel()
 		self.task = nil
+		doer.components.power:RemoveModifier(self.inst)
 	end
+
 	if self.onremovetask ~= nil then
 		self.onremovetask(self.inst, doer)
 	end
+
+	self.caster = nil
 end
 
 function Spellcard:CastSpell(doer, target)
@@ -75,6 +89,9 @@ function Spellcard:CastSpell(doer, target)
 	end
 
 	if self.taskfn ~= nil then
+		self.caster = doer
+		doer.components.power:SetModifier(self.inst, self:GetRateScale())
+
 		self.task = doer.DoPeriodicTask(doer, self.taskinterval or 1, function()
 			local islow = doer.components.power.current < self.costpower
 			if not inst.components.inventoryitem:IsHeld() or islow and doer.components.talker ~= nil then

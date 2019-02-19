@@ -1,3 +1,4 @@
+local CONST = TUNING.YUKARI
 local STATUS = TUNING.YUKARI_STATUS
 
 local Upgrader = Class(function(self, inst)
@@ -14,7 +15,7 @@ local Upgrader = Class(function(self, inst)
 	self.sanitybonus = 0
 	self.powerbonus = 0
 	self.fastactionlevel = 0
-	self.hatbonuspowergain = 0
+	self.hatpowergain = 0.1
 	self.bonusspeedmult = 1
 	
 	self.powerupvalue = 0
@@ -31,7 +32,7 @@ local Upgrader = Class(function(self, inst)
 	self.hatspeedmult = 1
 	self.dodgechance = 0.1
 	self.skilltextpage = 3
-	self.schemecost = 30 -- Deprecated
+	self.schemecost = 30
 	
 	self.hatequipped = false
 	self.fireimmuned = false
@@ -284,22 +285,22 @@ function Upgrader:ApplyHatAbility(hat)
 		local skill = self.hatskill
 		
 		self.hatabsorption = 0.2
+		self.hatpowergain = CONST.HAT_BASE_POWER_GAIN_RATE
 
 		if skill[2] then
 			self.hatdodgechance = 0.05
 			self.hatabsorption = 0.3
 			self.hatspeedmult = 1.05
-			self.hatbonuspowergain = 0.01
+			self.hatpowergain = CONST.HAT_BASE_POWER_GAIN_RATE + 0.01
 		end
 		
 		if skill[3] then
 			self.IsGoggle = true
-			--self.inst.components.playervision:ForceGoggleVision(true)
 			self.WaterProofer = true
 			self.hatdodgechance = 0.1
-			self.hatspeedmult = 1.1
 			self.hatabsorption = 0.5
-			self.hatbonuspowergain = 0.03
+			self.hatspeedmult = 1.1
+			self.hatpowergain = CONST.HAT_BASE_POWER_GAIN_RATE + 0.03
 		end
 		
 		if skill[4] then
@@ -307,25 +308,24 @@ function Upgrader:ApplyHatAbility(hat)
 			self.hatdodgechance = 0.15
 			self.hatabsorption = 0.7
 			self.hatspeedmult = 1.15
-			self.hatbonuspowergain = 0.05
+			self.hatpowergain = CONST.HAT_BASE_POWER_GAIN_RATE + 0.05
 		end
 		
 		if skill[5] then
 			self.GodTeleport = true
 			self.hatdodgechance = 0.2
 			self.hatabsorption = 0.8
-			self.hatbonuspowergain = 0.1
 			self.hatspeedmult = 1.2
+			self.hatpowergain = CONST.HAT_BASE_POWER_GAIN_RATE + 0.1
 		end
 	else
 		self.WaterProofer = false
 		self.FireResist = false
 		self.GodTeleport = false
 		self.IsGoggle = false
-		--self.inst.components.playervision:ForceGoggleVision(false)
-		self.hatbonuspowergain = 0
+		self.hatpowergain = 0
 		self.hatdodgechance = 0
-		self.hatabsorption = 0.01
+		self.hatabsorption = CONST.HAT_NO_DAMAGE_REDUCTION
 		self.hatspeedmult = 1
 	end
 	
@@ -336,6 +336,8 @@ function Upgrader:ApplyHatAbility(hat)
 		hat:SetGoggle(self.IsGoggle)
 		self:SetFireDamageScale()
 	end
+
+	self.inst.components.power:SetModifier("hatrate", self.hatpowergain)
 end
 
 function Upgrader:UpdateSkillStatus()

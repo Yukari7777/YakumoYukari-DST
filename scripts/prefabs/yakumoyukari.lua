@@ -467,7 +467,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.components.hunger:SetMax(150)
 	inst.components.hunger.hungerrate = 1.5 * TUNING.WILSON_HUNGER_RATE
 	inst.components.combat.damagemultiplier = TUNING.YUKARI.DAMAGE_MULTIPLIER
-	inst.components.combat.areahitdamagepercent = TUNING.YUKARI.AREA_DAMAGE_PERCENT
+	inst.components.combat.areahitdamagepercent = TUNING.YUKARI.AOE_DAMAGE_PERCENT
 	inst.components.builder.science_bonus = 1
 	inst.components.eater:SetOnEatFn(oneat)
 	MakeSaneOnEatMeat(inst)
