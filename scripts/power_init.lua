@@ -63,19 +63,19 @@ local function StatusDisplaysInit(self)
 		end
 		
 		self.inst:ListenForEvent("powerdelta", function(inst, data) self.power:SetPercent(data.newpercent, self.owner.replica.power:Max()) end, self.owner)
-	end
 
-	local _SetGhostMode = self.SetGhostMode
-	function self:SetGhostMode(ghostmode)
-		if not self.isghostmode == not ghostmode then --force boolean
-			return
-		end
+		local _SetGhostMode = self.SetGhostMode
+		function self:SetGhostMode(ghostmode)
+			if not self.isghostmode == not ghostmode then --force boolean
+				return
+			end
 
-		_SetGhostMode(self, ghostmode)
-		if ghostmode then
-			self.power:Hide()
-		else
-			self.power:Show()
+			_SetGhostMode(self, ghostmode)
+			if ghostmode then
+				self.power:Hide()
+			else
+				self.power:Show()
+			end
 		end
 	end
 end
