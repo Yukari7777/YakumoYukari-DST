@@ -19,8 +19,7 @@ function MakeUltimate(id)
 		local issw = name:find("sw") ~= nil
 		local abilityindex = issw and 6 or 5
 
-		local difficulty = _G.YUKARI_DIFFICULTY
-		local ultreq = difficulty == "EASY" and 20 or difficulty == "HARD" and 30 or 25
+		local ultreq = _G.YUKARI_STATUS.MAX_UPGRADE
 		
 		if level >= ultreq then
 			if not caster.components.upgrader.ability[index][abilityindex] then

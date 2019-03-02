@@ -41,4 +41,4 @@ local function fn()
     return inst
 end
 
-return Prefab( "common/barrierfield_fx", fn, assets) 
+return Prefab("fx/barrierfield_fx", fn, assets) 

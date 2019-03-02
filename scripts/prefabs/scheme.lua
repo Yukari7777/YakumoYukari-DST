@@ -1,15 +1,10 @@
-local assets=
+local assets =
 {   
 	Asset("ANIM", "anim/spell_none.zip"),    
 	Asset("ATLAS", "images/inventoryimages/scheme.xml"),    
 }
 
-local Ingredients = {
-	{{"rocks", 80}, {"log", 80}, {"rope", 20}},
-	{{"silk", 30}, {"pigskin", 20}, {"tentaclespots", 10}, {"deserthat", 1}},
-	{{"monstermeat", 60}, {"nightmarefuel", 50}, {"livinglog", 20}, {"armordragonfly", 1}},
-	{{"thulecite", 20}, {"spellcard_away", 10}, {"spellcard_matter", 5}, {"spellcard_laplace", 2}, {"spellcard_necro", 1}}
-}
+local Ingredients = TUNING.YUKARI.SCHEME_INGREDIENT
 
 local function GetIngameName(prefab)
 	return STRINGS.NAMES[string.upper(prefab)]
@@ -89,6 +84,21 @@ local function GetCanpell(owner)
 	return condition
 end
 
+local function SetCanspell(inst, data)
+	local owner = data.owner or data
+	local condition = GetCanpell(owner)
+	inst.components.spellcard:SetCondition(condition)
+	inst.canspell:set(condition)
+end
+
+local function GetDesc(inst, viewer)
+	if viewer:HasTag("yakumoyukari") then
+		local condition = GetCanpell(viewer)
+		SetCanspell(inst, viewer)
+		return string.format( STRINGS.YUKARI_CURRENT_LEVEL.." - "..viewer.components.upgrader.hatlevel..GetStr(viewer)..(condition and "\nI can spell." or "") )
+	end
+end
+
 local function DoUpgrade(inst, owner)
 	local inventory = owner.components.inventory
 	local list = GetTable(owner)
@@ -151,22 +161,6 @@ local function OnFinish(inst, owner)
 	owner.components.upgrader:ApplyStatus()
 end
 
-local function SetState(inst, data)
-	local owner = data.owner or data
-	local condition = GetCanpell(owner)
-	inst.components.spellcard:SetCondition(condition)
-	inst.canspell:set(condition)
-end
-
-
-local function GetDesc(inst, viewer)
-	if viewer.prefab == "yakumoyukari" then
-		local condition = GetCanpell(viewer)
-		SetState(inst, viewer)
-		return string.format( STRINGS.YUKARI_CURRENT_LEVEL.." - "..viewer.components.upgrader.hatlevel..GetStr(viewer)..(condition and "\nI can spell." or "") )
-	end
-end
-
 local function fn()  
 	local inst = CreateEntity() 
 	
@@ -175,6 +169,7 @@ local function fn()
 	inst.entity:AddNetwork()
 	inst.entity:AddSoundEmitter()
 	inst.entity:AddMiniMapEntity()
+	
     inst.MiniMapEntity:SetIcon("scheme.tex")
 
 	MakeInventoryPhysics(inst)

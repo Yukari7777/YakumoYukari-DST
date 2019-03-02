@@ -1,16 +1,5 @@
-local Ingredients = {
-	{"honey", "healingsalve", "bandage"},
-	{"berries", "meatballs", "bonestew"},
-	{"petals", "nightmarefuel", "purplegem"},
-	{"goldnugget", "livinglog", "thulecite"}
-}
-
-local Ingredients_sw = {
-	{"spidergland", "healingsalve", "bandage"},
-	{"berries", "fishsticks", "surfnturf"},
-	{"petals", "taffy", "livinglog"},
-	{"goldnugget", "nightmarefuel", "obsidian"}
-}
+local Ingredients = TUNING.YUKARI.UPGRADEPANEL_INGREDIENT
+local Ingredients_sw = TUNING.YUKARI.UPGRADEPANEL_INGREDIENT_SW
 
 local function GetIngameName(prefab)
 	return STRINGS.NAMES[string.upper(prefab)]
@@ -35,7 +24,6 @@ local function GetIngreCount(owner, index)
 	local info = {a,b,c}
 	
 	return info
-	
 end
 
 local function CountInventoryItem(owner, item)
@@ -107,7 +95,7 @@ local function GetCanpell(inst, owner)
 	return condition
 end
 
-local function SetState(inst, data)
+local function SetCanspell(inst, data)
 	local owner = data.owner or data
 	local condition = GetCanpell(inst, owner)
 	inst.components.spellcard:SetCondition(condition)
@@ -115,11 +103,11 @@ local function SetState(inst, data)
 end
 
 local function GetDesc(inst, viewer)
-	if viewer.prefab == "yakumoyukari" then
+	if viewer:HasTag("yakumoyukari") then
 		local index = inst.index 
 		local CurrentLevel = GetStatLevel(viewer, index)
 		local condition = GetCanpell(inst, viewer)
-		SetState(inst, viewer)
+		SetCanspell(inst, viewer)
 
 		return string.format( STRINGS.YUKARI_CURRENT_LEVEL.." - "..CurrentLevel..GetStr(viewer, index)..(condition and "\nI can spell." or "") )
 	end
