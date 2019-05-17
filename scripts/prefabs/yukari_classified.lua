@@ -42,8 +42,8 @@ local function OnEntityReplicated(inst)
 end
 
 local function PushMessage(inst)
-	local modname = KnownModIndex:GetModActualName("Yakumo Yukari")
-	local inspect = GetModConfigData("skill", modname) or 4
+	local modname = KnownModIndex:GetModActualName("Yakumo Yukari - Test") or KnownModIndex:GetModActualName("Yakumo Yukari")
+	local inspect = GetModConfigData("skill", "modname") or 4
 	local ClientString = inst.inspect:value()
 
 	if inst._parent.HUD ~= nil then
@@ -64,7 +64,8 @@ local function RegisterKeyEvent(classified)
 	local parent = classified._parent
 	if parent.HUD == nil then return end -- if it's not a client, stop here.
 
-	local INFOKEY = GetModConfigData("skillkey", _G.YAKUMOYUKARI_MODNAME) or "KEY_V"
+	local modname = KnownModIndex:GetModActualName("Yakumo Yukari - Test") or KnownModIndex:GetModActualName("Yakumo Yukari")
+	local INFOKEY = GetModConfigData("skillkey", modname) or "KEY_V"
 	TheInput:AddKeyDownHandler(_G[INFOKEY], function() 
 		if KeyCheckCommon(parent) then
 			SendModRPCToServer(MOD_RPC["yakumoyukari"]["sayinfo"], parent) 
@@ -97,11 +98,7 @@ local function RegisterNetListeners(inst)
 	if TheWorld.ismastersim then
 		inst._parent = inst.entity:GetParent()
 	else
-		-- Be aware that writting something in this block means,
-		-- You do NOT want to run the thing in the server
-		-- which EXCLUDES the host of server that doesn't have cave.
-		-- In most cases that you want to make 'clienty' things, call the function out of this block.
-		-- Then use parent.HUD == nil rather writting things in here.
+
 	end
 	RegisterKeyEvent(inst)
 	inst:ListenForEvent("onskillinspectdirty", PushMessage)

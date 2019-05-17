@@ -66,7 +66,7 @@ local FindEntity = GLOBAL.FindEntity
 local SpringCombatMod = GLOBAL.SpringCombatMod
 local KnownModIndex = GLOBAL.KnownModIndex
 
-GLOBAL.YAKUMOYUKARI_MODNAME = KnownModIndex:GetModActualName("Yakumo Yukari")
+GLOBAL.YAKUMOYUKARI_MODNAME = KnownModIndex:GetModActualName("Yakumo Yukari - Test") or KnownModIndex:GetModActualName("Yakumo Yukari")
 GLOBAL.YUKARI_DIFFICULTY = GetModConfigData("diff")
 
 local Language = GetModConfigData("language")
@@ -310,7 +310,6 @@ AddSimPostInit(function()
         return 
     end
 
-	local KnownModIndex = GLOBAL.KnownModIndex
 	GLOBAL.assert(KnownModIndex:IsModEnabled(KnownModIndex:GetModActualName("Scheme")) or KnownModIndex:IsModEnabled(KnownModIndex:GetModActualName("Scheme - Test")), 
 	"\n[Yakumo Yukari] No Scheme Network mod detected. Please enable Scheme mod as well. Terminating the server...\n"..
 	"[야쿠모 유카리] 스키마 네트워크 모드가 감지되지 않았습니다. 해당 모드도 활성화 해주세요. 서버를 종료합니다...\n"..

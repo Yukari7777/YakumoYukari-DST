@@ -1,6 +1,6 @@
 name = "Yakumo Yukari"
 author = "Yakumo Yukari"
-version = "0.11.13"
+version = "0.11.14"
 description = "Yakumo Yukari comes from unknown world to manipulate Don't Starve Together world!\n\nVersion : "..version.."\nPress [V] to show status.\nYOU MUST ENABLE SCHEME OR YOU'LL GET CRASHED."
 forumthread = ""
 api_version = 6
@@ -17,7 +17,7 @@ icon = "modicon.tex"
 priority = -5
 
 folder_name = folder_name or ""
-if not folder_name:find("workshop-") then
+if folder_name:find("YakumoYukari%-DST") then
     name = name.." - Test"
 end
 
@@ -49,10 +49,10 @@ configuration_options = {
 		hover = "Set Language",
 		options = {
 			{ description = "Auto", data = "AUTO" },
-			--{ description = "ÇÑ±¹¾î", data = "kr" },
+			--{ description = "ï¿½Ñ±ï¿½ï¿½ï¿½", data = "kr" },
 			{ description = "English", data = "en" },
-			{ description = "ñéÙþ", data = "ch" },
-			--{ description = "¬â¬å¬ã¬ã¬Ü¬Ú¬Û", data = "ru" },
+			{ description = "ï¿½ï¿½ï¿½ï¿½", data = "ch" },
+			--{ description = "ï¿½ï¿½ï¿½ï¿½ï¿½Ü¬Ú¬ï¿½", data = "ru" },
 		},
 		default = "AUTO",
 	},
