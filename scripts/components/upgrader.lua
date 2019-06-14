@@ -348,7 +348,7 @@ function Upgrader:UpdateSkillStatus()
 	end
 
 	if self.ResistDark ~= 0 then
-		skill.insulation = "Reduces sanity decrement from darkness by "..(self.ResistDark * 100).."%" 
+		skill.resistdark = "Reduces sanity decrement from darkness by "..(self.ResistDark * 100).."%" 
 	end	
 
 	local winter, summer = self.inst.components.temperature:GetInsulation()
@@ -374,7 +374,7 @@ function Upgrader:UpdateSkillStatus()
 
 	local friendlylevel = 0 + (self.inst:HasTag("youkai") and 0 or 1) + (self.inst:HasTag("realyoukai") and 1 or 0) + (self.inst:HasTag("spiderwhisperer") and 1 or 0)
 	if friendlylevel ~= 0 then
-		skill.friendlylevel = "Friendly Level : "..friendlylevel
+		skill.friendlylevel = "Friendship Level : "..friendlylevel
 	end
 
 	if self.absorbsanity ~= 0 then

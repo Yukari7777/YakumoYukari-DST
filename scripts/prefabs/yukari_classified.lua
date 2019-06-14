@@ -60,7 +60,7 @@ local function KeyCheckCommon(inst)
 	return inst == ThePlayer and TheFrontEnd:GetActiveScreen() ~= nil and TheFrontEnd:GetActiveScreen().name == "HUD"
 end
 
-local function RegisterKeyEvent(classified)
+local function RegisterKeyEvents(classified)
 	local parent = classified._parent
 	if parent.HUD == nil then return end -- if it's not a client, stop here.
 
@@ -100,7 +100,7 @@ local function RegisterNetListeners(inst)
 	else
 
 	end
-	RegisterKeyEvent(inst)
+	RegisterKeyEvents(inst)
 	inst:ListenForEvent("onskillinspectdirty", PushMessage)
 	inst:ListenForEvent("setnightvisiondirty", SetNightVision)
 	inst:ListenForEvent("setfastactiondirty", SetFastActionLevel)

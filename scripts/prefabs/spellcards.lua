@@ -106,7 +106,7 @@ local function necro(inst)
 				end
 				
 				if v:HasTag("flower") then
-					SpawnPrefab("flower_evil").Transform:SetPosition(v:GetPosition():Get())
+					SpawnPrefab("flower_evil").Transform:SetPosition(v.Transform:GetWorldPosition())
 					v:Remove()
 				end
 			end)
