@@ -10,9 +10,8 @@ PrefabFiles = {
 	"barrierfield_fx",
 	"graze_fx",
 	"puff_fx",
-	"scheme",
+	"scheme", 
 }
-
 Assets = {
     Asset( "IMAGE", "images/saveslot_portraits/yakumoyukari.tex" ),
     Asset( "ATLAS", "images/saveslot_portraits/yakumoyukari.xml" ),
@@ -46,8 +45,9 @@ Assets = {
 	Asset( "ANIM" , "anim/ypower.zip"),
 	
 	Asset("SOUNDPACKAGE", "sound/soundpack.fev"),
-	Asset("SOUND", "sound/spell.fsb"),
+	Asset("SOUND", "sound/spell.fsb")
 }
+
 AddMinimapAtlas("images/map_icons/yakumoyukari.xml")
 AddMinimapAtlas("images/map_icons/yukarihat.xml")
 AddMinimapAtlas("images/map_icons/yukariumbre.xml")
@@ -85,14 +85,12 @@ if Language == "AUTO" then
 else
 	GLOBAL.YUKARI_LANGUAGE = Language
 end
-
+modimport "scripts/tunings_yukari.lua"
+modimport "scripts/strings_yukari.lua"
 GLOBAL.YUKARISTATINDEX = { "health", "hunger", "sanity", "power" }
 
-modimport "scripts/tunings_yukari.lua"
 TUNING.YUKARI_STATUS = TUNING["YUKARI_STATUS"..(GLOBAL.YUKARI_DIFFICULTY or "")]
-
 modimport "scripts/power_init.lua"
-modimport "scripts/strings_yukari.lua"
 modimport "scripts/actions_yukari.lua" -- actions must be loaded before stategraph loads
 modimport "scripts/stategraph_yukari.lua"
 modimport "scripts/recipes_yukari.lua"
@@ -295,6 +293,37 @@ local function SpiderqueenRetargetFn(inst)
 
 	inst.components.combat:SetRetargetFunction(3, Retarget)
 end
+
+local function moonrock_onsave(inst, data)
+    inst:_OnSave(data)
+    data.YakumoYukariPreservedData = GLOBAL.next(inst.YakumoYukariPreservedData) ~= nil and inst.YakumoYukariPreservedData or nil
+end
+
+local function moonrock_onload(inst, data)
+    inst:_OnLoad(data)
+    inst.YakumoYukariPreservedData = data ~= nil and data.YakumoYukariPreservedData or inst.YakumoYukariPreservedData
+end
+
+local function PreserveUpgradeData(inst)
+    if not GLOBAL.TheWorld:HasTag("cave") then
+        inst.YakumoYukariPreservedData = {}
+        inst._OnSave = inst.OnSave
+        inst._OnLoad = inst.OnLoad
+        inst.OnSave = moonrock_onsave
+        inst.OnLoad = moonrock_onload
+        
+        inst:ListenForEvent("ms_newplayerspawned", function(world, player)
+            if player:HasTag("yakumoyukari") and inst.YakumoYukariPreservedData[player.userid] ~= nil then
+                if player.LoadPreserved ~= nil then
+                    player:LoadPreserved(inst.YakumoYukariPreservedData[player.userid])
+                end
+                inst.YakumoYukariPreservedData[player.userid] = nil
+            end
+        end, GLOBAL.TheWorld)
+    end
+end
+
+AddPrefabPostInit("multiplayer_portal_moonrock", PreserveUpgradeData)
 AddPrefabPostInit("bunnyman", BunnymanNormalRetargetFn)
 AddPrefabPostInit("pigman", PigmanNormalRetargetFn)
 AddPrefabPostInit("bat", BatRetargetFn)
@@ -324,19 +353,19 @@ local function SayInfo(inst)
 	local str = ""
 	local skilltable = {}
 	local inspect = GetModConfigData("skill") or 1
-	inst.infopage = inst.infopage >= (inst.components.upgrader.skilltextpage or TUNING.YUKARI.SKILLPAGE_BASE) and 0 or inst.infopage
+	inst.infopage = inst.infopage >= (inst.components.dreadful.skilltextpage or TUNING.YUKARI.SKILLPAGE_BASE) and 0 or inst.infopage
 
 	if inst.infopage == 0 then
-		HP = inst.components.upgrader.health_level
-		HN = inst.components.upgrader.hunger_level
-		SA = inst.components.upgrader.sanity_level
-		PO = inst.components.upgrader.power_level
+		HP = inst.components.dreadful.health_level
+		HN = inst.components.dreadful.hunger_level
+		SA = inst.components.dreadful.sanity_level
+		PO = inst.components.dreadful.power_level
 
 		str = STRINGS.NAMES.HEALTHPANEL.." : "..HP.."\n"..STRINGS.NAMES.HUNGERPANEL.." : "..HN.."\n"..STRINGS.NAMES.SANITYPANEL.." : "..SA.."\n"..STRINGS.NAMES.POWERPANEL.." : "..PO.."\n"
 	elseif inst.infopage == 1 then
-		for i = 1, inst.components.upgrader.skillsort, 1 do
-			for j = 1, inst.components.upgrader.skilllevel, 1 do
-				if inst.components.upgrader.ability[i][j] then
+		for i = 1, inst.components.dreadful.skillsort, 1 do
+			for j = 1, inst.components.dreadful.skilllevel, 1 do
+				if inst.components.dreadful.ability[i][j] then
 					if i == 1 then HP = HP + 1
 					elseif i == 2 then HN = HN + 1
 					elseif i == 3 then SA = SA + 1
@@ -349,13 +378,13 @@ local function SayInfo(inst)
 		str = STRINGS.HEALTH.." "..STRINGS.ABILITY.." : lev."..HP.."\n"..STRINGS.HUNGER.." "..STRINGS.ABILITY.." : lev."..HN.."\n"..STRINGS.SANITY.." "..STRINGS.ABILITY.." : lev."..SA.."\n"..STRINGS.POWER.." "..STRINGS.ABILITY.." : lev."..PO.."\n"
 	else
 		local skillindex = 0
-		inst.components.upgrader:UpdateSkillStatus()
+		inst.components.dreadful:UpdateSkillStatus()
 
-		for k, v in pairs(inst.components.upgrader.skill) do
+		for k, v in pairs(inst.components.dreadful.skill) do
 			skillindex = skillindex + 1
 			skilltable[skillindex] = v
 		end
-		inst.components.upgrader.skilltextpage = (skillindex ~= 0 and 2 + math.ceil(skillindex / 3) or 3)
+		inst.components.dreadful.skilltextpage = (skillindex ~= 0 and 2 + math.ceil(skillindex / 3) or 3)
 
 		for k = 1, 3 do
 			str = str..(skilltable[(inst.infopage-2) * 3 + k] or "").."\n"

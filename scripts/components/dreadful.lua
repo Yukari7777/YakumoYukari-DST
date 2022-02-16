@@ -1,7 +1,7 @@
 local CONST = TUNING.YUKARI
 local STATUS = TUNING.YUKARI_STATUS
 
-local Upgrader = Class(function(self, inst)
+local Dreadful = Class(function(self, inst)
     self.inst = inst
 
 	self.health_level = 0
@@ -76,14 +76,14 @@ local Upgrader = Class(function(self, inst)
 	
 end)
 
-function Upgrader:SetFireDamageScale()
+function Dreadful:SetFireDamageScale()
 	local shouldimmune = self.fireimmuned or (self.hatequipped and self.FireResist)
 	if self.inst.components.health then
 		self.inst.components.health.fire_damage_scale = shouldimmune and 0 or 1
 	end
 end
 
-function Upgrader:AbilityManager()
+function Dreadful:AbilityManager()
 	local ability = self.ability
 	local hatskill = self.hatskill
 	local unlockpoint = STATUS.UNLOCKABILITY
@@ -104,7 +104,7 @@ function Upgrader:AbilityManager()
 	self:UpdateAbilityStatus()
 end
 
-function Upgrader:UpdateAbilityStatus()
+function Dreadful:UpdateAbilityStatus()
 	local ability = self.ability
 	
 	if ability[1][1] then
@@ -280,7 +280,7 @@ function Upgrader:UpdateAbilityStatus()
 	self.inst.yukari_classified.fastaction:set(self.fastactionlevel)
 end
 
-function Upgrader:ApplyHatAbility(hat)	
+function Dreadful:ApplyHatAbility(hat)	
 	if self.hatequipped then
 		local skill = self.hatskill
 		
@@ -340,7 +340,7 @@ function Upgrader:ApplyHatAbility(hat)
 	self.inst.components.power:SetModifier("hatrate", self.hatpowergain)
 end
 
-function Upgrader:UpdateSkillStatus()
+function Dreadful:UpdateSkillStatus()
 	local skill = self.skill
 
 	if self.powerupvalue ~= 0 then
@@ -467,7 +467,7 @@ function Upgrader:UpdateSkillStatus()
 	end
 end
 
-function Upgrader:ApplyStatus()
+function Dreadful:ApplyStatus()
 	local inst = self.inst
 	local hunger_percent = inst.components.hunger:GetPercent()
 	local health_percent = inst.components.health:GetPercent()
@@ -493,4 +493,4 @@ function Upgrader:ApplyStatus()
 	inst.components.sanity.ignore = ignoresanity
 end
 
-return Upgrader
+return Dreadful

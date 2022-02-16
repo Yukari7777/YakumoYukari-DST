@@ -12,7 +12,7 @@ local function MakeStackableCommon(inst, cost)
 end
 
 local function MakeBuffSpellCommon(inst, uses, costmult)
-	SetInitialCost(inst, TUNING.SPELL_POWERCOST_NORMAL * (costmult or 1))
+	SetInitialCost(inst, TUNING.SPELL_POWERCOST_LASTING * (costmult or 1))
 	inst:AddComponent("finiteuses")
 	inst.components.finiteuses:SetMaxUses(uses)
 	inst.components.finiteuses:SetUses(uses)
@@ -59,7 +59,7 @@ local function away(inst)
 				v.components.combat.target = nil
 			end
 		end
-		owner.components.power:DoDelta(-TUNING.SPELL_POWERCOST_NORMAL)
+		owner.components.power:DoDelta(-TUNING.SPELL_POWERCOST_LASTING)
 		inst.components.finiteuses:Use(1)
 	end)
 	inst.components.spellcard:SetDoneSpeech("DESCRIBE_DECLOAKING")
@@ -139,7 +139,7 @@ local function curse(inst)
 		if mindcontrol ~= nil then mindcontrol._level:set(0) end
 		owner.components.hunger.hungerrate = 0
 		owner.components.sanity:DoDelta(- owner.components.sanity:GetMaxWithPenalty() * 0.025)
-		owner.components.power:DoDelta(-TUNING.SPELL_POWERCOST_NORMAL * 1.5)
+		owner.components.power:DoDelta(-TUNING.SPELL_POWERCOST_LASTING * 1.5)
 		owner.components.combat.damagemultiplier = 1 + mod * 0.5
 		owner.components.combat:SetAttackPeriod(0)
 		owner.components.locomotor.walkspeed = 4 + mod
@@ -154,7 +154,7 @@ local function curse(inst)
 		if YukariHat ~= nil then
 			YukariHat:RemoveTag("shadowdominance")
 		end
-		owner.components.upgrader:ApplyStatus()
+		owner.components.dreadful:ApplyStatus()
 		if owner.yukari_classified ~= nil then
 			owner.yukari_classified.inspellcurse:set(false)
 		end
@@ -223,7 +223,7 @@ local function laplace(inst)
 	end)
 	inst.components.spellcard:SetTaskFn(function(inst, owner)
 		local IsWearGoggle = owner.components.inventory.equipslots ~= nil and owner.components.inventory.equipslots["head"] ~= nil and owner.components.inventory.equipslots["head"].prefab == "molehat"
-		owner.components.power:DoDelta(-TUNING.SPELL_POWERCOST_NORMAL / 2)
+		owner.components.power:DoDelta(-TUNING.SPELL_POWERCOST_LASTING / 2)
 		inst.components.finiteuses:Use(1)
 		if IsWearGoggle then
 			owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_EYEHURT"))
@@ -292,12 +292,12 @@ local function bait(inst)
 		if owner.yukari_classified ~= nil then
 			owner.yukari_classified.inspellbait:set(true)
 		end
-		owner.components.upgrader:ApplyStatus()
+		owner.components.dreadful:ApplyStatus()
 		owner.components.talker:Say(GetString(owner.prefab, "TAUNT"))
 		inst.fx = barrier(inst, owner)
 	end)
 	inst.components.spellcard:SetTaskFn(function(inst, owner)
-		owner.components.power:DoDelta(-TUNING.SPELL_POWERCOST_NORMAL)
+		owner.components.power:DoDelta(-TUNING.SPELL_POWERCOST_LASTING)
 		owner:RemoveTag("realyoukai")
 		local x,y,z = owner.Transform:GetWorldPosition()
 		local ents = TheSim:FindEntities(x, y, z, 12)
@@ -312,7 +312,7 @@ local function bait(inst)
 		if owner.yukari_classified ~= nil then
 			owner.yukari_classified.inspellbait:set(false)
 		end
-		owner.components.upgrader:ApplyStatus()
+		owner.components.dreadful:ApplyStatus()
 		inst.fx:kill_fx()
 		inst.fx = nil
 	end)
@@ -349,10 +349,7 @@ local function addictive(inst)
 					v.components.pickable.protected_cycles = nil
 					v.components.pickable.transplanted = false
 					v.components.pickable:Regen()
-					if v.components.timer:TimerExists("morphing") or v.components.timer:TimerExists("morphrelay") or v.components.timer:TimerExists("morphdelay") then
-						v.components.timer:OnRemoveFromEntity()
-						v:RemoveComponent("timer")
-					end
+                    
 					if v.rain ~= nil then
 						v.rain = 0
 					end

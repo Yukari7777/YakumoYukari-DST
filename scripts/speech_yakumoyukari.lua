@@ -1,4 +1,5 @@
-return {
+return 
+{
 	ACTIONFAIL =
 	{
 		REPAIR =
@@ -10,11 +11,6 @@ return {
             MOUNTED = "In this elevated position, I can't reach the ground.",
             HASPET = "One domestic creature is enough for me.",
         },
-        READ =
-        {
-            GENERIC = "Other matters await.",
-            NOBIRDS = "The birds are not keen on this weather."
-        },
 		SHAVE =
 		{
 			AWAKEBEEFALO = "I don't want to annoy him.",
@@ -25,6 +21,8 @@ return {
 		{
 			GENERIC = "Not enough stores left.",
 			NOTALLOWED = "This is not for here.",
+			INUSE = "Someone's using.",
+            NOTMASTERCHEF = "Someone really good at cooking would use this.",
 		},
 		CONSTRUCT =
         {
@@ -33,48 +31,31 @@ return {
             EMPTY = "I need something to build with first.",
             MISMATCH = "Those are the wrong plans.",
         },
-        WRITE =
-        {
-            GENERIC = "I'd rather write in my own books.",
-            INUSE = "I have to wait",
-        },
-        RUMMAGE =
+		RUMMAGE =
         {   
             GENERIC = "I've other things on my mind currently.",
             INUSE = "Be sure to sort by color and weight.",   
+			NOTMASTERCHEF = "Someone really good at cooking would use this.",
         },
-        DRAW =
+		USEKLAUSSACKKEY =
         {
-            NOIMAGE = "An example of what I should diagram would be helpful.",
+        	WRONGKEY = "Does this mean something guilty?",
+        	KLAUS = "I don't think it's safe to open this.",
+			QUAGMIRE_WRONGKEY = "I'll just have to find another key.",
         },
-		CHANGEIN =
+		ACTIVATE = 
+		{
+			LOCKED_GATE = "The gate has sealed.",
+		},
+		COOK =
         {
-            GENERIC = "I think I look pretty smart already.",
-            BURNING = "No more changes for me. It's gone up in flames.",
-            INUSE = "If I could use that after you.",
-        },
-        COOK =
-        {
-            GENERIC = "Perhaps later. Not all old ladies enjoy cooking, you know.",
-            INUSE = "Mmm, smells lovely.",
+            GENERIC = "I don't think I can't cook right now.",
+            INUSE = "It makes me more hungry!",
             TOOFAR = "It is not within my reach.",
         },
-        MOUNT =
+		GIVE =
         {
-            INUSE = "I must be patient. I can ride this beefalo later.",
-            TARGETINCOMBAT = "It's fighting.",
-        },
-        SADDLE =
-        {
-            TARGETINCOMBAT = "It's fighting.",
-        },
-        ATTUNE =
-        {
-            NOHEALTH = "I'm feeling too ill for that.",
-        },
-        GIVE =
-        {
-            GENERIC = "? where are you?",
+            GENERIC = "What am I doing right now",
             DEAD = "Oh, it's dead.",
             SLEEPING = "It appears to be sleeping.",
             BUSY = "Seems busy.",
@@ -90,29 +71,64 @@ return {
             NOTDISH = "Oh sure you don't eat this.",
             DUPLICATE = "You've already taken note of this recipe.",
             NOTSCULPTABLE = "No one ever sculpt like that.",
+			NOTATRIUMKEY = "It doesn't even look like.",
             CANTSHADOWREVIVE = "Conditions are not right.",
             WRONGSHADOWFORM = "The skeletal anatomy is incorrect.",
             NOMOON = "It needs a lunar influence.",
+			PIGKINGGAME_MESSY = "I need to clean up first.",
+			PIGKINGGAME_DANGER = "It's too dangerous for that right now.",
+			PIGKINGGAME_TOOLATE = "It's too late for that now.",
         },
         GIVETOPLAYER = 
         {
             FULL = "You don't have any inventory slots left.",
             DEAD = "Oh, it's dead.",
-            SLEEPING = "They've entered REM sleep.",
+            SLEEPING = "It has entered the deep sleep.",
             BUSY = "They're busy.",
         },
         GIVEALLTOPLAYER = 
         {
             FULL = "They're already heavily burdened.",
             DEAD = "Oh, it's dead.",
-            SLEEPING = "They've entered REM sleep.",
+            SLEEPING = "They've entered the deep sleep.",
             BUSY = "They're busy.",
+        },
+        WRITE =
+        {
+            GENERIC = "I'd rather write in my own books.",
+            INUSE = "I have to wait",
+        },
+        DRAW =
+        {
+            NOIMAGE = "An example of what I should diagram would be helpful.",
+        },
+		CHANGEIN =
+        {
+            GENERIC = "How many skins do you have?",
+            BURNING = "I don't think it's time for dress-up?",
+            INUSE = "I can't use this right now.",
+        },
+		ATTUNE =
+        {
+            NOHEALTH = "I'm feeling too ill for that.",
+        },
+        MOUNT =
+        {
+            TARGETINCOMBAT = "It's fighting. I can't do that.",
+			INUSE = "I must be patient. I can ride this beefalo later.",
+        },
+        SADDLE =
+        {
+            TARGETINCOMBAT = "It's fighting. I can't do that.",
         },
         TEACH =
         {
+			--Recipes/Teacher
             KNOWN = "Please. That knowledge is child's play.",
-            CANTLEARN = "A piece of knowledge I cannot grasp... Intriguing!",
-            WRONGWORLD = "This map is for some other location.",
+            CANTLEARN = "Is this a kind of forbidden knowledge or something?",
+			
+			--MapRecorder/MapExplorer
+            WRONGWORLD = "This map is not for this dimension, I mean world.",
         },
         WRAPBUNDLE =
         {
@@ -123,21 +139,45 @@ return {
             RESTRICTION = "That's not my area of expertise.",
             INUSE = "? Where is it?",
         },
+		SLAUGHTER =
+        {
+            TOOFAR = "It got away.",
+        },
         REPLATE =
         {
-            MISMATCH = "That's not the proper dinnerware for this food.", 
-            SAMEDISH = "It's already on the proper dinnerware.", 
+            MISMATCH = "It needs another type of dish.", 
+            SAMEDISH = "I only need to use one dish.", 
         },
-		REPAIRBOAT = {
-			GENERIC = "I think it's no problem.",
-		},
+		SAIL =
+        {
+            REPAIR = "It's already in ideal condition.",
+        },
+        ROW_FAIL =
+        {
+            BAD_TIMING0 = "That's too early!",
+            BAD_TIMING1 = "Am I really focusing?",
+            BAD_TIMING2 = "That was terrible timing!",
+        },
+        LOWER_SAIL_FAIL =
+        {
+            "Why it doesn't lower?",
+            "Is there something stuck?",
+            "I, can't lower?",
+        },
+        BATHBOMB =
+        {
+            GLASSED = "It was not mine that the surface has crystallized.",
+            ALREADY_BOMBED = "It's already bombed",
+        },
 	},
 	ACTIONFAIL_GENERIC = "I can't do that.",
+	ANNOUNCE_BOAT_LEAK = "I don't feel so good...",
+	ANNOUNCE_BOAT_SINK = "I don't want to drown!",
 	ANNOUNCE_ADVENTUREFAIL = "Something is disturbing that I go to another dimension. I'll have to try again.",
 	ANNOUNCE_BEES = "Bee careful!",
 	ANNOUNCE_BOOMERANG = {
 		"Ouch! Is that your physical limit?",
-		"Please press the Space Bar before it hit me!",
+		"Please press the Spacebar before it hits me!",
 	},
 	ANNOUNCE_CHARLIE = "Where? where is it?!",
 	ANNOUNCE_CHARLIE_ATTACK = "IT FORCES ME OUT OF THIS WORLD!!",
@@ -240,7 +280,7 @@ return {
 	ANNOUNCE_CANFIX = "\nI can fix this.",
 	ANNOUNCE_ACCOMPLISHMENT = "Do I acheive or something?",
 	ANNOUNCE_ACCOMPLISHMENT_DONE = "Well, It's done.",	
-	ANNOUNCE_INSUFFICIENTFERTILIZER = "This plant is going to be withered.  Gonna need some fertilizer.",
+	ANNOUNCE_INSUFFICIENTFERTILIZER = "This plant is going to be withered. I need some fertilizer.",
 	ANNOUNCE_TOOL_SLIP = "Aw! That was dangerous!",
 	ANNOUNCE_LIGHTNING_DAMAGE_AVOIDED = "What! Is this a fully-shockproof?",
 	ANNOUNCE_TOADESCAPING = "It will need to burrow soon to rehydrate its skin.",
@@ -318,7 +358,7 @@ return {
 		GENERIC = "Now you have murdered by me.",
 		SPIDER_WARRIOR = "How weak were you!",
 	},
-	DESCRIBE = ----------------------------------------------------------------------------- 1209
+	DESCRIBE =
 	{
         GLOMMER = "Hey! can you see UV rays?",
         GLOMMERFLOWER = 

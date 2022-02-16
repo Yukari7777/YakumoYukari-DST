@@ -79,12 +79,52 @@ local function onsave(inst, data)
 	data.invin_cool = inst.invin_cool
 	data.grazecnt = inst.grazecnt
 	data.naughtiness = inst.naughtiness
-	data.health_level = inst.components.upgrader.health_level
-	data.hunger_level = inst.components.upgrader.hunger_level
-	data.sanity_level = inst.components.upgrader.sanity_level
-	data.power_level = inst.components.upgrader.power_level
-	data.skilltree = inst.components.upgrader.ability
-	data.hatlevel = inst.components.upgrader.hatlevel
+	data.health_level = inst.components.dreadful.health_level
+	data.hunger_level = inst.components.dreadful.hunger_level
+	data.sanity_level = inst.components.dreadful.sanity_level
+	data.power_level = inst.components.dreadful.power_level
+	data.skilltree = inst.components.dreadful.ability
+	data.hatlevel = inst.components.dreadful.hatlevel
+end
+
+local function PreserveLevel(inst)
+    local data = {
+        regen_cool = inst.regen_cool,
+        poison_cool = inst.poison_cool,
+        invin_cool = inst.invin_cool,
+        grazecnt = inst.grazecnt,
+        naughtiness = inst.naughtiness,
+        health_level = inst.components.dreadful.health_level,
+        hunger_level = inst.components.dreadful.hunger_level,
+        sanity_level = inst.components.dreadful.sanity_level,
+        power_level = inst.components.dreadful.power_level,
+        skilltree = inst.components.dreadful.ability,
+        hatlevel = inst.components.dreadful.hatlevel,
+    }
+    
+    -- Damn it, it seems I need to find and get multiplayer_portal from the whole entity list.
+    for k, prefab in pairs(Ents) do 
+        if prefab:HasTag("moonportal") then
+            prefab.YakumoYukariPreservedData[inst.userid] = data
+        end
+    end
+end
+
+local function LoadForReroll(inst, data)
+    if inst.components.dreadful ~= nil then
+        inst.regen_cool = data.regen_cool
+        inst.poison_cool = data.poison_cool
+        inst.invin_cool = data.invin_cool
+        inst.grazecnt = data.grazecnt
+        inst.naughtiness = data.naughtiness
+        inst.components.dreadful.health_level = data.health_level
+        inst.components.dreadful.hunger_level = data.hunger_level
+        inst.components.dreadful.sanity_level = data.sanity_level
+        inst.components.dreadful.power_level = data.power_level
+        inst.components.dreadful.ability = data.skilltree
+        inst.components.dreadful.hatlevel = data.hatlevel
+        inst.components.dreadful:ApplyStatus()
+    end
 end
 
 local function onpreload(inst, data)
@@ -94,13 +134,13 @@ local function onpreload(inst, data)
 			inst.poison_cool = data.poison_cool or 0 
 			inst.invin_cool = data.invin_cool or 0 
 			inst.grazecnt = data.grazecnt or 0
-			inst.components.upgrader.health_level = data.health_level or 0 
-			inst.components.upgrader.hunger_level = data.hunger_level or 0
-			inst.components.upgrader.sanity_level = data.sanity_level or 0 
-			inst.components.upgrader.power_level = data.power_level or 0	
-			inst.components.upgrader.hatlevel = data.hatlevel or 1
-			inst.components.upgrader.ability = data.skilltree
-			inst.components.upgrader:ApplyStatus()
+			inst.components.dreadful.health_level = data.health_level or 0 
+			inst.components.dreadful.hunger_level = data.hunger_level or 0
+			inst.components.dreadful.sanity_level = data.sanity_level or 0 
+			inst.components.dreadful.power_level = data.power_level or 0	
+			inst.components.dreadful.hatlevel = data.hatlevel or 1
+			inst.components.dreadful.ability = data.skilltree
+			inst.components.dreadful:ApplyStatus()
 
 			--re-set these from the save data, because of load-order clipping issues
 			if data.health ~= nil and data.health.health ~= nil then inst.components.health.currenthealth = data.health.health end
@@ -118,7 +158,7 @@ end
 local function OnWorldLoaded(inst)
 	local yukarihat = inst:GetYukariHat()
 	if yukarihat ~= nil then
-		inst.components.upgrader:ApplyHatAbility(yukarihat)
+		inst.components.dreadful:ApplyHatAbility(yukarihat)
 	end
 end
 
@@ -133,9 +173,9 @@ end
 local function OnAttackOther(inst, data)
 	local target = data.target
 	if target == nil then return end
-	local CanAOE = inst.components.upgrader.IsAOE and math.random() < 0.4
+	local CanAOE = inst.components.dreadful.IsAOE and math.random() < 0.4
 
-	if inst.components.upgrader.IsVampire then
+	if inst.components.dreadful.IsVampire then
 		if target.components.health ~= nil and not target:HasTag("chester") and not target:HasTag("wall") and not target:HasTag("companion") then
 			inst.components.health:DoDelta(1, nil, nil, true)
 			if CanAOE then
@@ -150,14 +190,14 @@ local function OnAttackOther(inst, data)
 end
 
 local function DoPowerRestore(inst, amount)
-	local delta = amount * inst.components.upgrader.PowerGainMultiplier
+	local delta = amount * inst.components.dreadful.PowerGainMultiplier
 	inst.components.power:DoDelta(delta)
 	--inst.HUD.controls.status.power:PulseGreen() 
 	--inst.HUD.controls.status.power:ScaleTo(1.3,1,.7)
 end
 
 local function MakeInvincible(inst)
-	inst.components.upgrader.CanbeInvincibled = false
+	inst.components.dreadful.CanbeInvincibled = false
 	inst.invin_cool = STATUS.INVINCIBLE_COOLTIME
 	inst.IsInvincible = true
 	inst.components.health:SetInvincible(true)
@@ -170,8 +210,8 @@ local function MakeInvincible(inst)
 end
 	
 local function OnHealthDelta(inst, data)
-	if inst.components.upgrader.InvincibleLearned 
-	and inst.components.upgrader.CanbeInvincibled
+	if inst.components.dreadful.InvincibleLearned 
+	and inst.components.dreadful.CanbeInvincibled
 	and inst.components.health.currenthealth <= math.max(30, inst.components.health:GetMaxWithPenalty() * 0.15) then
 		MakeInvincible(inst)
 	end
@@ -183,7 +223,7 @@ function OnHungerDelta(inst, data)
 	end
 
 	if inst.components.combat ~= nil then
-		local dmgmult = TUNING.YUKARI.DAMAGE_MULTIPLIER + math.max(data.newpercent - (1 - inst.components.upgrader.powerupvalue * 0.2), 0)
+		local dmgmult = TUNING.YUKARI.DAMAGE_MULTIPLIER + math.max(data.newpercent - (1 - inst.components.dreadful.powerupvalue * 0.2), 0)
 		local scale = 0.95 + (dmgmult - TUNING.YUKARI.DAMAGE_MULTIPLIER) * 0.15
 		inst.components.combat.damagemultiplier = dmgmult
 
@@ -202,7 +242,7 @@ local function SetLight(inst, var)
 end
 
 local function OnSanityDelta(inst, data)
-	if inst.components.upgrader.NightVision and (TheWorld.state.phase == "night" or TheWorld:HasTag("cave")) and inst.sleepingbag == nil then
+	if inst.components.dreadful.NightVision and (TheWorld.state.phase == "night" or TheWorld:HasTag("cave")) and inst.sleepingbag == nil then
 		local sanitypercent = data.newpercent
 		if sanitypercent > 0.9 then
 			inst:SetLight(sanitypercent)
@@ -216,18 +256,18 @@ end
 
 local function HealthRegen(inst)
 	if inst.components.health ~= nil then
-		inst.components.health:DoDelta(inst.components.upgrader.regenamount)
+		inst.components.health:DoDelta(inst.components.dreadful.regenamount)
 	end
 end
 
 local function InvincibleRegen(inst)
 	if inst.components.health ~= nil and inst.IsInvincible then
-		inst.components.health:DoDelta(inst.components.upgrader.emergency, nil, nil, true)
+		inst.components.health:DoDelta(inst.components.dreadful.emergency, nil, nil, true)
 	end
 end
 
 local function Cooldown(inst)
-	if inst.components.upgrader.ability[1][2] then
+	if inst.components.dreadful.ability[1][2] then
 		if inst.regen_cool > 0 then
 			inst.regen_cool = inst.regen_cool - 1
 		elseif inst.regen_cool == 0 
@@ -235,14 +275,14 @@ local function Cooldown(inst)
 		and inst.components.health:IsHurt() 
 		and inst.components.hunger:GetPercent() > 0.5 then
 			HealthRegen(inst)
-			inst.regen_cool = inst.components.upgrader.regencool
+			inst.regen_cool = inst.components.dreadful.regencool
 		end
 	end
 
 	if inst.invin_cool > 0 then
 		inst.invin_cool = inst.invin_cool - 1
 	elseif inst.invin_cool == 0 then
-		inst.components.upgrader.CanbeInvincibled = true
+		inst.components.dreadful.CanbeInvincibled = true
 	end
 
 	if inst.naughtiness > 0 then
@@ -251,7 +291,7 @@ local function Cooldown(inst)
 end
 
 local function PeriodicFunction(inst)
-	inst.components.sanity.night_drain_mult = 1 - inst.components.upgrader.ResistDark - (inst.components.upgrader.hatequipped and 0.2 or 0)
+	inst.components.sanity.night_drain_mult = 1 - inst.components.dreadful.ResistDark - (inst.components.dreadful.hatequipped and 0.2 or 0)
 	
 	if inst.sleepingbag ~= nil then
 		inst:SetLight(false)
@@ -262,7 +302,7 @@ local function PeriodicFunction(inst)
 			InvincibleRegen(inst)
 		end
 
-		if inst.components.upgrader.nohealthpenalty then
+		if inst.components.dreadful.nohealthpenalty then
 			inst.components.health:SetPenalty(0)
 		end
 	end
@@ -271,7 +311,7 @@ local function PeriodicFunction(inst)
 end
 
 local function Graze(inst)
-	if inst.components.upgrader.Ability_45 and not inst.IsGrazing then
+	if inst.components.dreadful.Ability_45 and not inst.IsGrazing then
 		inst.IsGrazing = true
 		inst:DoTaskInTime(0.75, function(inst)
 			inst.IsGrazing = false
@@ -344,7 +384,7 @@ end
 local function MakeToolEfficient(item)
 	function item.components.tool.GetEffectiveness(self, action)
 		local owner = item.components.inventoryitem ~= nil and item.components.inventoryitem.owner
-		if owner ~= nil and owner.components.upgrader ~= nil and owner.components.upgrader.IsEfficient and action ~= ACTIONS.HAMMER then
+		if owner ~= nil and owner.components.dreadful ~= nil and owner.components.dreadful.IsEfficient and action ~= ACTIONS.HAMMER then
 			return self.actions[action] * 1.5 or 0
 		end
 		return self.actions[action] or 0
@@ -354,7 +394,7 @@ end
 local function MakeGrazeable(inst)
 	local _ApplyDamage = inst.components.inventory.ApplyDamage
 	function inst.components.inventory.ApplyDamage(self, damage, attacker, weapon, ...)
-		local totaldodge = (inst.components.upgrader.dodgechance + inst.components.upgrader.hatdodgechance) * (inst.sg:HasStateTag("moving") and 2 or 1) -- double when is moving
+		local totaldodge = (inst.components.dreadful.dodgechance + inst.components.dreadful.hatdodgechance) * (inst.sg:HasStateTag("moving") and 2 or 1) -- double when is moving
 		local candodge = inst.IsGrazing or math.random() < totaldodge and inst.components.freezeable == nil and not inst.components.health:IsInvincible() and (attacker ~= nil and attacker.components ~= nil and attacker.components.combat ~= nil)
 
 		if candodge then
@@ -372,7 +412,7 @@ local function MakeDapperOnEquipItem(inst)
 		for k, v in pairs(self.inst.components.inventory.equipslots) do
 			if v.components.equippable ~= nil then
 				local itemdap = v.components.equippable:GetDapperness(self.inst)
-				NumBeforeCalc = itemdap < 0 and NumBeforeCalc + itemdap * self.inst.components.upgrader.absorbsanity or NumBeforeCalc
+				NumBeforeCalc = itemdap < 0 and NumBeforeCalc + itemdap * self.inst.components.dreadful.absorbsanity or NumBeforeCalc
 			end
 		end
 		self.dapperness = NumBeforeCalc ~= 0 and -NumBeforeCalc or 0
@@ -381,7 +421,7 @@ local function MakeDapperOnEquipItem(inst)
 end
 
 local function OnEquipHat(inst, data)
-	inst.components.upgrader.hatequipped = data.isequipped
+	inst.components.dreadful.hatequipped = data.isequipped
 end
 
 local ShouldApplyStatus = {
@@ -392,7 +432,7 @@ local function OnEquip(inst, data)
 	local item = data ~= nil and data.item ~= nil and data.item or nil
 	if item == nil then return end
 
-	if inst.components.upgrader ~= nil and inst.components.upgrader.IsEfficient and data.eslot == EQUIPSLOTS.HANDS and item.components.tool ~= nil then
+	if inst.components.dreadful ~= nil and inst.components.dreadful.IsEfficient and data.eslot == EQUIPSLOTS.HANDS and item.components.tool ~= nil then
 		MakeToolEfficient(item)
 	end
 	
@@ -406,12 +446,12 @@ local function OnEquip(inst, data)
 
 	if ShouldApply then
 		-- I don't like how Klei sets the fire_damage_scale.
-		inst.components.upgrader.fireimmuned = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == "armordragonfly"
+		inst.components.dreadful.fireimmuned = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY) ~= nil and inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY).prefab == "armordragonfly"
 
 		if item.prefab == "yukarihat" then
-			inst.components.upgrader:ApplyHatAbility(item)
+			inst.components.dreadful:ApplyHatAbility(item)
 		end
-		inst.components.upgrader:ApplyStatus()
+		inst.components.dreadful:ApplyStatus()
 	end
 end
 
@@ -455,7 +495,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.grazecnt = 0
 	inst.infopage = 0
 
-	inst:AddComponent("upgrader")
+	inst:AddComponent("dreadful")
 	inst:AddComponent("power")
 
 	inst.soundsname = "willow"
@@ -478,6 +518,7 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst.GetYukariHat = GetEquippedYukariHat
 	inst.SetLight = SetLight
 	inst.PowerRestores = powertable
+    inst.LoadPreserved = LoadForReroll
 	
 	inst:DoPeriodicTask(1, PeriodicFunction)
 	--inst:DoTaskInTime(1, OnWorldLoaded)
@@ -490,6 +531,8 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:ListenForEvent("unequip", OnEquip )
 	inst:ListenForEvent("graze", Graze )
 	inst:ListenForEvent("debugmode", DebugFunction, inst)
+    inst:ListenForEvent("ms_playerreroll", PreserveLevel)
+ 
 end
 
 return MakePlayerCharacter("yakumoyukari", prefabs, assets, common_postinit, master_postinit)

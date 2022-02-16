@@ -56,10 +56,13 @@ local function StatusDisplaysInit(self)
 			self.power.maxnum:SetPosition(6, 0, 0)
 			self.power.maxnum:MoveToFront()
 			self.power.maxnum:Hide()
+            
+            self.boatmeter:SetPosition(-62, -130, 0)
 		else
 			self.power:SetPosition(-40, -50,0)
 			self.brain:SetPosition(40, -50, 0)
 			self.stomach:SetPosition(-40,17,0)
+            self.boatmeter:SetPosition(-40, -117, 0)
 		end
 		
 		self.inst:ListenForEvent("powerdelta", function(inst, data) self.power:SetPercent(data.newpercent, self.owner.replica.power:Max()) end, self.owner)

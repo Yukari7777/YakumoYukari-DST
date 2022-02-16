@@ -111,7 +111,6 @@ local function fn()
 
 	inst.entity:SetPristine()
 	
-
 	inst:AddComponent("inspectable")
 	
 	inst:AddComponent("inventoryitem")

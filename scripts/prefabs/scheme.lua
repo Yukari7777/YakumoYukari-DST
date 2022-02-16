@@ -12,7 +12,7 @@ end
 
 local function GetTable(owner)
 	--local difficulty = _G.YUKARI_DIFFICULTY
-	local hatlevel = owner.components.upgrader.hatlevel
+	local hatlevel = owner.components.dreadful.hatlevel
 	local list = {}
 	
 	if hatlevel < 5 then
@@ -58,7 +58,7 @@ local function GetStr(owner)
 	local list = GetTable(owner)
 	local text = ""
 
-	if owner.components.upgrader.hatlevel < 5 then
+	if owner.components.dreadful.hatlevel < 5 then
 		for i = 1, #list, 1 do
 			text = text.."\n"..GetIngameName(list[i][1]).." - "..CountInventoryItem(owner, list[i][1]).." / "..list[i][2]
 		end
@@ -73,7 +73,7 @@ local function GetCanpell(owner)
 	local list = GetTable(owner)
 	local condition = true
 
-	if owner.components.upgrader.hatlevel < 5 then 
+	if owner.components.dreadful.hatlevel < 5 then 
 		for i = 1, #list, 1 do 
 			condition = condition and ( CountInventoryItem(owner, list[i][1]) >= list[i][2] )
 		end
@@ -95,7 +95,7 @@ local function GetDesc(inst, viewer)
 	if viewer:HasTag("yakumoyukari") then
 		local condition = GetCanpell(viewer)
 		SetCanspell(inst, viewer)
-		return string.format( STRINGS.YUKARI_CURRENT_LEVEL.." - "..viewer.components.upgrader.hatlevel..GetStr(viewer)..(condition and "\nI can spell." or "") )
+		return string.format( STRINGS.YUKARI_CURRENT_LEVEL.." - "..viewer.components.dreadful.hatlevel..GetStr(viewer)..(condition and "\nI can spell." or "") )
 	end
 end
 
@@ -150,15 +150,15 @@ local function DoUpgrade(inst, owner)
 		end
 	end
 
-	owner.components.upgrader.hatlevel = owner.components.upgrader.hatlevel + 1
+	owner.components.dreadful.hatlevel = owner.components.dreadful.hatlevel + 1
 	owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_HATUPGRADE"))
 end
 
 local function OnFinish(inst, owner)
 	inst.canspell:set(false)
 	inst.components.spellcard:SetCondition(false)
-	owner.components.upgrader:ApplyHatAbility(owner:GetYukariHat())
-	owner.components.upgrader:ApplyStatus()
+	owner.components.dreadful:ApplyHatAbility(owner:GetYukariHat())
+	owner.components.dreadful:ApplyStatus()
 end
 
 local function fn()  

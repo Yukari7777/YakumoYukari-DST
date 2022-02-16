@@ -14,7 +14,7 @@ function MakeUltimate(id)
 		local spellcard = inst.components.spellcard
 		local index = spellcard.index
 		local name = spellcard.name
-		local level = caster.components.upgrader[_G.YUKARISTATINDEX[index].."_level"]
+		local level = caster.components.dreadful[_G.YUKARISTATINDEX[index].."_level"]
 
 		local issw = name:find("sw") ~= nil
 		local abilityindex = issw and 6 or 5
@@ -22,10 +22,10 @@ function MakeUltimate(id)
 		local ultreq = TUNING.YUKARI_STATUS.MAX_UPGRADE
 		
 		if level >= ultreq then
-			if not caster.components.upgrader.ability[index][abilityindex] then
+			if not caster.components.dreadful.ability[index][abilityindex] then
 				caster.components.talker:Say(STRINGS.CHARACTERS.YAKUMOYUKARI["ONULTIMATE"..(issw and "SW" or "")][index])
-				caster.components.upgrader.ability[index][abilityindex] = true
-				caster.components.upgrader:ApplyStatus()
+				caster.components.dreadful.ability[index][abilityindex] = true
+				caster.components.dreadful:ApplyStatus()
 				inst:Remove()
 			else
 				if caster.components.talker ~= nil then

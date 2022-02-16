@@ -4,7 +4,7 @@ local ACTIONS = GLOBAL.ACTIONS
 
 ----------------------------------------------------------------------------------------------------
 
-local YTELE = AddAction("YTELE", "Teleport", function(act)
+local YTELE = AddAction("YTELE", STRINGS.ACTIONS.YTELE, function(act)
 	if act.invobject and act.invobject.components.makegate then
 		return act.invobject.components.makegate:Teleport(act.pos, act.doer)
 	end
@@ -16,7 +16,7 @@ YTELE.mount_valid = false
 
 ---------------------------------------------------------------------------------------------------
 
-local CASTTOHO = AddAction("CASTTOHO", "castspell", function(act)
+local CASTTOHO = AddAction("CASTTOHO", STRINGS.ACTIONS.CASTTOHO, function(act)
 	local item = act.invobject or act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
 
 	if item and item.components.spellcard ~= nil then
@@ -28,7 +28,7 @@ CASTTOHO.priority = -1
 CASTTOHO.rmb = true
 CASTTOHO.mount_valid = false
 
-local CASTTOHOH = AddAction("CASTTOHOH", "castspell", function(act)
+local CASTTOHOH = AddAction("CASTTOHOH", STRINGS.ACTIONS.CASTTOHOH, function(act)
 	local item = act.invobject or act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
 
 	if item and item.components.spellcard then

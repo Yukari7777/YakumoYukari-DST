@@ -6,7 +6,7 @@ local function GetIngameName(prefab)
 end
 
 local function GetStatLevel(owner, index)
-	return owner.components.upgrader[_G.YUKARISTATINDEX[index].."_level"]
+	return owner.components.dreadful[_G.YUKARISTATINDEX[index].."_level"]
 end
 
 local function GetIngreCount(owner, index)
@@ -167,10 +167,10 @@ local function DoUpgrade(inst, owner)
 	end
 
 	local stat = _G.YUKARISTATINDEX[index]
-	owner.components.upgrader[stat.."_level"] = owner.components.upgrader[stat.."_level"] + 1
+	owner.components.dreadful[stat.."_level"] = owner.components.dreadful[stat.."_level"] + 1
 	owner.components.talker:Say(GetString(owner.prefab, "DESCRIBE_UPGRADE_"..stat:upper()))
 
-	owner.components.upgrader:ApplyStatus()
+	owner.components.dreadful:ApplyStatus()
 end
 
 local function OnFinish(inst, owner)
