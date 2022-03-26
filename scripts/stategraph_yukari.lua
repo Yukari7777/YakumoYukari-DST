@@ -32,12 +32,15 @@ end
 AddStategraphActionHandler("wilson", ActionHandler(ACTIONS.PICK, SetFastPickerServer))
 AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.PICK, SetFastPickerClient))
 
-local function SetFastBuilder(inst, action)
+local function SetFastBuilder(inst, action) --DAMN HARD-CODED, I gave up.
 	local rec = GLOBAL.GetValidRecipe(action.recipe)
-    return (rec ~= nil and rec.tab.shop and "give")
+    return (rec ~= nil and rec.sg_state and "give")
         or (inst.yukari_classified ~= nil and inst.yukari_classified.fastaction:value() > 1 and "domediumaction")
         or (inst.fastcrafter and "domediumaction")
-        or "dolongaction"
+        or (inst:HasTag("hungrybuilder") and "dohungrybuild")
+		or (inst:HasTag("fastbuilder") and "domediumaction")
+		or (inst:HasTag("slowbuilder") and "dolongestaction")
+		or "dolongaction"
 end
 AddStategraphActionHandler("wilson", ActionHandler(ACTIONS.BUILD, SetFastBuilder))
 AddStategraphActionHandler("wilson_client", ActionHandler(ACTIONS.BUILD, SetFastBuilder))
