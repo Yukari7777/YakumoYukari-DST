@@ -295,17 +295,21 @@ local function SpiderqueenRetargetFn(inst)
 end
 
 local function moonrock_onsave(inst, data)
-    inst:_OnSave(data)
-    data.YakumoYukariPreservedData = GLOBAL.next(inst.YakumoYukariPreservedData) ~= nil and inst.YakumoYukariPreservedData or nil
+	if data ~= nil then 
+		inst:_OnSave(data)
+		data.YakumoYukariPreservedData = GLOBAL.next(inst.YakumoYukariPreservedData) ~= nil and inst.YakumoYukariPreservedData or nil
+	end
 end
 
 local function moonrock_onload(inst, data)
-    inst:_OnLoad(data)
-    inst.YakumoYukariPreservedData = data ~= nil and data.YakumoYukariPreservedData or inst.YakumoYukariPreservedData
+	if data ~= nil then 
+		inst:_OnLoad(data)
+		inst.YakumoYukariPreservedData = data ~= nil and data.YakumoYukariPreservedData or inst.YakumoYukariPreservedData
+	end
 end
 
 local function PreserveUpgradeData(inst)
-    if not GLOBAL.TheWorld:HasTag("cave") then
+    if not GLOBAL.TheWorld:HasTag("cave") and inst._OnLoad == nil then
         inst.YakumoYukariPreservedData = {}
         inst._OnSave = inst.OnSave
         inst._OnLoad = inst.OnLoad
