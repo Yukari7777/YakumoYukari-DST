@@ -101,11 +101,20 @@ local function PreserveLevel(inst)
         skilltree = inst.components.dreadful.ability,
         hatlevel = inst.components.dreadful.hatlevel,
     }
-    
+	
     -- Damn it, it seems I need to find and get multiplayer_portal from the whole entity list.
     for k, prefab in pairs(Ents) do 
         if prefab:HasTag("moonportal") then
             prefab.YakumoYukariPreservedData[inst.userid] = data
+			print("Saving", prefab, prefab.YakumoYukariPreservedData[inst.userid])
+        end
+    end
+end
+
+local function TellPortalToSendPreservedData(inst)
+    for k, prefab in pairs(Ents) do 
+        if prefab:HasTag("moonportal") then
+            prefab:PushEvent("LoadYukariPreservedData", inst)
         end
     end
 end
@@ -467,6 +476,10 @@ local function DebugFunction(inst)
 	end)
 end	
 
+local function RerollTweak(inst)
+	
+end
+
 local function common_postinit(inst) -- things before SetPristine()
 	inst.entity:AddLight()
 	
@@ -532,7 +545,10 @@ local master_postinit = function(inst) -- after SetPristine()
 	inst:ListenForEvent("graze", Graze )
 	inst:ListenForEvent("debugmode", DebugFunction, inst)
     inst:ListenForEvent("ms_playerreroll", PreserveLevel)
- 
+	inst:ListenForEvent("ms_playerseamlessswaped", TellPortalToSendPreservedData)
+	-- SaveForReroll Test
+	-- inst:DoTaskInTime(0, RerollTweak)
+	--RerollTweak(inst)
 end
 
 return MakePlayerCharacter("yakumoyukari", prefabs, assets, common_postinit, master_postinit)

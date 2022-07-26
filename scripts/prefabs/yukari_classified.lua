@@ -23,7 +23,9 @@ local function YukariToggleGoggles(self, show)
 end
 
 local function PatchHUD(inst)
-	inst._parent.HUD.gogglesover.ToggleGoggles = YukariToggleGoggles
+	if inst._parent.HUD ~= nil then 
+		inst._parent.HUD.gogglesover.ToggleGoggles = YukariToggleGoggles
+	end
 end
 
 local function OnEntityReplicated(inst)

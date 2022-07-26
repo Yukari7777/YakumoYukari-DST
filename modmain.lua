@@ -317,6 +317,7 @@ local function PreserveUpgradeData(inst)
         inst.OnLoad = moonrock_onload
         
         inst:ListenForEvent("ms_newplayerspawned", function(world, player)
+			print("Loading newplayer", inst, inst.YakumoYukariPreservedData[player.userid])
             if player:HasTag("yakumoyukari") and inst.YakumoYukariPreservedData[player.userid] ~= nil then
                 if player.LoadPreserved ~= nil then
                     player:LoadPreserved(inst.YakumoYukariPreservedData[player.userid])
@@ -324,6 +325,16 @@ local function PreserveUpgradeData(inst)
                 inst.YakumoYukariPreservedData[player.userid] = nil
             end
         end, GLOBAL.TheWorld)
+		
+		inst:ListenForEvent("LoadYukariPreservedData", function(inst, player) 
+			print("Loading", inst, inst.YakumoYukariPreservedData[player.userid])
+			if player:HasTag("yakumoyukari") and inst.YakumoYukariPreservedData[player.userid] ~= nil then
+                if player.LoadPreserved ~= nil then
+                    player:LoadPreserved(inst.YakumoYukariPreservedData[player.userid])
+                end
+                inst.YakumoYukariPreservedData[player.userid] = nil
+            end
+		end)
     end
 end
 
