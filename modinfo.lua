@@ -1,6 +1,6 @@
 name = "Yakumo Yukari"
 author = "Yakumo Yukari"
-version = "0.12.05"
+version = "0.12.06"
 description = "Yakumo Yukari comes from unknown world to manipulate Don't Starve Together world!\n\nVersion : "..version.."\nPress [V] to show status.\nYOU MUST ENABLE SCHEME OR YOU'LL GET CRASHED."
 forumthread = ""
 api_version = 6
