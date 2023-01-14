@@ -6,7 +6,7 @@ local ACTIONS = GLOBAL.ACTIONS
 
 local YTELE = AddAction("YTELE", STRINGS.ACTIONS.YTELE, function(act)
 	if act.invobject and act.invobject.components.makegate then
-		return act.invobject.components.makegate:Teleport(act.pos, act.doer)
+		return act.invobject.components.makegate:Teleport(act:GetActionPoint(), act.doer)
 	end
 end)
 YTELE.priority = 10
