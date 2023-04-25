@@ -477,7 +477,7 @@ function Dreadful:ApplyStatus()
     inst.components.sanity.ignore = false
 	
 	self:AbilityManager()
-	inst.components.combat:SetAttackPeriod(self.Ability_45 and 0 or TUNING.WILSON_ATTACK_PERIOD)
+	inst.components.combat:SetAttackPeriod(self.Ability_45 and TUNING.WILSON_ATTACK_PERIOD * 0.75 or TUNING.WILSON_ATTACK_PERIOD)
 	inst.components.health.maxhealth = STATUS.DEFAULT_HP + self.health_level * STATUS.HP_RATE + self.healthbonus + math.max(0, (self.health_level - 30) * 7.5)
 	inst.components.health:SetAbsorptionAmount(1 - (self.IsDamage and 0.7 or 1) * (inst.yukari_classified ~= nil and inst.yukari_classified.inspellbait:value() and 0.5 or 1) )
 	inst.components.hunger.hungerrate = math.max( 0, (STATUS.DEFAULT_HR - self.hunger_level * STATUS.HR_RATE - math.max(0, (self.hunger_level - 30) * 0.025 )) ) * TUNING.WILSON_HUNGER_RATE 
