@@ -141,7 +141,7 @@ local function curse(inst)
 		owner.components.sanity:DoDelta(- owner.components.sanity:GetMaxWithPenalty() * 0.025)
 		owner.components.power:DoDelta(-TUNING.SPELL_POWERCOST_LASTING * 1.5)
 		owner.components.combat.damagemultiplier = 1 + mod * 0.5
-		owner.components.combat:SetAttackPeriod(TUNING.WILSON_ATTACK_PERIOD * 0.75)
+		owner.components.combat:SetAttackPeriod(0.4 * 0.75)
 		owner.components.locomotor.walkspeed = 4 + mod
 		owner.components.locomotor.runspeed = 6 + mod
 		owner.components.locomotor:SetExternalSpeedMultiplier(inst, "dreadful", 1)
